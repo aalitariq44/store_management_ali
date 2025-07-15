@@ -14,7 +14,7 @@ class InternetScreen extends StatefulWidget {
 }
 
 class _InternetScreenState extends State<InternetScreen> {
-  String _selectedFilter = 'all'; // all, active, expired, archived
+  String _selectedFilter = 'all'; // all, active, expired
   int? _selectedPersonId;
 
   void _showInternetForm({InternetSubscription? subscription}) {
@@ -137,44 +137,6 @@ class _InternetScreenState extends State<InternetScreen> {
     );
   }
 
-  void _confirmArchiveSubscription(InternetSubscription subscription) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('تأكيد الأرشفة'),
-        content: const Text('هل أنت متأكد من أرشفة هذا الاشتراك؟'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final internetProvider = Provider.of<InternetProvider>(context, listen: false);
-              final scaffoldMessenger = ScaffoldMessenger.of(context);
-              Navigator.pop(context);
-              try {
-                await internetProvider.archiveSubscription(subscription.id!);
-                if (mounted) {
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(content: Text('تم أرشفة الاشتراك بنجاح')),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(content: Text('خطأ: ${e.toString()}')),
-                  );
-                }
-              }
-            },
-            child: const Text('أرشفة'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _confirmDeleteSubscription(InternetSubscription subscription) {
     showDialog(
       context: context,
@@ -280,7 +242,6 @@ class _InternetScreenState extends State<InternetScreen> {
               DropdownMenuItem(value: 'all', child: Text('جميع الاشتراكات')),
               DropdownMenuItem(value: 'active', child: Text('الاشتراكات النشطة')),
               DropdownMenuItem(value: 'expired', child: Text('الاشتراكات المنتهية')),
-              DropdownMenuItem(value: 'archived', child: Text('الاشتراكات المؤرشفة')),
             ],
             onChanged: (value) {
               setState(() {
@@ -399,9 +360,6 @@ class _InternetScreenState extends State<InternetScreen> {
           case 'expired':
             subscriptions = internetProvider.getExpiredSubscriptions();
             break;
-          case 'archived':
-            subscriptions = internetProvider.getArchivedSubscriptions();
-            break;
         }
 
         if (_selectedPersonId != null) {
@@ -455,10 +413,7 @@ class _InternetScreenState extends State<InternetScreen> {
                 Color statusColor;
                 String statusText;
                 
-                if (subscription.isArchived) {
-                  statusColor = Colors.grey;
-                  statusText = 'مؤرشف';
-                } else if (subscription.isExpired) {
+                if (subscription.isExpired) {
                   statusColor = Colors.red;
                   statusText = 'منتهي';
                 } else if (subscription.isExpiringSoon) {
@@ -502,18 +457,11 @@ class _InternetScreenState extends State<InternetScreen> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (!subscription.isArchived) ...[
-                            IconButton(
-                              icon: const Icon(Icons.refresh, color: Colors.blue),
-                              onPressed: () => _showRenewDialog(subscription),
-                              tooltip: 'تجديد',
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.archive, color: Colors.orange),
-                              onPressed: () => _confirmArchiveSubscription(subscription),
-                              tooltip: 'أرشفة',
-                            ),
-                          ],
+                          IconButton(
+                            icon: const Icon(Icons.refresh, color: Colors.blue),
+                            onPressed: () => _showRenewDialog(subscription),
+                            tooltip: 'تجديد',
+                          ),
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),
                             onPressed: () => _showInternetForm(subscription: subscription),

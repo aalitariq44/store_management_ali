@@ -109,7 +109,6 @@ class DatabaseHelper {
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
         is_active INTEGER DEFAULT 1,
-        is_archived INTEGER DEFAULT 0,
         FOREIGN KEY (person_id) REFERENCES persons (id) ON DELETE CASCADE
       )
     ''');

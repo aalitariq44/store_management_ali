@@ -81,22 +81,6 @@ class InternetProvider with ChangeNotifier {
     }
   }
 
-  Future<void> archiveSubscription(int id) async {
-    try {
-      final subscription = _subscriptions.firstWhere((s) => s.id == id);
-      final archivedSubscription = subscription.copyWith(
-        isActive: false,
-        isArchived: true,
-        updatedAt: DateTime.now(),
-      );
-      
-      await updateSubscription(archivedSubscription);
-    } catch (e) {
-      debugPrint('Error archiving subscription: $e');
-      throw Exception('فشل في أرشفة الاشتراك');
-    }
-  }
-
   Future<void> activateSubscription(int id) async {
     try {
       final subscription = _subscriptions.firstWhere((s) => s.id == id);
@@ -117,7 +101,7 @@ class InternetProvider with ChangeNotifier {
   }
 
   List<InternetSubscription> getActiveSubscriptions() {
-    return _subscriptions.where((subscription) => subscription.isActive && !subscription.isArchived).toList();
+    return _subscriptions.where((subscription) => subscription.isActive).toList();
   }
 
   List<InternetSubscription> getExpiredSubscriptions() {
@@ -128,23 +112,19 @@ class InternetProvider with ChangeNotifier {
     return _subscriptions.where((subscription) => subscription.isExpiringSoon && subscription.isActive && !subscription.isExpired).toList();
   }
 
-  List<InternetSubscription> getArchivedSubscriptions() {
-    return _subscriptions.where((subscription) => subscription.isArchived).toList();
-  }
-
   double getTotalActiveSubscriptionsRevenue() {
     return getActiveSubscriptions().fold(0.0, (sum, subscription) => sum + subscription.price);
   }
 
   double getPersonTotalActiveSubscriptions(int personId) {
     return _subscriptions
-        .where((subscription) => subscription.personId == personId && subscription.isActive && !subscription.isArchived)
+        .where((subscription) => subscription.personId == personId && subscription.isActive)
         .fold(0.0, (sum, subscription) => sum + subscription.price);
   }
 
   int getPersonActiveSubscriptionsCount(int personId) {
     return _subscriptions
-        .where((subscription) => subscription.personId == personId && subscription.isActive && !subscription.isArchived)
+        .where((subscription) => subscription.personId == personId && subscription.isActive)
         .length;
   }
 }

@@ -11,7 +11,6 @@ class InternetSubscription {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isActive;
-  final bool isArchived;
 
   InternetSubscription({
     this.id,
@@ -26,7 +25,6 @@ class InternetSubscription {
     required this.createdAt,
     required this.updatedAt,
     this.isActive = true,
-    this.isArchived = false,
   });
 
   bool get isExpired => DateTime.now().isAfter(endDate);
@@ -46,7 +44,6 @@ class InternetSubscription {
       'created_at': createdAt.millisecondsSinceEpoch,
       'updated_at': updatedAt.millisecondsSinceEpoch,
       'is_active': isActive ? 1 : 0,
-      'is_archived': isArchived ? 1 : 0,
     };
   }
 
@@ -64,7 +61,6 @@ class InternetSubscription {
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['created_at']),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updated_at']),
       isActive: map['is_active'] == 1,
-      isArchived: map['is_archived'] == 1,
     );
   }
 
@@ -81,7 +77,6 @@ class InternetSubscription {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isActive,
-    bool? isArchived,
   }) {
     return InternetSubscription(
       id: id ?? this.id,
@@ -96,12 +91,11 @@ class InternetSubscription {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isActive: isActive ?? this.isActive,
-      isArchived: isArchived ?? this.isArchived,
     );
   }
 
   @override
   String toString() {
-    return 'InternetSubscription(id: $id, personId: $personId, packageName: $packageName, price: $price, durationInDays: $durationInDays, startDate: $startDate, endDate: $endDate, paymentDate: $paymentDate, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, isActive: $isActive, isArchived: $isArchived)';
+    return 'InternetSubscription(id: $id, personId: $personId, packageName: $packageName, price: $price, durationInDays: $durationInDays, startDate: $startDate, endDate: $endDate, paymentDate: $paymentDate, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, isActive: $isActive)';
   }
 }
