@@ -18,7 +18,6 @@ class _InstallmentFormState extends State<InstallmentForm> {
   final _formKey = GlobalKey<FormState>();
   final _productNameController = TextEditingController();
   final _totalAmountController = TextEditingController();
-  final _paidAmountController = TextEditingController();
   final _notesController = TextEditingController();
 
   Person? _selectedPerson;
@@ -30,7 +29,6 @@ class _InstallmentFormState extends State<InstallmentForm> {
     if (widget.installment != null) {
       _productNameController.text = widget.installment!.productName;
       _totalAmountController.text = widget.installment!.totalAmount.toString();
-      _paidAmountController.text = widget.installment!.paidAmount.toString();
       _notesController.text = widget.installment!.notes ?? '';
       
       // Set selected person
@@ -43,7 +41,6 @@ class _InstallmentFormState extends State<InstallmentForm> {
   void dispose() {
     _productNameController.dispose();
     _totalAmountController.dispose();
-    _paidAmountController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -66,8 +63,6 @@ class _InstallmentFormState extends State<InstallmentForm> {
       final installmentProvider = Provider.of<InstallmentProvider>(context, listen: false);
       final now = DateTime.now();
       final totalAmount = double.parse(_totalAmountController.text);
-      final paidAmount = double.tryParse(_paidAmountController.text) ?? 0.0;
-      final isCompleted = paidAmount >= totalAmount;
 
       if (widget.installment == null) {
         // إضافة قسط جديد
@@ -75,11 +70,11 @@ class _InstallmentFormState extends State<InstallmentForm> {
           personId: _selectedPerson!.id!,
           productName: _productNameController.text.trim(),
           totalAmount: totalAmount,
-          paidAmount: paidAmount,
+          paidAmount: 0.0,
           notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
           createdAt: now,
           updatedAt: now,
-          isCompleted: isCompleted,
+          isCompleted: totalAmount <= 0,
         );
         
         await installmentProvider.addInstallment(installment);
@@ -96,10 +91,9 @@ class _InstallmentFormState extends State<InstallmentForm> {
           personId: _selectedPerson!.id!,
           productName: _productNameController.text.trim(),
           totalAmount: totalAmount,
-          paidAmount: paidAmount,
           notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
           updatedAt: now,
-          isCompleted: isCompleted,
+          isCompleted: widget.installment!.paidAmount >= totalAmount,
         );
         
         await installmentProvider.updateInstallment(updatedInstallment);
@@ -193,29 +187,6 @@ class _InstallmentFormState extends State<InstallmentForm> {
                   final amount = double.tryParse(value);
                   if (amount == null || amount <= 0) {
                     return 'يرجى إدخال مبلغ صحيح';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _paidAmountController,
-                decoration: const InputDecoration(
-                  labelText: 'المبلغ المدفوع',
-                  hintText: 'أدخل المبلغ المدفوع',
-                  suffixText: 'د.ع',
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value != null && value.trim().isNotEmpty) {
-                    final paidAmount = double.tryParse(value);
-                    if (paidAmount == null || paidAmount < 0) {
-                      return 'يرجى إدخال مبلغ صحيح';
-                    }
-                    final totalAmount = double.tryParse(_totalAmountController.text) ?? 0;
-                    if (paidAmount > totalAmount) {
-                      return 'المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ الإجمالي';
-                    }
                   }
                   return null;
                 },
