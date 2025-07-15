@@ -17,7 +17,6 @@ class DebtForm extends StatefulWidget {
 class _DebtFormState extends State<DebtForm> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
-  final _paidAmountController = TextEditingController();
   final _notesController = TextEditingController();
 
   Person? _selectedPerson;
@@ -28,7 +27,6 @@ class _DebtFormState extends State<DebtForm> {
     super.initState();
     if (widget.debt != null) {
       _amountController.text = widget.debt!.amount.toString();
-      _paidAmountController.text = widget.debt!.paidAmount.toString();
       _notesController.text = widget.debt!.notes ?? '';
       
       // Set selected person
@@ -40,7 +38,6 @@ class _DebtFormState extends State<DebtForm> {
   @override
   void dispose() {
     _amountController.dispose();
-    _paidAmountController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -63,19 +60,17 @@ class _DebtFormState extends State<DebtForm> {
       final debtProvider = Provider.of<DebtProvider>(context, listen: false);
       final now = DateTime.now();
       final amount = double.parse(_amountController.text);
-      final paidAmount = double.tryParse(_paidAmountController.text) ?? 0.0;
-      final isPaid = paidAmount >= amount;
 
       if (widget.debt == null) {
         // إضافة دين جديد
         final debt = Debt(
           personId: _selectedPerson!.id!,
           amount: amount,
-          paidAmount: paidAmount,
+          paidAmount: 0.0,
           notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
           createdAt: now,
           updatedAt: now,
-          isPaid: isPaid,
+          isPaid: amount <= 0,
         );
         
         await debtProvider.addDebt(debt);
@@ -91,10 +86,9 @@ class _DebtFormState extends State<DebtForm> {
         final updatedDebt = widget.debt!.copyWith(
           personId: _selectedPerson!.id!,
           amount: amount,
-          paidAmount: paidAmount,
           notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
           updatedAt: now,
-          isPaid: isPaid,
+          isPaid: widget.debt!.paidAmount >= amount,
         );
         
         await debtProvider.updateDebt(updatedDebt);
@@ -174,29 +168,6 @@ class _DebtFormState extends State<DebtForm> {
                   final amount = double.tryParse(value);
                   if (amount == null || amount <= 0) {
                     return 'يرجى إدخال مبلغ صحيح';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _paidAmountController,
-                decoration: const InputDecoration(
-                  labelText: 'المبلغ المدفوع',
-                  hintText: 'أدخل المبلغ المدفوع',
-                  suffixText: 'د.ع',
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value != null && value.trim().isNotEmpty) {
-                    final paidAmount = double.tryParse(value);
-                    if (paidAmount == null || paidAmount < 0) {
-                      return 'يرجى إدخال مبلغ صحيح';
-                    }
-                    final totalAmount = double.tryParse(_amountController.text) ?? 0;
-                    if (paidAmount > totalAmount) {
-                      return 'المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ الأصلي';
-                    }
                   }
                   return null;
                 },
