@@ -193,7 +193,7 @@ class _InternetScreenState extends State<InternetScreen> {
                   items: [
                     const DropdownMenuItem<int>(
                       value: null,
-                      child: Text('جميع الأشخاص'),
+                      child: Text('جميع الزبائن'),
                     ),
                     ...personProvider.persons.map((person) => DropdownMenuItem<int>(
                       value: person.id,

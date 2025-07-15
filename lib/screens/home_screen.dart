@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   final List<String> _titles = [
-    'إدارة الأشخاص',
+    'إدارة الزبائن',
     'إدارة الديون',
     'إدارة الأقساط',
     'اشتراكات الإنترنت',
@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _buildSidebarItem(
                   icon: Icons.people,
-                  title: 'الأشخاص',
+                  title: 'الزبائن',
                   index: 0,
                 ),
                 _buildSidebarItem(
@@ -136,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 12),
                 _buildSummaryItem(
-                  'الأشخاص',
+                  'الزبائن',
                   '${personProvider.persons.length}',
                   Icons.people,
                 ),

@@ -159,7 +159,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
                   items: [
                     const DropdownMenuItem<int>(
                       value: null,
-                      child: Text('جميع الأشخاص'),
+                      child: Text('جميع الزبائن'),
                     ),
                     ...personProvider.persons.map((person) => DropdownMenuItem<int>(
                       value: person.id,
@@ -306,7 +306,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'لا توجدديون',
+                  'لا توجد ديون',
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.grey[600],
