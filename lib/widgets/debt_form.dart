@@ -16,6 +16,7 @@ class DebtForm extends StatefulWidget {
 
 class _DebtFormState extends State<DebtForm> {
   final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
 
@@ -26,6 +27,7 @@ class _DebtFormState extends State<DebtForm> {
   void initState() {
     super.initState();
     if (widget.debt != null) {
+      _titleController.text = widget.debt!.title ?? '';
       _amountController.text = widget.debt!.amount.toString();
       _notesController.text = widget.debt!.notes ?? '';
       
@@ -37,6 +39,7 @@ class _DebtFormState extends State<DebtForm> {
 
   @override
   void dispose() {
+    _titleController.dispose();
     _amountController.dispose();
     _notesController.dispose();
     super.dispose();
@@ -64,6 +67,7 @@ class _DebtFormState extends State<DebtForm> {
       if (widget.debt == null) {
         // إضافة دين جديد
         final debt = Debt(
+          title: _titleController.text.trim().isEmpty ? null : _titleController.text.trim(),
           personId: _selectedPerson!.id!,
           amount: amount,
           paidAmount: 0.0,
@@ -84,6 +88,7 @@ class _DebtFormState extends State<DebtForm> {
       } else {
         // تعديل دين موجود
         final updatedDebt = widget.debt!.copyWith(
+          title: _titleController.text.trim().isEmpty ? null : _titleController.text.trim(),
           personId: _selectedPerson!.id!,
           amount: amount,
           notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
@@ -150,6 +155,20 @@ class _DebtFormState extends State<DebtForm> {
                       return null;
                     },
                   );
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'العنوان',
+                  hintText: 'أدخل عنوان الدين',
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'يرجى إدخال العنوان';
+                  }
+                  return null;
                 },
               ),
               const SizedBox(height: 16),

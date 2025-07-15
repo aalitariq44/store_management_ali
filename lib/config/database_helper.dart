@@ -53,6 +53,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE debts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
         person_id INTEGER NOT NULL,
         amount REAL NOT NULL,
         paid_amount REAL DEFAULT 0.0,

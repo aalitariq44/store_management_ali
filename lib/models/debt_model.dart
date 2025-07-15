@@ -1,5 +1,6 @@
 class Debt {
   final int? id;
+  final String? title;
   final int personId;
   final double amount;
   final double paidAmount;
@@ -10,6 +11,7 @@ class Debt {
 
   Debt({
     this.id,
+    this.title,
     required this.personId,
     required this.amount,
     this.paidAmount = 0.0,
@@ -24,6 +26,7 @@ class Debt {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'title': title,
       'person_id': personId,
       'amount': amount,
       'paid_amount': paidAmount,
@@ -37,6 +40,7 @@ class Debt {
   factory Debt.fromMap(Map<String, dynamic> map) {
     return Debt(
       id: map['id'],
+      title: map['title'],
       personId: map['person_id'],
       amount: map['amount'].toDouble(),
       paidAmount: map['paid_amount'].toDouble(),
@@ -49,6 +53,7 @@ class Debt {
 
   Debt copyWith({
     int? id,
+    String? title,
     int? personId,
     double? amount,
     double? paidAmount,
@@ -59,6 +64,7 @@ class Debt {
   }) {
     return Debt(
       id: id ?? this.id,
+      title: title ?? this.title,
       personId: personId ?? this.personId,
       amount: amount ?? this.amount,
       paidAmount: paidAmount ?? this.paidAmount,
@@ -71,6 +77,6 @@ class Debt {
 
   @override
   String toString() {
-    return 'Debt(id: $id, personId: $personId, amount: $amount, paidAmount: $paidAmount, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, isPaid: $isPaid)';
+    return 'Debt(id: $id, title: $title, personId: $personId, amount: $amount, paidAmount: $paidAmount, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, isPaid: $isPaid)';
   }
 }
