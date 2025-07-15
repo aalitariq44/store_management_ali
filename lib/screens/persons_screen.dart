@@ -4,6 +4,7 @@ import '../providers/person_provider.dart';
 import '../models/person_model.dart';
 import '../widgets/person_form.dart';
 import '../utils/date_formatter.dart';
+import 'customer_details_screen.dart';
 
 class PersonsScreen extends StatefulWidget {
   const PersonsScreen({super.key});
@@ -206,9 +207,23 @@ class _PersonsScreenState extends State<PersonsScreen> {
                   cells: [
                     DataCell(Text((index + 1).toString())),
                     DataCell(
-                      Text(
-                        person.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CustomerDetailsScreen(person: person),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          person.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
                       ),
                     ),
                     DataCell(Text(person.phone ?? '-')),
@@ -219,6 +234,18 @@ class _PersonsScreenState extends State<PersonsScreen> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          IconButton(
+                            icon: const Icon(Icons.visibility, color: Colors.green),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CustomerDetailsScreen(person: person),
+                                ),
+                              );
+                            },
+                            tooltip: 'عرض التفاصيل',
+                          ),
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),
                             onPressed: () => _showPersonForm(person: person),
