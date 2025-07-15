@@ -56,18 +56,19 @@ class _DebtsScreenState extends State<DebtsScreen> {
             onPressed: () async {
               final amount = double.tryParse(amountController.text);
               if (amount != null && amount > 0) {
+                final debtProvider = Provider.of<DebtProvider>(context, listen: false);
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
                 try {
-                  await Provider.of<DebtProvider>(context, listen: false)
-                      .payDebt(debt.id!, amount);
+                  await debtProvider.payDebt(debt.id!, amount);
                   if (mounted) {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    scaffoldMessenger.showSnackBar(
                       const SnackBar(content: Text('تم دفع المبلغ بنجاح')),
                     );
                   }
                 } catch (e) {
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    scaffoldMessenger.showSnackBar(
                       SnackBar(content: Text('خطأ: ${e.toString()}')),
                     );
                   }
@@ -94,18 +95,19 @@ class _DebtsScreenState extends State<DebtsScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
+              final debtProvider = Provider.of<DebtProvider>(context, listen: false);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
               Navigator.pop(context);
               try {
-                await Provider.of<DebtProvider>(context, listen: false)
-                    .deleteDebt(debt.id!);
+                await debtProvider.deleteDebt(debt.id!);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(content: Text('تم حذف الدين بنجاح')),
                   );
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(content: Text('خطأ: ${e.toString()}')),
                   );
                 }
