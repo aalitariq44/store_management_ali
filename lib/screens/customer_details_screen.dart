@@ -94,12 +94,14 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           // Left sidebar with customer info and summary
           SizedBox(
             width: 400,
-            child: Column(
-              children: [
-                _buildCustomerInfo(),
-                _buildSummaryCards(),
-                _buildQuickActions(),
-              ],
+            child: SingleChildScrollView( // أضف هذا الـ Scroll
+              child: Column(
+                children: [
+                  _buildCustomerInfo(),
+                  _buildSummaryCards(),
+                  _buildQuickActions(),
+                ],
+              ),
             ),
           ),
           // Vertical divider
@@ -285,7 +287,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     return Card(
       color: color.withOpacity(0.1),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12), // تم تصغير البادينج
         child: Row(
           children: [
             Icon(icon, color: color, size: 24),
