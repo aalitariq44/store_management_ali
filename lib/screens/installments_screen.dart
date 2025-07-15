@@ -66,6 +66,10 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
             onPressed: () async {
               final amount = double.tryParse(amountController.text);
               if (amount != null && amount > 0) {
+                final provider = Provider.of<InstallmentProvider>(context, listen: false);
+                final navigator = Navigator.of(context);
+                final messenger = ScaffoldMessenger.of(context);
+
                 try {
                   final payment = InstallmentPayment(
                     installmentId: installment.id!,
@@ -75,18 +79,17 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                     createdAt: DateTime.now(),
                   );
                   
-                  await Provider.of<InstallmentProvider>(context, listen: false)
-                      .addPayment(installment.id!, payment);
+                  await provider.addPayment(installment.id!, payment);
                   
                   if (mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    navigator.pop();
+                    messenger.showSnackBar(
                       const SnackBar(content: Text('تم إضافة الدفعة بنجاح')),
                     );
                   }
                 } catch (e) {
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    messenger.showSnackBar(
                       SnackBar(content: Text('خطأ: ${e.toString()}')),
                     );
                   }
@@ -138,17 +141,19 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red),
                                 onPressed: () async {
+                                  final navigator = Navigator.of(context);
+                                  final messenger = ScaffoldMessenger.of(context);
                                   try {
                                     await installmentProvider.deletePayment(installment.id!, payment.id!);
                                     if (mounted) {
-                                      Navigator.pop(context);
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      navigator.pop();
+                                      messenger.showSnackBar(
                                         const SnackBar(content: Text('تم حذف الدفعة بنجاح')),
                                       );
                                     }
                                   } catch (e) {
                                     if (mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      messenger.showSnackBar(
                                         SnackBar(content: Text('خطأ: ${e.toString()}')),
                                       );
                                     }
@@ -186,18 +191,21 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context);
+              final provider = Provider.of<InstallmentProvider>(context, listen: false);
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+
+              navigator.pop();
               try {
-                await Provider.of<InstallmentProvider>(context, listen: false)
-                    .deleteInstallment(installment.id!);
+                await provider.deleteInstallment(installment.id!);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  messenger.showSnackBar(
                     const SnackBar(content: Text('تم حذف القسط بنجاح')),
                   );
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  messenger.showSnackBar(
                     SnackBar(content: Text('خطأ: ${e.toString()}')),
                   );
                 }
