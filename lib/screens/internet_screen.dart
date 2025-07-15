@@ -5,6 +5,7 @@ import '../providers/person_provider.dart';
 import '../models/internet_model.dart';
 import '../widgets/internet_form.dart';
 import '../utils/date_formatter.dart';
+import '../utils/number_formatter.dart';
 
 class InternetScreen extends StatefulWidget {
   const InternetScreen({super.key});
@@ -225,7 +226,7 @@ class _InternetScreenState extends State<InternetScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${internetProvider.getTotalActiveSubscriptionsRevenue().toStringAsFixed(2)} د.ع',
+                          '${NumberFormatter.format(internetProvider.getTotalActiveSubscriptionsRevenue())} د.ع',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             color: Colors.blue,
                           ),
@@ -344,11 +345,11 @@ class _InternetScreenState extends State<InternetScreen> {
                     ),
                     DataCell(Text(subscription.packageName)),
                     DataCell(
-                        Text('${subscription.price.toStringAsFixed(2)} د.ع')),
+                        Text('${NumberFormatter.format(subscription.price)} د.ع')),
                     DataCell(Text(
-                        '${subscription.paidAmount.toStringAsFixed(2)} د.ع')),
+                        '${NumberFormatter.format(subscription.paidAmount)} د.ع')),
                     DataCell(Text(
-                        '${subscription.remainingAmount.toStringAsFixed(2)} د.ع')),
+                        '${NumberFormatter.format(subscription.remainingAmount)} د.ع')),
                     DataCell(Text(
                         DateFormatter.formatDisplayDate(subscription.startDate))),
                     DataCell(Text(
