@@ -19,7 +19,6 @@ class _InternetFormState extends State<InternetForm> {
   final _formKey = GlobalKey<FormState>();
   final _packageNameController = TextEditingController();
   final _priceController = TextEditingController();
-  final _durationController = TextEditingController();
   final _notesController = TextEditingController();
 
   Person? _selectedPerson;
@@ -33,7 +32,6 @@ class _InternetFormState extends State<InternetForm> {
     if (widget.subscription != null) {
       _packageNameController.text = widget.subscription!.packageName;
       _priceController.text = widget.subscription!.price.toString();
-      _durationController.text = widget.subscription!.durationInDays.toString();
       _notesController.text = widget.subscription!.notes ?? '';
       _startDate = widget.subscription!.startDate;
       _paymentDate = widget.subscription!.paymentDate;
@@ -48,7 +46,6 @@ class _InternetFormState extends State<InternetForm> {
   void dispose() {
     _packageNameController.dispose();
     _priceController.dispose();
-    _durationController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -71,8 +68,8 @@ class _InternetFormState extends State<InternetForm> {
       final internetProvider = Provider.of<InternetProvider>(context, listen: false);
       final now = DateTime.now();
       final price = double.parse(_priceController.text);
-      final duration = int.parse(_durationController.text);
-      final endDate = _startDate.add(Duration(days: duration));
+      const duration = 30; // Default duration
+      final endDate = _startDate.add(const Duration(days: duration));
 
       if (widget.subscription == null) {
         // إضافة اشتراك جديد
@@ -227,25 +224,6 @@ class _InternetFormState extends State<InternetForm> {
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _durationController,
-                  decoration: const InputDecoration(
-                    labelText: 'المدة بالأيام *',
-                    hintText: 'أدخل المدة بالأيام',
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'يرجى إدخال المدة';
-                    }
-                    final duration = int.tryParse(value);
-                    if (duration == null || duration <= 0) {
-                      return 'يرجى إدخال مدة صحيحة';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
@@ -280,33 +258,6 @@ class _InternetFormState extends State<InternetForm> {
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  color: Colors.blue[50],
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.info, color: Colors.blue),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('تاريخ الانتهاء المتوقع:'),
-                              Text(
-                                DateFormatter.formatDisplayDate(
-                                  _startDate.add(Duration(days: int.tryParse(_durationController.text) ?? 0)),
-                                ),
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

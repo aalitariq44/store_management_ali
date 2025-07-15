@@ -25,7 +25,6 @@ class _InternetScreenState extends State<InternetScreen> {
   }
 
   void _showRenewDialog(InternetSubscription subscription) {
-    final TextEditingController durationController = TextEditingController(text: subscription.durationInDays.toString());
     final TextEditingController priceController = TextEditingController(text: subscription.price.toString());
     DateTime startDate = DateTime.now();
     DateTime paymentDate = DateTime.now();
@@ -46,15 +45,6 @@ class _InternetScreenState extends State<InternetScreen> {
                   labelText: 'السعر',
                   hintText: 'أدخل السعر',
                   suffixText: 'د.ع',
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: durationController,
-                decoration: const InputDecoration(
-                  labelText: 'المدة بالأيام',
-                  hintText: 'أدخل المدة بالأيام',
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -113,11 +103,11 @@ class _InternetScreenState extends State<InternetScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final duration = int.tryParse(durationController.text);
                 final price = double.tryParse(priceController.text);
-                if (duration != null && price != null) {
+                if (price != null) {
                   try {
-                    final endDate = startDate.add(Duration(days: duration));
+                    const duration = 30; // Default duration
+                    final endDate = startDate.add(const Duration(days: duration));
                     await Provider.of<InternetProvider>(context, listen: false)
                         .renewSubscription(subscription.id!, startDate, endDate, paymentDate);
                     
@@ -449,7 +439,6 @@ class _InternetScreenState extends State<InternetScreen> {
                 DataColumn(label: Text('الشخص')),
                 DataColumn(label: Text('الباقة')),
                 DataColumn(label: Text('السعر')),
-                DataColumn(label: Text('المدة')),
                 DataColumn(label: Text('تاريخ البداية')),
                 DataColumn(label: Text('تاريخ الانتهاء')),
                 DataColumn(label: Text('الحالة')),
@@ -485,7 +474,6 @@ class _InternetScreenState extends State<InternetScreen> {
                     ),
                     DataCell(Text(subscription.packageName)),
                     DataCell(Text('${subscription.price.toStringAsFixed(2)} د.ع')),
-                    DataCell(Text('${subscription.durationInDays} يوم')),
                     DataCell(Text(DateFormatter.formatDisplayDate(subscription.startDate))),
                     DataCell(Text(DateFormatter.formatDisplayDate(subscription.endDate))),
                     DataCell(
