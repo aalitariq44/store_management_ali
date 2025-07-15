@@ -1,0 +1,107 @@
+class InternetSubscription {
+  final int? id;
+  final int personId;
+  final String packageName;
+  final double price;
+  final int durationInDays;
+  final DateTime startDate;
+  final DateTime endDate;
+  final DateTime paymentDate;
+  final String? notes;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isActive;
+  final bool isArchived;
+
+  InternetSubscription({
+    this.id,
+    required this.personId,
+    required this.packageName,
+    required this.price,
+    required this.durationInDays,
+    required this.startDate,
+    required this.endDate,
+    required this.paymentDate,
+    this.notes,
+    required this.createdAt,
+    required this.updatedAt,
+    this.isActive = true,
+    this.isArchived = false,
+  });
+
+  bool get isExpired => DateTime.now().isAfter(endDate);
+  bool get isExpiringSoon => DateTime.now().add(const Duration(days: 3)).isAfter(endDate);
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'person_id': personId,
+      'package_name': packageName,
+      'price': price,
+      'duration_in_days': durationInDays,
+      'start_date': startDate.millisecondsSinceEpoch,
+      'end_date': endDate.millisecondsSinceEpoch,
+      'payment_date': paymentDate.millisecondsSinceEpoch,
+      'notes': notes,
+      'created_at': createdAt.millisecondsSinceEpoch,
+      'updated_at': updatedAt.millisecondsSinceEpoch,
+      'is_active': isActive ? 1 : 0,
+      'is_archived': isArchived ? 1 : 0,
+    };
+  }
+
+  factory InternetSubscription.fromMap(Map<String, dynamic> map) {
+    return InternetSubscription(
+      id: map['id'],
+      personId: map['person_id'],
+      packageName: map['package_name'],
+      price: map['price'].toDouble(),
+      durationInDays: map['duration_in_days'],
+      startDate: DateTime.fromMillisecondsSinceEpoch(map['start_date']),
+      endDate: DateTime.fromMillisecondsSinceEpoch(map['end_date']),
+      paymentDate: DateTime.fromMillisecondsSinceEpoch(map['payment_date']),
+      notes: map['notes'],
+      createdAt: DateTime.fromMillisecondsSinceEpoch(map['created_at']),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updated_at']),
+      isActive: map['is_active'] == 1,
+      isArchived: map['is_archived'] == 1,
+    );
+  }
+
+  InternetSubscription copyWith({
+    int? id,
+    int? personId,
+    String? packageName,
+    double? price,
+    int? durationInDays,
+    DateTime? startDate,
+    DateTime? endDate,
+    DateTime? paymentDate,
+    String? notes,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isActive,
+    bool? isArchived,
+  }) {
+    return InternetSubscription(
+      id: id ?? this.id,
+      personId: personId ?? this.personId,
+      packageName: packageName ?? this.packageName,
+      price: price ?? this.price,
+      durationInDays: durationInDays ?? this.durationInDays,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      paymentDate: paymentDate ?? this.paymentDate,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isActive: isActive ?? this.isActive,
+      isArchived: isArchived ?? this.isArchived,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'InternetSubscription(id: $id, personId: $personId, packageName: $packageName, price: $price, durationInDays: $durationInDays, startDate: $startDate, endDate: $endDate, paymentDate: $paymentDate, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, isActive: $isActive, isArchived: $isArchived)';
+  }
+}
