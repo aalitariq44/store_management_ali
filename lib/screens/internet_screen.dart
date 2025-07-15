@@ -274,10 +274,11 @@ class _InternetScreenState extends State<InternetScreen> {
             ),
           ),
           const SizedBox(width: 16),
-          DropdownButtonFormField<String>(
-            value: _selectedFilter,
-            decoration: const InputDecoration(
-              labelText: 'فلترة حسب الحالة',
+          Expanded(
+            child: DropdownButtonFormField<String>(
+              value: _selectedFilter,
+              decoration: const InputDecoration(
+                labelText: 'فلترة حسب الحالة',
               border: OutlineInputBorder(),
             ),
             items: const [
@@ -291,6 +292,7 @@ class _InternetScreenState extends State<InternetScreen> {
                 _selectedFilter = value!;
               });
             },
+            ),
           ),
           const SizedBox(width: 16),
           ElevatedButton.icon(
