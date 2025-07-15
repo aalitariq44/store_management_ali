@@ -3,6 +3,7 @@ class InternetSubscription {
   final int personId;
   final String packageName;
   final double price;
+  final double paidAmount;
   final int durationInDays;
   final DateTime startDate;
   final DateTime endDate;
@@ -17,6 +18,7 @@ class InternetSubscription {
     required this.personId,
     required this.packageName,
     required this.price,
+    required this.paidAmount,
     required this.durationInDays,
     required this.startDate,
     required this.endDate,
@@ -28,7 +30,9 @@ class InternetSubscription {
   });
 
   bool get isExpired => DateTime.now().isAfter(endDate);
-  bool get isExpiringSoon => DateTime.now().add(const Duration(days: 3)).isAfter(endDate);
+  bool get isExpiringSoon =>
+      DateTime.now().add(const Duration(days: 3)).isAfter(endDate);
+  double get remainingAmount => price - paidAmount;
 
   Map<String, dynamic> toMap() {
     return {
@@ -36,6 +40,7 @@ class InternetSubscription {
       'person_id': personId,
       'package_name': packageName,
       'price': price,
+      'paid_amount': paidAmount,
       'duration_in_days': durationInDays,
       'start_date': startDate.millisecondsSinceEpoch,
       'end_date': endDate.millisecondsSinceEpoch,
@@ -53,6 +58,7 @@ class InternetSubscription {
       personId: map['person_id'],
       packageName: map['package_name'],
       price: map['price'].toDouble(),
+      paidAmount: map['paid_amount']?.toDouble() ?? 0.0,
       durationInDays: map['duration_in_days'],
       startDate: DateTime.fromMillisecondsSinceEpoch(map['start_date']),
       endDate: DateTime.fromMillisecondsSinceEpoch(map['end_date']),
@@ -69,6 +75,7 @@ class InternetSubscription {
     int? personId,
     String? packageName,
     double? price,
+    double? paidAmount,
     int? durationInDays,
     DateTime? startDate,
     DateTime? endDate,
@@ -83,6 +90,7 @@ class InternetSubscription {
       personId: personId ?? this.personId,
       packageName: packageName ?? this.packageName,
       price: price ?? this.price,
+      paidAmount: paidAmount ?? this.paidAmount,
       durationInDays: durationInDays ?? this.durationInDays,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
@@ -96,6 +104,6 @@ class InternetSubscription {
 
   @override
   String toString() {
-    return 'InternetSubscription(id: $id, personId: $personId, packageName: $packageName, price: $price, durationInDays: $durationInDays, startDate: $startDate, endDate: $endDate, paymentDate: $paymentDate, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, isActive: $isActive)';
+    return 'InternetSubscription(id: $id, personId: $personId, packageName: $packageName, price: $price, paidAmount: $paidAmount, durationInDays: $durationInDays, startDate: $startDate, endDate: $endDate, paymentDate: $paymentDate, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, isActive: $isActive)';
   }
 }

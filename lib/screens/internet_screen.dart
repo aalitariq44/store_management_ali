@@ -25,116 +25,15 @@ class _InternetScreenState extends State<InternetScreen> {
   }
 
   void _showRenewDialog(InternetSubscription subscription) {
-    final TextEditingController priceController = TextEditingController(text: subscription.price.toString());
-    DateTime startDate = DateTime.now();
-    DateTime paymentDate = DateTime.now();
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('تجديد الاشتراك'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('الباقة: ${subscription.packageName}'),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: priceController,
-                decoration: const InputDecoration(
-                  labelText: 'السعر',
-                  hintText: 'أدخل السعر',
-                  suffixText: 'د.ع',
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () async {
-                        final selectedDate = await showDatePicker(
-                          context: context,
-                          initialDate: startDate,
-                          firstDate: DateTime.now().subtract(const Duration(days: 30)),
-                          lastDate: DateTime.now().add(const Duration(days: 365)),
-                        );
-                        if (selectedDate != null) {
-                          setState(() {
-                            startDate = selectedDate;
-                          });
-                        }
-                      },
-                      child: Text('تاريخ البداية: ${DateFormatter.formatDisplayDate(startDate)}'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () async {
-                        final selectedDate = await showDatePicker(
-                          context: context,
-                          initialDate: paymentDate,
-                          firstDate: DateTime.now().subtract(const Duration(days: 30)),
-                          lastDate: DateTime.now().add(const Duration(days: 30)),
-                        );
-                        if (selectedDate != null) {
-                          setState(() {
-                            paymentDate = selectedDate;
-                          });
-                        }
-                      },
-                      child: Text('تاريخ الدفع: ${DateFormatter.formatDisplayDate(paymentDate)}'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('إلغاء'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final price = double.tryParse(priceController.text);
-                if (price != null) {
-                  final internetProvider = Provider.of<InternetProvider>(context, listen: false);
-                  final scaffoldMessenger = ScaffoldMessenger.of(context);
-                  final navigator = Navigator.of(context);
-                  try {
-                    const duration = 30; // Default duration
-                    final endDate = startDate.add(const Duration(days: duration));
-                    await internetProvider
-                        .renewSubscription(subscription.id!, price, startDate, endDate, paymentDate);
-                    
-                    if (mounted) {
-                      navigator.pop();
-                      scaffoldMessenger.showSnackBar(
-                        const SnackBar(content: Text('تم تجديد الاشتراك بنجاح')),
-                      );
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(content: Text('خطأ: ${e.toString()}')),
-                      );
-                    }
-                  }
-                }
-              },
-              child: const Text('تجديد'),
-            ),
-          ],
-        ),
-      ),
+    final newSubscription = subscription.copyWith(
+      id: null,
+      paidAmount: 0.0,
+      startDate: DateTime.now(),
+      paymentDate: DateTime.now(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
+    _showInternetForm(subscription: newSubscription);
   }
 
   void _confirmDeleteSubscription(InternetSubscription subscription) {
@@ -402,6 +301,8 @@ class _InternetScreenState extends State<InternetScreen> {
                 DataColumn(label: Text('الشخص')),
                 DataColumn(label: Text('الباقة')),
                 DataColumn(label: Text('السعر')),
+                DataColumn(label: Text('المبلغ المدفوع')),
+                DataColumn(label: Text('المبلغ المتبقي')),
                 DataColumn(label: Text('تاريخ البداية')),
                 DataColumn(label: Text('تاريخ الانتهاء')),
                 DataColumn(label: Text('الحالة')),
@@ -433,9 +334,16 @@ class _InternetScreenState extends State<InternetScreen> {
                       ),
                     ),
                     DataCell(Text(subscription.packageName)),
-                    DataCell(Text('${subscription.price.toStringAsFixed(2)} د.ع')),
-                    DataCell(Text(DateFormatter.formatDisplayDate(subscription.startDate))),
-                    DataCell(Text(DateFormatter.formatDisplayDate(subscription.endDate))),
+                    DataCell(
+                        Text('${subscription.price.toStringAsFixed(2)} د.ع')),
+                    DataCell(Text(
+                        '${subscription.paidAmount.toStringAsFixed(2)} د.ع')),
+                    DataCell(Text(
+                        '${subscription.remainingAmount.toStringAsFixed(2)} د.ع')),
+                    DataCell(Text(
+                        DateFormatter.formatDisplayDate(subscription.startDate))),
+                    DataCell(Text(
+                        DateFormatter.formatDisplayDate(subscription.endDate))),
                     DataCell(
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -458,9 +366,23 @@ class _InternetScreenState extends State<InternetScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.refresh, color: Colors.blue),
-                            onPressed: () => _showRenewDialog(subscription),
-                            tooltip: 'تجديد',
+                            icon: const Icon(Icons.add_circle_outline, color: Colors.green),
+                            onPressed: () => _showInternetForm(
+                              subscription: InternetSubscription(
+                                personId: subscription.personId,
+                                startDate: DateTime.now(),
+                                endDate: DateTime.now().add(const Duration(days: 30)),
+                                price: subscription.price,
+                                paidAmount: 0,
+                                packageName: subscription.packageName,
+                                notes: '',
+                                createdAt: DateTime.now(),
+                                updatedAt: DateTime.now(),
+                                durationInDays: 30,
+                                paymentDate: DateTime.now(),
+                              ),
+                            ),
+                            tooltip: 'إضافة اشتراك جديد',
                           ),
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),

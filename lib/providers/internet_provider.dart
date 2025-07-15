@@ -62,24 +62,6 @@ class InternetProvider with ChangeNotifier {
     }
   }
 
-  Future<void> renewSubscription(int id, double newPrice, DateTime newStartDate, DateTime newEndDate, DateTime newPaymentDate) async {
-    try {
-      final subscription = _subscriptions.firstWhere((s) => s.id == id);
-      final renewedSubscription = subscription.copyWith(
-        price: newPrice,
-        startDate: newStartDate,
-        endDate: newEndDate,
-        paymentDate: newPaymentDate,
-        isActive: true,
-        updatedAt: DateTime.now(),
-      );
-      
-      await updateSubscription(renewedSubscription);
-    } catch (e) {
-      debugPrint('Error renewing subscription: $e');
-      throw Exception('فشل في تجديد الاشتراك');
-    }
-  }
 
   Future<void> activateSubscription(int id) async {
     try {

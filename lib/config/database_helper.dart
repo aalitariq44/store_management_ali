@@ -101,6 +101,7 @@ class DatabaseHelper {
         person_id INTEGER NOT NULL,
         package_name TEXT NOT NULL,
         price REAL NOT NULL,
+        paid_amount REAL NOT NULL,
         duration_in_days INTEGER NOT NULL,
         start_date INTEGER NOT NULL,
         end_date INTEGER NOT NULL,

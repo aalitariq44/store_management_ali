@@ -19,6 +19,7 @@ class _InternetFormState extends State<InternetForm> {
   final _formKey = GlobalKey<FormState>();
   final _packageNameController = TextEditingController();
   final _priceController = TextEditingController();
+  final _paidAmountController = TextEditingController();
   final _notesController = TextEditingController();
 
   Person? _selectedPerson;
@@ -32,6 +33,7 @@ class _InternetFormState extends State<InternetForm> {
     if (widget.subscription != null) {
       _packageNameController.text = widget.subscription!.packageName;
       _priceController.text = widget.subscription!.price.toString();
+      _paidAmountController.text = widget.subscription!.paidAmount.toString();
       _notesController.text = widget.subscription!.notes ?? '';
       _startDate = widget.subscription!.startDate;
       _paymentDate = widget.subscription!.paymentDate;
@@ -46,6 +48,7 @@ class _InternetFormState extends State<InternetForm> {
   void dispose() {
     _packageNameController.dispose();
     _priceController.dispose();
+    _paidAmountController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -65,18 +68,21 @@ class _InternetFormState extends State<InternetForm> {
     });
 
     try {
-      final internetProvider = Provider.of<InternetProvider>(context, listen: false);
+      final internetProvider =
+          Provider.of<InternetProvider>(context, listen: false);
       final now = DateTime.now();
       final price = double.parse(_priceController.text);
+      final paidAmount = double.parse(_paidAmountController.text);
       const duration = 30; // Default duration
       final endDate = _startDate.add(const Duration(days: duration));
 
-      if (widget.subscription == null) {
+      if (widget.subscription?.id == null) {
         // إضافة اشتراك جديد
         final subscription = InternetSubscription(
           personId: _selectedPerson!.id!,
           packageName: _packageNameController.text.trim(),
           price: price,
+          paidAmount: paidAmount,
           durationInDays: duration,
           startDate: _startDate,
           endDate: endDate,
@@ -100,6 +106,7 @@ class _InternetFormState extends State<InternetForm> {
           personId: _selectedPerson!.id!,
           packageName: _packageNameController.text.trim(),
           price: price,
+          paidAmount: paidAmount,
           durationInDays: duration,
           startDate: _startDate,
           endDate: endDate,
@@ -154,7 +161,9 @@ class _InternetFormState extends State<InternetForm> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.subscription == null ? 'إضافة اشتراك جديد' : 'تعديل الاشتراك'),
+      title: Text(widget.subscription?.id == null
+          ? 'إضافة اشتراك جديد'
+          : 'تعديل الاشتراك'),
       content: SizedBox(
         width: 400,
         child: SingleChildScrollView(
@@ -224,6 +233,30 @@ class _InternetFormState extends State<InternetForm> {
                   },
                 ),
                 const SizedBox(height: 16),
+                TextFormField(
+                  controller: _paidAmountController,
+                  decoration: const InputDecoration(
+                    labelText: 'المبلغ المدفوع *',
+                    hintText: 'أدخل المبلغ المدفوع',
+                    suffixText: 'د.ع',
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'يرجى إدخال المبلغ المدفوع';
+                    }
+                    final paidAmount = double.tryParse(value);
+                    if (paidAmount == null || paidAmount < 0) {
+                      return 'يرجى إدخال مبلغ صحيح';
+                    }
+                    final price = double.tryParse(_priceController.text);
+                    if (price != null && paidAmount > price) {
+                      return 'المبلغ المدفوع لا يمكن أن يكون أكبر من السعر';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
@@ -286,7 +319,7 @@ class _InternetFormState extends State<InternetForm> {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Text(widget.subscription == null ? 'إضافة' : 'تحديث'),
+              : Text(widget.subscription?.id == null ? 'إضافة' : 'تحديث'),
         ),
       ],
     );

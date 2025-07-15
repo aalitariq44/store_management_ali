@@ -192,42 +192,49 @@ class _PersonsScreenState extends State<PersonsScreen> {
           child: SingleChildScrollView(
             child: DataTable(
               columns: const [
+                DataColumn(label: Text('ت')),
                 DataColumn(label: Text('الاسم')),
                 DataColumn(label: Text('الهاتف')),
                 DataColumn(label: Text('العنوان')),
                 DataColumn(label: Text('تاريخ الإضافة')),
                 DataColumn(label: Text('الإجراءات')),
               ],
-              rows: persons.map((person) => DataRow(
-                cells: [
-                  DataCell(
-                    Text(
-                      person.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+              rows: persons.asMap().entries.map((entry) {
+                final index = entry.key;
+                final person = entry.value;
+                return DataRow(
+                  cells: [
+                    DataCell(Text((index + 1).toString())),
+                    DataCell(
+                      Text(
+                        person.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  ),
-                  DataCell(Text(person.phone ?? '-')),
-                  DataCell(Text(person.address ?? '-')),
-                  DataCell(Text(DateFormatter.formatDisplayDate(person.createdAt))),
-                  DataCell(
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _showPersonForm(person: person),
-                          tooltip: 'تعديل',
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _confirmDeletePerson(person),
-                          tooltip: 'حذف',
-                        ),
-                      ],
+                    DataCell(Text(person.phone ?? '-')),
+                    DataCell(Text(person.address ?? '-')),
+                    DataCell(
+                        Text(DateFormatter.formatDisplayDate(person.createdAt))),
+                    DataCell(
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _showPersonForm(person: person),
+                            tooltip: 'تعديل',
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _confirmDeletePerson(person),
+                            tooltip: 'حذف',
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              )).toList(),
+                  ],
+                );
+              }).toList(),
             ),
           ),
         );
