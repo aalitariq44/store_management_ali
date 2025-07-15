@@ -5,6 +5,7 @@ import '../providers/person_provider.dart';
 import '../models/debt_model.dart';
 import '../widgets/debt_form.dart';
 import '../utils/date_formatter.dart';
+import '../utils/number_formatter.dart';
 
 class DebtsScreen extends StatefulWidget {
   const DebtsScreen({super.key});
@@ -34,7 +35,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('المبلغ المتبقي: ${debt.remainingAmount.toStringAsFixed(2)} د.ع'),
+            Text('المبلغ المتبقي: ${NumberFormatter.format(debt.remainingAmount)} د.ع'),
             const SizedBox(height: 16),
             TextFormField(
               controller: amountController,
@@ -215,7 +216,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${debtProvider.getTotalDebtAmount().toStringAsFixed(2)} د.ع',
+                          '${NumberFormatter.format(debtProvider.getTotalDebtAmount())} د.ع',
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                       ],
@@ -236,7 +237,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${debtProvider.getTotalPaidAmount().toStringAsFixed(2)} د.ع',
+                          '${NumberFormatter.format(debtProvider.getTotalPaidAmount())} د.ع',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             color: Colors.green,
                           ),
@@ -259,7 +260,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${debtProvider.getTotalRemainingAmount().toStringAsFixed(2)} د.ع',
+                          '${NumberFormatter.format(debtProvider.getTotalRemainingAmount())} د.ع',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             color: Colors.red,
                           ),
@@ -345,11 +346,11 @@ class _DebtsScreenState extends State<DebtsScreen> {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    DataCell(Text('${debt.amount.toStringAsFixed(2)} د.ع')),
-                    DataCell(Text('${debt.paidAmount.toStringAsFixed(2)} د.ع')),
+                    DataCell(Text('${NumberFormatter.format(debt.amount)} د.ع')),
+                    DataCell(Text('${NumberFormatter.format(debt.paidAmount)} د.ع')),
                     DataCell(
                       Text(
-                        '${debt.remainingAmount.toStringAsFixed(2)} د.ع',
+                        '${NumberFormatter.format(debt.remainingAmount)} د.ع',
                         style: TextStyle(
                           color: debt.isPaid ? Colors.green : Colors.red,
                           fontWeight: FontWeight.bold,

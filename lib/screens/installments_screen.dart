@@ -5,6 +5,7 @@ import '../providers/person_provider.dart';
 import '../models/installment_model.dart';
 import '../widgets/installment_form.dart';
 import '../utils/date_formatter.dart';
+import '../utils/number_formatter.dart';
 
 class InstallmentsScreen extends StatefulWidget {
   const InstallmentsScreen({super.key});
@@ -35,7 +36,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('المبلغ المتبقي: ${installment.remainingAmount.toStringAsFixed(2)} د.ع'),
+            Text('المبلغ المتبقي: ${NumberFormatter.format(installment.remainingAmount)} د.ع'),
             const SizedBox(height: 16),
             TextFormField(
               controller: amountController,
@@ -117,9 +118,9 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
           child: Column(
             children: [
               Text('المنتج: ${installment.productName}'),
-              Text('المبلغ الإجمالي: ${installment.totalAmount.toStringAsFixed(2)} د.ع'),
-              Text('المبلغ المدفوع: ${installment.paidAmount.toStringAsFixed(2)} د.ع'),
-              Text('المبلغ المتبقي: ${installment.remainingAmount.toStringAsFixed(2)} د.ع'),
+              Text('المبلغ الإجمالي: ${NumberFormatter.format(installment.totalAmount)} د.ع'),
+              Text('المبلغ المدفوع: ${NumberFormatter.format(installment.paidAmount)} د.ع'),
+              Text('المبلغ المتبقي: ${NumberFormatter.format(installment.remainingAmount)} د.ع'),
               const SizedBox(height: 16),
               Expanded(
                 child: payments.isEmpty
@@ -130,7 +131,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                           final payment = payments[index];
                           return Card(
                             child: ListTile(
-                              title: Text('${payment.amount.toStringAsFixed(2)} د.ع'),
+                              title: Text('${NumberFormatter.format(payment.amount)} د.ع'),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -313,7 +314,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${installmentProvider.getTotalInstallmentAmount().toStringAsFixed(2)} د.ع',
+                          '${NumberFormatter.format(installmentProvider.getTotalInstallmentAmount())} د.ع',
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                       ],
@@ -334,7 +335,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${installmentProvider.getTotalPaidAmount().toStringAsFixed(2)} د.ع',
+                          '${NumberFormatter.format(installmentProvider.getTotalPaidAmount())} د.ع',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             color: Colors.green,
                           ),
@@ -357,7 +358,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${installmentProvider.getTotalRemainingAmount().toStringAsFixed(2)} د.ع',
+                          '${NumberFormatter.format(installmentProvider.getTotalRemainingAmount())} د.ع',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             color: Colors.red,
                           ),
@@ -445,11 +446,11 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                       ),
                     ),
                     DataCell(Text(installment.productName)),
-                    DataCell(Text('${installment.totalAmount.toStringAsFixed(2)} د.ع')),
-                    DataCell(Text('${installment.paidAmount.toStringAsFixed(2)} د.ع')),
+                    DataCell(Text('${NumberFormatter.format(installment.totalAmount)} د.ع')),
+                    DataCell(Text('${NumberFormatter.format(installment.paidAmount)} د.ع')),
                     DataCell(
                       Text(
-                        '${installment.remainingAmount.toStringAsFixed(2)} د.ع',
+                        '${NumberFormatter.format(installment.remainingAmount)} د.ع',
                         style: TextStyle(
                           color: installment.isCompleted ? Colors.green : Colors.red,
                           fontWeight: FontWeight.bold,
