@@ -76,6 +76,85 @@ class _InternetScreenState extends State<InternetScreen> {
     );
   }
 
+  void _showSubscriptionDetails(BuildContext context, InternetSubscription subscription) {
+    final personProvider = Provider.of<PersonProvider>(context, listen: false);
+    final person = personProvider.getPersonById(subscription.personId);
+
+    String statusText;
+    Color statusColor;
+    if (subscription.isExpired) {
+      statusText = 'منتهي';
+      statusColor = Colors.red;
+    } else if (subscription.isExpiringSoon) {
+      statusText = 'ينتهي قريباً';
+      statusColor = Colors.orange;
+    } else {
+      statusText = 'نشط';
+      statusColor = Colors.green;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('تفاصيل الاشتراك'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              _buildDetailRow('الشخص:', person?.name ?? 'غير محدد'),
+              _buildDetailRow('الباقة:', subscription.packageName),
+              _buildDetailRow('السعر:', '${NumberFormatter.format(subscription.price)} د.ع'),
+              _buildDetailRow('المبلغ المدفوع:', '${NumberFormatter.format(subscription.paidAmount)} د.ع'),
+              _buildDetailRow('المبلغ المتبقي:', '${NumberFormatter.format(subscription.remainingAmount)} د.ع'),
+              _buildDetailRow('تاريخ البداية:', DateFormatter.formatDisplayDate(subscription.startDate)),
+              _buildDetailRow('تاريخ الانتهاء:', DateFormatter.formatDisplayDate(subscription.endDate)),
+              Row(
+                children: [
+                  const Text('الحالة:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      statusText,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              if (subscription.notes != null && subscription.notes!.isNotEmpty)
+                _buildDetailRow('ملاحظات:', subscription.notes!),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('إغلاق'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(width: 8),
+          Expanded(child: Text(value)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -300,12 +379,10 @@ class _InternetScreenState extends State<InternetScreen> {
             child: DataTable(
               columns: const [
                 DataColumn(label: Text('الشخص')),
-                DataColumn(label: Text('الباقة')),
                 DataColumn(label: Text('السعر')),
                 DataColumn(label: Text('المبلغ المدفوع')),
                 DataColumn(label: Text('المبلغ المتبقي')),
                 DataColumn(label: Text('تاريخ البداية')),
-                DataColumn(label: Text('تاريخ الانتهاء')),
                 DataColumn(label: Text('الحالة')),
                 DataColumn(label: Text('الإجراءات')),
               ],
@@ -328,12 +405,20 @@ class _InternetScreenState extends State<InternetScreen> {
                 final bool isFullyPaid = subscription.remainingAmount == 0;
 
                 return DataRow(
+                  onSelectChanged: (selected) {
+                    if (selected != null && selected) {
+                      _showSubscriptionDetails(context, subscription);
+                    }
+                  },
                   color: MaterialStateProperty.resolveWith<Color?>(
                     (Set<MaterialState> states) {
+                      if (states.contains(MaterialState.selected)) {
+                        return Theme.of(context).colorScheme.primary.withOpacity(0.2);
+                      }
                       if (isFullyPaid) {
                         return Colors.green.shade100;
                       }
-                      return null; 
+                      return null;
                     },
                   ),
                   cells: [
@@ -343,7 +428,6 @@ class _InternetScreenState extends State<InternetScreen> {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    DataCell(Text(subscription.packageName)),
                     DataCell(
                         Text('${NumberFormatter.format(subscription.price)} د.ع')),
                     DataCell(Text(
@@ -352,8 +436,6 @@ class _InternetScreenState extends State<InternetScreen> {
                         '${NumberFormatter.format(subscription.remainingAmount)} د.ع')),
                     DataCell(Text(
                         DateFormatter.formatDisplayDate(subscription.startDate))),
-                    DataCell(Text(
-                        DateFormatter.formatDisplayDate(subscription.endDate))),
                     DataCell(
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
