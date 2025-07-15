@@ -62,10 +62,11 @@ class InternetProvider with ChangeNotifier {
     }
   }
 
-  Future<void> renewSubscription(int id, DateTime newStartDate, DateTime newEndDate, DateTime newPaymentDate) async {
+  Future<void> renewSubscription(int id, double newPrice, DateTime newStartDate, DateTime newEndDate, DateTime newPaymentDate) async {
     try {
       final subscription = _subscriptions.firstWhere((s) => s.id == id);
       final renewedSubscription = subscription.copyWith(
+        price: newPrice,
         startDate: newStartDate,
         endDate: newEndDate,
         paymentDate: newPaymentDate,

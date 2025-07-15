@@ -105,21 +105,24 @@ class _InternetScreenState extends State<InternetScreen> {
               onPressed: () async {
                 final price = double.tryParse(priceController.text);
                 if (price != null) {
+                  final internetProvider = Provider.of<InternetProvider>(context, listen: false);
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+                  final navigator = Navigator.of(context);
                   try {
                     const duration = 30; // Default duration
                     final endDate = startDate.add(const Duration(days: duration));
-                    await Provider.of<InternetProvider>(context, listen: false)
-                        .renewSubscription(subscription.id!, startDate, endDate, paymentDate);
+                    await internetProvider
+                        .renewSubscription(subscription.id!, price, startDate, endDate, paymentDate);
                     
                     if (mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      navigator.pop();
+                      scaffoldMessenger.showSnackBar(
                         const SnackBar(content: Text('تم تجديد الاشتراك بنجاح')),
                       );
                     }
                   } catch (e) {
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      scaffoldMessenger.showSnackBar(
                         SnackBar(content: Text('خطأ: ${e.toString()}')),
                       );
                     }
@@ -147,18 +150,19 @@ class _InternetScreenState extends State<InternetScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
+              final internetProvider = Provider.of<InternetProvider>(context, listen: false);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
               Navigator.pop(context);
               try {
-                await Provider.of<InternetProvider>(context, listen: false)
-                    .archiveSubscription(subscription.id!);
+                await internetProvider.archiveSubscription(subscription.id!);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(content: Text('تم أرشفة الاشتراك بنجاح')),
                   );
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(content: Text('خطأ: ${e.toString()}')),
                   );
                 }
@@ -184,18 +188,19 @@ class _InternetScreenState extends State<InternetScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
+              final internetProvider = Provider.of<InternetProvider>(context, listen: false);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
               Navigator.pop(context);
               try {
-                await Provider.of<InternetProvider>(context, listen: false)
-                    .deleteSubscription(subscription.id!);
+                await internetProvider.deleteSubscription(subscription.id!);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(content: Text('تم حذف الاشتراك بنجاح')),
                   );
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(content: Text('خطأ: ${e.toString()}')),
                   );
                 }
