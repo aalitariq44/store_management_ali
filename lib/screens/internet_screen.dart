@@ -324,8 +324,17 @@ class _InternetScreenState extends State<InternetScreen> {
                   statusColor = Colors.green;
                   statusText = 'نشط';
                 }
+                final bool isFullyPaid = subscription.remainingAmount == 0;
 
                 return DataRow(
+                  color: MaterialStateProperty.resolveWith<Color?>(
+                    (Set<MaterialState> states) {
+                      if (isFullyPaid) {
+                        return Colors.green.shade100;
+                      }
+                      return null; 
+                    },
+                  ),
                   cells: [
                     DataCell(
                       Text(
