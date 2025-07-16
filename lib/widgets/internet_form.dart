@@ -1,3 +1,4 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/internet_provider.dart';
@@ -178,34 +179,35 @@ class _InternetFormState extends State<InternetForm> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Consumer<PersonProvider>(
-                  builder: (context, personProvider, child) {
-                    return DropdownButtonFormField<Person>(
-                      value: _selectedPerson,
-                      decoration: const InputDecoration(
-                        labelText: 'الشخص *',
-                        hintText: 'اختر الشخص',
+              Consumer<PersonProvider>(
+                builder: (context, personProvider, child) {
+                  return DropdownSearch<Person>(
+                    popupProps: PopupProps.menu(
+                      showSearchBox: true,
+                      searchFieldProps: TextFieldProps(
+                        controller: TextEditingController(),
+                        decoration: const InputDecoration(
+                          hintText: "ابحث عن شخص",
+                        ),
                       ),
-                      items: personProvider.persons.map((person) => DropdownMenuItem<Person>(
-                        value: person,
-                        child: Text(person.name),
-                      )).toList(),
-                      onChanged: widget.customerId != null
-                          ? null
-                          : (person) {
-                              setState(() {
-                                _selectedPerson = person;
-                              });
-                            },
-                      validator: (value) {
-                        if (value == null) {
-                          return 'يرجى اختيار الشخص';
-                        }
-                        return null;
-                      },
-                    );
-                  },
-                ),
+                    ),
+                    items: personProvider.persons,
+                    itemAsString: (Person u) => u.name,
+                    onChanged: (Person? data) {
+                      setState(() {
+                        _selectedPerson = data;
+                      });
+                    },
+                    selectedItem: _selectedPerson,
+                    validator: (value) {
+                      if (value == null) {
+                        return 'يرجى اختيار الشخص';
+                      }
+                      return null;
+                    },
+                  );
+                },
+              ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _packageNameController,

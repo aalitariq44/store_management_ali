@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:provider/provider.dart';
 import '../providers/debt_provider.dart';
 import '../providers/person_provider.dart';
@@ -135,23 +136,24 @@ class _DebtFormState extends State<DebtForm> {
             children: [
               Consumer<PersonProvider>(
                 builder: (context, personProvider, child) {
-                  return DropdownButtonFormField<Person>(
-                    value: _selectedPerson,
-                    decoration: const InputDecoration(
-                      labelText: 'الشخص *',
-                      hintText: 'اختر الشخص',
+                  return DropdownSearch<Person>(
+                    popupProps: PopupProps.menu(
+                      showSearchBox: true,
+                      searchFieldProps: TextFieldProps(
+                        controller: TextEditingController(),
+                        decoration: const InputDecoration(
+                          hintText: "ابحث عن شخص",
+                        ),
+                      ),
                     ),
-                    items: personProvider.persons.map((person) => DropdownMenuItem<Person>(
-                      value: person,
-                      child: Text(person.name),
-                    )).toList(),
-                    onChanged: widget.personId != null
-                        ? null
-                        : (person) {
-                            setState(() {
-                              _selectedPerson = person;
-                            });
-                          },
+                    items: personProvider.persons,
+                    itemAsString: (Person u) => u.name,
+                    onChanged: (Person? data) {
+                      setState(() {
+                        _selectedPerson = data;
+                      });
+                    },
+                    selectedItem: _selectedPerson,
                     validator: (value) {
                       if (value == null) {
                         return 'يرجى اختيار الشخص';
