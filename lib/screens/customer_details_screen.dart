@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/person_model.dart';
 import '../models/debt_model.dart';
@@ -8,6 +9,7 @@ import '../providers/debt_provider.dart';
 import '../providers/installment_provider.dart';
 import '../providers/internet_provider.dart';
 import '../providers/person_provider.dart';
+import '../providers/password_provider.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
 import '../widgets/internet_form.dart';
@@ -1387,117 +1389,205 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
   }
 
-  void _confirmDeleteDebt(Debt debt) {
-    showDialog(
+  Future<void> _showPasswordConfirmationDialog({
+    required String title,
+    required String content,
+    required VoidCallback onConfirmed,
+  }) async {
+    final passwordController = TextEditingController();
+    final passwordProvider = Provider.of<PasswordProvider>(context, listen: false);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('تأكيد الحذف'),
-        content: const Text('هل أنت متأكد من حذف هذا الدين؟'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(content),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'كلمة المرور',
+                  border: OutlineInputBorder(),
+                ),
+                onSubmitted: (value) async {
+                  final password = passwordController.text;
+                  if (password.isEmpty) return;
+
+                  final isCorrect = await passwordProvider.verifyPassword(password);
+                  Navigator.of(context).pop(isCorrect);
+                },
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                await Provider.of<DebtProvider>(context, listen: false)
-                    .deleteDebt(debt.id!);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تم حذف الدين بنجاح')),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('خطأ: ${e.toString()}')),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('حذف', style: TextStyle(color: Colors.white)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(null),
+              child: const Text('إلغاء'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final password = passwordController.text;
+                if (password.isEmpty) return;
+
+                final isCorrect = await passwordProvider.verifyPassword(password);
+                Navigator.of(context).pop(isCorrect);
+              },
+              child: const Text('تأكيد'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      onConfirmed();
+    } else if (confirmed == false) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+          content: Text('كلمة المرور غير صحيحة.'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _confirmDeleteDebt(Debt debt) {
+    _showPasswordConfirmationDialog(
+      title: 'تأكيد كلمة المرور',
+      content: 'الرجاء إدخال كلمة المرور لحذف هذا الدين.',
+      onConfirmed: () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('تأكيد الحذف'),
+            content: const Text('هل أنت متأكد من حذف هذا الدين؟'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('إلغاء'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  try {
+                    await Provider.of<DebtProvider>(context, listen: false)
+                        .deleteDebt(debt.id!);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('تم حذف الدين بنجاح')),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('خطأ: ${e.toString()}')),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('حذف', style: TextStyle(color: Colors.white)),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   void _confirmDeleteInstallment(Installment installment) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('تأكيد الحذف'),
-        content: const Text('هل أنت متأكد من حذف هذا القسط؟'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+    _showPasswordConfirmationDialog(
+      title: 'تأكيد كلمة المرور',
+      content: 'الرجاء إدخال كلمة المرور لحذف هذا القسط.',
+      onConfirmed: () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('تأكيد الحذف'),
+            content: const Text('هل أنت متأكد من حذف هذا القسط؟'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('إلغاء'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  try {
+                    await Provider.of<InstallmentProvider>(context, listen: false)
+                        .deleteInstallment(installment.id!);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('تم حذف القسط بنجاح')),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('خطأ: ${e.toString()}')),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('حذف', style: TextStyle(color: Colors.white)),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                await Provider.of<InstallmentProvider>(context, listen: false)
-                    .deleteInstallment(installment.id!);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تم حذف القسط بنجاح')),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('خطأ: ${e.toString()}')),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('حذف', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   void _confirmDeleteSubscription(InternetSubscription subscription) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('تأكيد الحذف'),
-        content: const Text('هل أنت متأكد من حذف هذا الاشتراك؟'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+    _showPasswordConfirmationDialog(
+      title: 'تأكيد كلمة المرور',
+      content: 'الرجاء إدخال كلمة المرور لحذف هذا الاشتراك.',
+      onConfirmed: () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('تأكيد الحذف'),
+            content: const Text('هل أنت متأكد من حذف هذا الاشتراك؟'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('إلغاء'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  try {
+                    await Provider.of<InternetProvider>(context, listen: false)
+                        .deleteSubscription(subscription.id!);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('تم حذف الاشتراك بنجاح')),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('خطأ: ${e.toString()}')),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('حذف', style: TextStyle(color: Colors.white)),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                await Provider.of<InternetProvider>(context, listen: false)
-                    .deleteSubscription(subscription.id!);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تم حذف الاشتراك بنجاح')),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('خطأ: ${e.toString()}')),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('حذف', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
