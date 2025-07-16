@@ -7,7 +7,8 @@ import 'providers/installment_provider.dart';
 import 'providers/internet_provider.dart';
 import 'providers/backup_provider.dart';
 import 'providers/income_provider.dart';
-import 'screens/home_screen.dart';
+import 'providers/password_provider.dart';
+import 'screens/auth_wrapper.dart';
 
 class StoreManagementApp extends StatelessWidget {
   const StoreManagementApp({super.key});
@@ -16,6 +17,7 @@ class StoreManagementApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => PasswordProvider()),
         ChangeNotifierProvider(create: (context) => PersonProvider()),
         ChangeNotifierProvider(create: (context) => DebtProvider()),
         ChangeNotifierProvider(create: (context) => InstallmentProvider()),
@@ -86,7 +88,7 @@ class StoreManagementApp extends StatelessWidget {
                 }),
               ),
             ),
-            home: const HomeScreen(),
+            home: const AuthWrapper(),
             debugShowCheckedModeBanner: false,
           );
         },

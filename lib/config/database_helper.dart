@@ -29,7 +29,7 @@ class DatabaseHelper {
     databaseFactory = databaseFactoryFfi;
     return await openDatabase(
       path,
-      version: 2, // Update version number
+      version: 3, // Update version number
       onCreate: _createTables,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -48,6 +48,18 @@ class DatabaseHelper {
           amount REAL NOT NULL,
           description TEXT NOT NULL,
           date INTEGER NOT NULL
+        )
+      ''');
+    }
+    
+    if (oldVersion < 3) {
+      // Create app_password table if upgrading from version 2 to 3
+      await db.execute('''
+        CREATE TABLE app_password (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          hashed_password TEXT NOT NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
         )
       ''');
     }
@@ -139,6 +151,16 @@ class DatabaseHelper {
         amount REAL NOT NULL,
         description TEXT NOT NULL,
         date INTEGER NOT NULL
+      )
+    ''');
+    
+    // Create app_password table
+    await db.execute('''
+      CREATE TABLE app_password (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        hashed_password TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
       )
     ''');
   }

@@ -54,6 +54,9 @@ dependencies:
   dropdown_search: ^5.0.6
   flutter_localizations:
     sdk: flutter
+  
+  # Cryptography
+  crypto: ^3.0.5
 
 dev_dependencies:
   flutter_test:

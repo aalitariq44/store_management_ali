@@ -5,6 +5,7 @@ import '../providers/debt_provider.dart';
 import '../providers/installment_provider.dart';
 import '../providers/internet_provider.dart';
 import '../providers/income_provider.dart';
+import '../providers/password_provider.dart';
 import '../services/backup_service.dart';
 import '../utils/number_formatter.dart';
 import 'persons_screen.dart';
@@ -13,6 +14,7 @@ import 'installments_screen.dart';
 import 'internet_screen.dart';
 import 'income_screen.dart';
 import 'backup_screen.dart';
+import 'password_settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -167,6 +169,38 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _openPasswordSettings() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const PasswordSettingsScreen(),
+      ),
+    );
+  }
+
+  void _logout() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('تسجيل الخروج'),
+        content: const Text('هل أنت متأكد من رغبتك في تسجيل الخروج؟'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('إلغاء'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              final passwordProvider = Provider.of<PasswordProvider>(context, listen: false);
+              passwordProvider.logout();
+            },
+            child: const Text('تسجيل الخروج'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,6 +210,11 @@ class _HomeScreenState extends State<HomeScreen> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: _openPasswordSettings,
+            tooltip: 'إعدادات كلمة المرور',
+          ),
+          IconButton(
             icon: const Icon(Icons.backup),
             onPressed: _showBackupOptions,
             tooltip: 'النسخ الاحتياطية',
@@ -184,6 +223,23 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.refresh),
             onPressed: _loadAllData,
             tooltip: 'تحديث البيانات',
+          ),
+          PopupMenuButton(
+            icon: const Icon(Icons.more_vert),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'logout',
+                child: ListTile(
+                  leading: Icon(Icons.logout),
+                  title: Text('تسجيل الخروج'),
+                ),
+              ),
+            ],
+            onSelected: (value) {
+              if (value == 'logout') {
+                _logout();
+              }
+            },
           ),
         ],
       ),
