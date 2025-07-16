@@ -6,6 +6,7 @@ import 'providers/debt_provider.dart';
 import 'providers/installment_provider.dart';
 import 'providers/internet_provider.dart';
 import 'providers/backup_provider.dart';
+import 'providers/income_provider.dart';
 import 'screens/home_screen.dart';
 
 class StoreManagementApp extends StatelessWidget {
@@ -20,6 +21,7 @@ class StoreManagementApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => InstallmentProvider()),
         ChangeNotifierProvider(create: (context) => InternetProvider()),
         ChangeNotifierProvider(create: (context) => BackupProvider()),
+        ChangeNotifierProvider(create: (context) => IncomeProvider()),
       ],
       child: Consumer4<PersonProvider, DebtProvider, InstallmentProvider, InternetProvider>(
         builder: (context, personProvider, debtProvider, installmentProvider, internetProvider, child) {

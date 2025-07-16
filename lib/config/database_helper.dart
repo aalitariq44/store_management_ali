@@ -29,13 +29,28 @@ class DatabaseHelper {
     databaseFactory = databaseFactoryFfi;
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // Update version number
       onCreate: _createTables,
+      onUpgrade: _onUpgrade,
       onOpen: (db) async {
         // Enable foreign key constraints
         await db.execute('PRAGMA foreign_keys = ON');
       },
     );
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Create incomes table if upgrading from version 1 to 2
+      await db.execute('''
+        CREATE TABLE incomes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          amount REAL NOT NULL,
+          description TEXT NOT NULL,
+          date INTEGER NOT NULL
+        )
+      ''');
+    }
   }
 
   Future<void> _createTables(Database db, int version) async {
@@ -114,6 +129,16 @@ class DatabaseHelper {
         updated_at INTEGER NOT NULL,
         is_active INTEGER DEFAULT 1,
         FOREIGN KEY (person_id) REFERENCES persons (id) ON DELETE CASCADE
+      )
+    ''');
+    
+    // Create incomes table
+    await db.execute('''
+      CREATE TABLE incomes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        amount REAL NOT NULL,
+        description TEXT NOT NULL,
+        date INTEGER NOT NULL
       )
     ''');
   }

@@ -4,12 +4,14 @@ import '../providers/person_provider.dart';
 import '../providers/debt_provider.dart';
 import '../providers/installment_provider.dart';
 import '../providers/internet_provider.dart';
+import '../providers/income_provider.dart';
 import '../services/backup_service.dart';
 import '../utils/number_formatter.dart';
 import 'persons_screen.dart';
 import 'debts_screen.dart';
 import 'installments_screen.dart';
 import 'internet_screen.dart';
+import 'income_screen.dart';
 import 'backup_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const DebtsScreen(),
     const InstallmentsScreen(),
     const InternetScreen(),
+    const IncomeScreen(),
   ];
 
   final List<String> _titles = [
@@ -34,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'إدارة الديون',
     'إدارة الأقساط',
     'اشتراكات الإنترنت',
+    'الواردات',
   ];
 
   @override
@@ -47,12 +51,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final debtProvider = Provider.of<DebtProvider>(context, listen: false);
     final installmentProvider = Provider.of<InstallmentProvider>(context, listen: false);
     final internetProvider = Provider.of<InternetProvider>(context, listen: false);
+    final incomeProvider = Provider.of<IncomeProvider>(context, listen: false);
 
     await Future.wait([
       personProvider.loadPersons(),
       debtProvider.loadDebts(),
       installmentProvider.loadInstallments(),
       internetProvider.loadSubscriptions(),
+      incomeProvider.loadIncomes(),
     ]);
   }
 
@@ -225,6 +231,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: 'اشتراكات الإنترنت',
                   index: 3,
                 ),
+                _buildSidebarItem(
+                  icon: Icons.trending_up,
+                  title: 'الواردات',
+                  index: 4,
+                ),
               ],
             ),
           ),
@@ -234,46 +245,62 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildDashboardSummary() {
-    return Consumer4<PersonProvider, DebtProvider, InstallmentProvider, InternetProvider>(
-      builder: (context, personProvider, debtProvider, installmentProvider, internetProvider, child) {
-        return Card(
-          margin: const EdgeInsets.all(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'ملخص المحل',
-                  style: Theme.of(context).textTheme.headlineSmall,
+    return Consumer<IncomeProvider>(
+      builder: (context, incomeProvider, child) {
+        return Consumer4<PersonProvider, DebtProvider, InstallmentProvider, InternetProvider>(
+          builder: (context, personProvider, debtProvider, installmentProvider, internetProvider, child) {
+            return Card(
+              margin: const EdgeInsets.all(16),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ملخص المحل',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildSummaryItem(
+                      'الزبائن',
+                      '${personProvider.persons.length}',
+                      Icons.people,
+                    ),
+                    _buildSummaryItem(
+                      'الديون المستحقة',
+                      '${NumberFormatter.format(debtProvider.getTotalRemainingAmount())} د.ع',
+                      Icons.account_balance_wallet,
+                      color: Colors.red,
+                    ),
+                    _buildSummaryItem(
+                      'الأقساط المتبقية',
+                      '${NumberFormatter.format(installmentProvider.getTotalRemainingAmount())} د.ع',
+                      Icons.payment,
+                      color: Colors.orange,
+                    ),
+                    _buildSummaryItem(
+                      'اشتراكات فعالة',
+                      '${internetProvider.getActiveSubscriptions().length}',
+                      Icons.wifi,
+                      color: Colors.green,
+                    ),
+                    _buildSummaryItem(
+                      'واردات اليوم',
+                      '${NumberFormatter.format(incomeProvider.getTodayIncome())} د.ع',
+                      Icons.trending_up,
+                      color: Colors.blue,
+                    ),
+                    _buildSummaryItem(
+                      'واردات الشهر',
+                      '${NumberFormatter.format(incomeProvider.getCurrentMonthIncome())} د.ع',
+                      Icons.calendar_today,
+                      color: Colors.purple,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                _buildSummaryItem(
-                  'الزبائن',
-                  '${personProvider.persons.length}',
-                  Icons.people,
-                ),
-                _buildSummaryItem(
-                  'الديون المستحقة',
-                  '${NumberFormatter.format(debtProvider.getTotalRemainingAmount())} د.ع',
-                  Icons.account_balance_wallet,
-                  color: Colors.red,
-                ),
-                _buildSummaryItem(
-                  'الأقساط المتبقية',
-                  '${NumberFormatter.format(installmentProvider.getTotalRemainingAmount())} د.ع',
-                  Icons.payment,
-                  color: Colors.orange,
-                ),
-                _buildSummaryItem(
-                  'اشتراكات فعالة',
-                  '${internetProvider.getActiveSubscriptions().length}',
-                  Icons.wifi,
-                  color: Colors.green,
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
