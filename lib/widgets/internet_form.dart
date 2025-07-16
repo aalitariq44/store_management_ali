@@ -243,28 +243,44 @@ class _InternetFormState extends State<InternetForm> {
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _paidAmountController,
-                  decoration: const InputDecoration(
-                    labelText: 'المبلغ المدفوع *',
-                    hintText: 'أدخل المبلغ المدفوع',
-                    suffixText: 'د.ع',
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'يرجى إدخال المبلغ المدفوع';
-                    }
-                    final paidAmount = double.tryParse(value);
-                    if (paidAmount == null || paidAmount < 0) {
-                      return 'يرجى إدخال مبلغ صحيح';
-                    }
-                    final price = double.tryParse(_priceController.text);
-                    if (price != null && paidAmount > price) {
-                      return 'المبلغ المدفوع لا يمكن أن يكون أكبر من السعر';
-                    }
-                    return null;
-                  },
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _paidAmountController,
+                        decoration: const InputDecoration(
+                          labelText: 'المبلغ المدفوع *',
+                          hintText: 'أدخل المبلغ المدفوع',
+                          suffixText: 'د.ع',
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'يرجى إدخال المبلغ المدفوع';
+                          }
+                          final paidAmount = double.tryParse(value);
+                          if (paidAmount == null || paidAmount < 0) {
+                            return 'يرجى إدخال مبلغ صحيح';
+                          }
+                          final price = double.tryParse(_priceController.text);
+                          if (price != null && paidAmount > price) {
+                            return 'المبلغ المدفوع لا يمكن أن يكون أكبر من السعر';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _paidAmountController.text = _priceController.text;
+                        });
+                      },
+                      child: const Text('دفع'),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 Row(

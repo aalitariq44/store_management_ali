@@ -37,6 +37,64 @@ class _InternetScreenState extends State<InternetScreen> {
     _showInternetForm(subscription: newSubscription);
   }
 
+  void _showPaymentDialog(InternetSubscription subscription) {
+    final TextEditingController amountController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('دفع اشتراك'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('المبلغ المتبقي: ${NumberFormatter.format(subscription.remainingAmount)} د.ع'),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: amountController,
+              decoration: const InputDecoration(
+                labelText: 'المبلغ المدفوع',
+                hintText: 'أدخل المبلغ المدفوع',
+                suffixText: 'د.ع',
+              ),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final amount = double.tryParse(amountController.text);
+              if (amount != null && amount > 0) {
+                final internetProvider = Provider.of<InternetProvider>(context, listen: false);
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                try {
+                  await internetProvider.payForSubscription(subscription.id!, amount);
+                  if (mounted) {
+                    Navigator.pop(context);
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(content: Text('تم دفع المبلغ بنجاح')),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(content: Text('خطأ: ${e.toString()}')),
+                    );
+                  }
+                }
+              }
+            },
+            child: const Text('دفع'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _confirmDeleteSubscription(InternetSubscription subscription) {
     showDialog(
       context: context,
@@ -457,27 +515,19 @@ class _InternetScreenState extends State<InternetScreen> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.add_circle_outline, color: Colors.green),
-                            onPressed: () => _showInternetForm(
-                              subscription: InternetSubscription(
-                                personId: subscription.personId,
-                                startDate: DateTime.now(),
-                                endDate: DateTime.now().add(const Duration(days: 30)),
-                                price: subscription.price,
-                                paidAmount: 0,
-                                packageName: subscription.packageName,
-                                notes: '',
-                                createdAt: DateTime.now(),
-                                updatedAt: DateTime.now(),
-                                durationInDays: 30,
-                                paymentDate: DateTime.now(),
-                              ),
+                          if (!isFullyPaid)
+                            IconButton(
+                              icon: const Icon(Icons.payment, color: Colors.green),
+                              onPressed: () => _showPaymentDialog(subscription),
+                              tooltip: 'دفع',
                             ),
-                            tooltip: 'إضافة اشتراك جديد',
+                          IconButton(
+                            icon: const Icon(Icons.repartition_outlined, color: Colors.blue),
+                            onPressed: () => _showRenewDialog(subscription),
+                            tooltip: 'تجديد',
                           ),
                           IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            icon: const Icon(Icons.edit, color: Colors.orange),
                             onPressed: () => _showInternetForm(subscription: subscription),
                             tooltip: 'تعديل',
                           ),

@@ -62,6 +62,26 @@ class InternetProvider with ChangeNotifier {
     }
   }
 
+  Future<void> payForSubscription(int subscriptionId, double amount) async {
+    try {
+      final subscription = _subscriptions.firstWhere((s) => s.id == subscriptionId);
+      final newPaidAmount = subscription.paidAmount + amount;
+      
+      if (newPaidAmount > subscription.price) {
+        throw Exception('المبلغ المدفوع يتجاوز سعر الاشتراك');
+      }
+
+      final updatedSubscription = subscription.copyWith(
+        paidAmount: newPaidAmount,
+        updatedAt: DateTime.now(),
+      );
+      
+      await updateSubscription(updatedSubscription);
+    } catch (e) {
+      debugPrint('Error paying for subscription: $e');
+      throw Exception('فشل في عملية الدفع');
+    }
+  }
 
   Future<void> activateSubscription(int id) async {
     try {
