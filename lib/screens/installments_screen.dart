@@ -67,6 +67,14 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
             onPressed: () async {
               final amount = double.tryParse(amountController.text);
               if (amount != null && amount > 0) {
+                if (amount > installment.remainingAmount) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ المتبقي')),
+                  );
+                  return;
+                }
                 final provider = Provider.of<InstallmentProvider>(context, listen: false);
                 final navigator = Navigator.of(context);
                 final messenger = ScaffoldMessenger.of(context);

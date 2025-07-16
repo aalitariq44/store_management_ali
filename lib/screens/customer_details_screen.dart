@@ -709,6 +709,14 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             onPressed: () async {
               final amount = double.tryParse(amountController.text);
               if (amount != null && amount > 0) {
+                if (amount > debt.remainingAmount) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ المتبقي')),
+                  );
+                  return;
+                }
                 try {
                   await Provider.of<DebtProvider>(context, listen: false)
                       .payDebt(debt.id!, amount);
@@ -870,6 +878,14 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             onPressed: () async {
               final amount = double.tryParse(amountController.text);
               if (amount != null && amount > 0) {
+                if (amount > installment.remainingAmount) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ المتبقي')),
+                  );
+                  return;
+                }
                 final provider = Provider.of<InstallmentProvider>(context, listen: false);
                 final navigator = Navigator.of(context);
                 final messenger = ScaffoldMessenger.of(context);
