@@ -177,7 +177,10 @@ class DatabaseHelper {
 
   Future<List<Debt>> getAllDebts() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('debts');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'debts',
+      orderBy: 'created_at DESC',
+    );
     return List.generate(maps.length, (i) => Debt.fromMap(maps[i]));
   }
 

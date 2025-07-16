@@ -328,6 +328,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
           child: SingleChildScrollView(
             child: DataTable(
               columns: const [
+                DataColumn(label: Text('ت')),
                 DataColumn(label: Text('الشخص')),
                 DataColumn(label: Text('المبلغ الأصلي')),
                 DataColumn(label: Text('المبلغ المدفوع')),
@@ -336,10 +337,13 @@ class _DebtsScreenState extends State<DebtsScreen> {
                 DataColumn(label: Text('الحالة')),
                 DataColumn(label: Text('الإجراءات')),
               ],
-              rows: debts.map((debt) {
+              rows: debts.asMap().entries.map((entry) {
+                final index = entry.key;
+                final debt = entry.value;
                 final person = personProvider.getPersonById(debt.personId);
                 return DataRow(
                   cells: [
+                    DataCell(Text('${index + 1}')),
                     DataCell(
                       Text(
                         person?.name ?? 'غير محدد',
