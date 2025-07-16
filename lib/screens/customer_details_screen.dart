@@ -923,6 +923,47 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
   }
 
+  void _confirmDeletePayment(Installment installment, InstallmentPayment payment) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('تأكيد الحذف'),
+        content: const Text('هل أنت متأكد من حذف هذه الدفعة؟'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final provider = Provider.of<InstallmentProvider>(context, listen: false);
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+
+              navigator.pop(); // Close the confirmation dialog
+              try {
+                await provider.deletePayment(installment.id!, payment.id!);
+                if (mounted) {
+                  messenger.showSnackBar(
+                    const SnackBar(content: Text('تم حذف الدفعة بنجاح')),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  messenger.showSnackBar(
+                    SnackBar(content: Text('خطأ: ${e.toString()}')),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('حذف', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showPaymentHistory(Installment installment) {
     final installmentProvider = Provider.of<InstallmentProvider>(context, listen: false);
     final payments = installmentProvider.getInstallmentPayments(installment.id!);
@@ -960,24 +1001,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                               ),
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () async {
-                                  final navigator = Navigator.of(context);
-                                  final messenger = ScaffoldMessenger.of(context);
-                                  try {
-                                    await installmentProvider.deletePayment(installment.id!, payment.id!);
-                                    if (mounted) {
-                                      navigator.pop();
-                                      messenger.showSnackBar(
-                                        const SnackBar(content: Text('تم حذف الدفعة بنجاح')),
-                                      );
-                                    }
-                                  } catch (e) {
-                                    if (mounted) {
-                                      messenger.showSnackBar(
-                                        SnackBar(content: Text('خطأ: ${e.toString()}')),
-                                      );
-                                    }
-                                  }
+                                onPressed: () {
+                                  // Close the history dialog first
+                                  Navigator.of(context).pop();
+                                  _confirmDeletePayment(installment, payment);
                                 },
                               ),
                             ),
