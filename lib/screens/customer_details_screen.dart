@@ -10,8 +10,6 @@ import '../providers/internet_provider.dart';
 import '../providers/person_provider.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
-import '../widgets/customer_debt_form.dart';
-import '../widgets/customer_installment_form.dart';
 import '../widgets/internet_form.dart';
 import '../widgets/debt_form.dart';
 import '../widgets/installment_form.dart';
