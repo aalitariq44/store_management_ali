@@ -17,6 +17,7 @@ class InternetProvider with ChangeNotifier {
 
     try {
       _subscriptions = await _dbHelper.getAllInternetSubscriptions();
+      _subscriptions.sort((a, b) => b.id!.compareTo(a.id!));
     } catch (e) {
       debugPrint('Error loading subscriptions: $e');
     } finally {
@@ -29,7 +30,7 @@ class InternetProvider with ChangeNotifier {
     try {
       final id = await _dbHelper.insertInternetSubscription(subscription);
       final newSubscription = subscription.copyWith(id: id);
-      _subscriptions.add(newSubscription);
+      _subscriptions.insert(0, newSubscription);
       notifyListeners();
     } catch (e) {
       debugPrint('Error adding subscription: $e');
