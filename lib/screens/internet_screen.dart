@@ -38,27 +38,44 @@ class _InternetScreenState extends State<InternetScreen> {
   }
 
   void _showPaymentDialog(InternetSubscription subscription) {
+    final _formKey = GlobalKey<FormState>();
     final TextEditingController amountController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('دفع اشتراك'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('المبلغ المتبقي: ${NumberFormatter.format(subscription.remainingAmount)} د.ع'),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: amountController,
-              decoration: const InputDecoration(
-                labelText: 'المبلغ المدفوع',
-                hintText: 'أدخل المبلغ المدفوع',
-                suffixText: 'د.ع',
+        content: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('المبلغ المتبقي: ${NumberFormatter.format(subscription.remainingAmount)} د.ع'),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: amountController,
+                decoration: const InputDecoration(
+                  labelText: 'المبلغ المدفوع',
+                  hintText: 'أدخل المبلغ المدفوع',
+                  suffixText: 'د.ع',
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'يرجى إدخال المبلغ';
+                  }
+                  final amount = double.tryParse(value);
+                  if (amount == null || amount <= 0) {
+                    return 'يرجى إدخال مبلغ صحيح';
+                  }
+                  if (amount > subscription.remainingAmount) {
+                    return 'المبلغ المدفوع أكبر من المبلغ المتبقي';
+                  }
+                  return null;
+                },
               ),
-              keyboardType: TextInputType.number,
-            ),
-          ],
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -67,8 +84,8 @@ class _InternetScreenState extends State<InternetScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              final amount = double.tryParse(amountController.text);
-              if (amount != null && amount > 0) {
+              if (_formKey.currentState!.validate()) {
+                final amount = double.parse(amountController.text);
                 final internetProvider = Provider.of<InternetProvider>(context, listen: false);
                 final scaffoldMessenger = ScaffoldMessenger.of(context);
                 try {
