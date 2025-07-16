@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../models/person_model.dart';
@@ -32,6 +31,10 @@ class DatabaseHelper {
       path,
       version: 1,
       onCreate: _createTables,
+      onOpen: (db) async {
+        // Enable foreign key constraints
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
     );
   }
 
@@ -152,11 +155,45 @@ class DatabaseHelper {
 
   Future<int> deletePerson(int id) async {
     final db = await database;
-    return await db.delete(
-      'persons',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    
+    // Start a transaction to ensure all related data is deleted
+    return await db.transaction((txn) async {
+      // Delete internet subscriptions
+      await txn.delete(
+        'internet_subscriptions',
+        where: 'person_id = ?',
+        whereArgs: [id],
+      );
+      
+      // Delete installment payments first (child table)
+      await txn.rawDelete('''
+        DELETE FROM installment_payments 
+        WHERE installment_id IN (
+          SELECT id FROM installments WHERE person_id = ?
+        )
+      ''', [id]);
+      
+      // Delete installments
+      await txn.delete(
+        'installments',
+        where: 'person_id = ?',
+        whereArgs: [id],
+      );
+      
+      // Delete debts
+      await txn.delete(
+        'debts',
+        where: 'person_id = ?',
+        whereArgs: [id],
+      );
+      
+      // Finally delete the person
+      return await txn.delete(
+        'persons',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    });
   }
 
   Future<List<Person>> searchPersons(String query) async {

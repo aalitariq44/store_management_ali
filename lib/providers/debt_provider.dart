@@ -106,4 +106,10 @@ class DebtProvider with ChangeNotifier {
         .where((debt) => debt.personId == personId && !debt.isPaid)
         .fold(0.0, (sum, debt) => sum + debt.remainingAmount);
   }
+
+  // Remove debts for a specific person (called when person is deleted)
+  void removeDebtsForPerson(int personId) {
+    _debts.removeWhere((debt) => debt.personId == personId);
+    notifyListeners();
+  }
 }

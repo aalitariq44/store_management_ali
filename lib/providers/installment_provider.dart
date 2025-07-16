@@ -155,4 +155,12 @@ class InstallmentProvider with ChangeNotifier {
         .where((installment) => installment.personId == personId && !installment.isCompleted)
         .fold(0.0, (sum, installment) => sum + installment.remainingAmount);
   }
+
+  // Remove installments for a specific person (called when person is deleted)
+  void removeInstallmentsForPerson(int personId) {
+    _installments.removeWhere((installment) => installment.personId == personId);
+    // Also remove associated payments
+    _payments.removeWhere((key, value) => _installments.any((i) => i.id == key && i.personId == personId));
+    notifyListeners();
+  }
 }

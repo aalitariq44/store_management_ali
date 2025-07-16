@@ -67,7 +67,7 @@ class _PersonsScreenState extends State<PersonsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('تأكيد الحذف'),
-        content: Text('هل أنت متأكد من حذف "${person.name}"؟'),
+        content: Text('هل أنت متأكد من حذف "${person.name}"؟\n\nسيتم حذف جميع البيانات المتعلقة بهذا الشخص من الديون والأقساط واشتراكات الإنترنت.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -75,21 +75,22 @@ class _PersonsScreenState extends State<PersonsScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context);
+              final navigator = Navigator.of(context);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              
+              navigator.pop(); // Close dialog first
+              
               try {
                 await Provider.of<PersonProvider>(context, listen: false)
                     .deletePerson(person.id!);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تم حذف الشخص بنجاح')),
-                  );
-                }
+                
+                scaffoldMessenger.showSnackBar(
+                  const SnackBar(content: Text('تم حذف الشخص وجميع بياناته بنجاح')),
+                );
               } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('خطأ: ${e.toString()}')),
-                  );
-                }
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(content: Text('خطأ في حذف الشخص: ${e.toString()}')),
+                );
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),

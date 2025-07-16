@@ -130,4 +130,10 @@ class InternetProvider with ChangeNotifier {
         .where((subscription) => subscription.personId == personId && !subscription.isExpired)
         .length;
   }
+
+  // Remove subscriptions for a specific person (called when person is deleted)
+  void removeSubscriptionsForPerson(int personId) {
+    _subscriptions.removeWhere((subscription) => subscription.personId == personId);
+    notifyListeners();
+  }
 }
