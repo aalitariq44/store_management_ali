@@ -442,7 +442,12 @@ class _IncomeScreenState extends State<IncomeScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(DateFormat('yyyy-MM-dd').format(_selectedDate)),
+            Expanded(
+              child: Text(
+                DateFormat('yyyy-MM-dd').format(_selectedDate),
+              ),
+            ),
+            const SizedBox(width: 8),
             const Icon(Icons.calendar_today),
           ],
         ),
