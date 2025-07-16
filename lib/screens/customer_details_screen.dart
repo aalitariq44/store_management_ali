@@ -12,7 +12,7 @@ import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
 import '../widgets/customer_debt_form.dart';
 import '../widgets/customer_installment_form.dart';
-import '../widgets/customer_internet_form.dart';
+import '../widgets/internet_form.dart';
 import '../widgets/debt_form.dart';
 import '../widgets/installment_form.dart';
 
@@ -70,7 +70,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   void _showInternetForm({InternetSubscription? subscription}) {
     showDialog(
       context: context,
-      builder: (context) => CustomerInternetForm(
+      builder: (context) => InternetForm(
         subscription: subscription,
         customerId: widget.person.id,
       ),
@@ -530,8 +530,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   }
 
   Widget _buildInternetTab() {
-    return Consumer2<InternetProvider, PersonProvider>(
-      builder: (context, internetProvider, personProvider, child) {
+    return Consumer<InternetProvider>(
+      builder: (context, internetProvider, child) {
         if (internetProvider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -546,7 +546,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             Expanded(
               child: customerSubscriptions.isEmpty
                   ? _buildEmptyState('لا توجد اشتراكات', Icons.wifi)
-                  : _buildInternetDataTable(customerSubscriptions, personProvider),
+                  : _buildInternetDataTable(customerSubscriptions),
             ),
           ],
         );
@@ -978,14 +978,15 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
   }
 
-  Widget _buildInternetDataTable(List<InternetSubscription> subscriptions, PersonProvider personProvider) {
+  Widget _buildInternetDataTable(List<InternetSubscription> subscriptions) {
+    // استخدم نفس الأعمدة والشكل الموجود في internet_screen
     return Container(
       margin: const EdgeInsets.all(16),
       child: Card(
         child: SingleChildScrollView(
           child: DataTable(
             columns: const [
-              DataColumn(label: Text('الشخص')),
+              DataColumn(label: Text('الباقة')),
               DataColumn(label: Text('السعر')),
               DataColumn(label: Text('المبلغ المدفوع')),
               DataColumn(label: Text('المبلغ المتبقي')),
@@ -994,11 +995,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               DataColumn(label: Text('الإجراءات')),
             ],
             rows: subscriptions.map((subscription) {
-              final person = personProvider.getPersonById(subscription.personId);
-
               Color statusColor;
               String statusText;
-
               if (subscription.isExpired) {
                 statusColor = Colors.red;
                 statusText = 'منتهي';
@@ -1012,16 +1010,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               final bool isFullyPaid = subscription.remainingAmount == 0;
 
               return DataRow(
-                onSelectChanged: (selected) {
-                  if (selected != null && selected) {
-                    _showSubscriptionDetails(context, subscription, person);
-                  }
-                },
                 color: MaterialStateProperty.resolveWith<Color?>(
                   (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.selected)) {
-                      return Theme.of(context).colorScheme.primary.withOpacity(0.2);
-                    }
                     if (isFullyPaid) {
                       return Colors.green.shade100;
                     }
@@ -1029,12 +1019,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                   },
                 ),
                 cells: [
-                  DataCell(
-                    Text(
-                      person?.name ?? 'غير محدد',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                  DataCell(Text(subscription.packageName)),
                   DataCell(Text('${NumberFormatter.format(subscription.price)} د.ع')),
                   DataCell(Text('${NumberFormatter.format(subscription.paidAmount)} د.ع')),
                   DataCell(Text('${NumberFormatter.format(subscription.remainingAmount)} د.ع')),
@@ -1061,25 +1046,6 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.add_circle_outline, color: Colors.green),
-                          onPressed: () => _showInternetForm(
-                            subscription: InternetSubscription(
-                              personId: subscription.personId,
-                              startDate: DateTime.now(),
-                              endDate: DateTime.now().add(const Duration(days: 30)),
-                              price: subscription.price,
-                              paidAmount: 0,
-                              packageName: subscription.packageName,
-                              notes: '',
-                              createdAt: DateTime.now(),
-                              updatedAt: DateTime.now(),
-                              durationInDays: 30,
-                              paymentDate: DateTime.now(),
-                            ),
-                          ),
-                          tooltip: 'إضافة اشتراك جديد',
-                        ),
-                        IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () => _showInternetForm(subscription: subscription),
                           tooltip: 'تعديل',
@@ -1101,77 +1067,24 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
   }
 
-  void _showSubscriptionDetails(BuildContext context, InternetSubscription subscription, Person? person) {
-    String statusText;
-    Color statusColor;
-    if (subscription.isExpired) {
-      statusText = 'منتهي';
-      statusColor = Colors.red;
-    } else if (subscription.isExpiringSoon) {
-      statusText = 'ينتهي قريباً';
-      statusColor = Colors.orange;
-    } else {
-      statusText = 'نشط';
-      statusColor = Colors.green;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('تفاصيل الاشتراك'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              _buildDetailRow('الشخص:', person?.name ?? 'غير محدد'),
-              _buildDetailRow('الباقة:', subscription.packageName),
-              _buildDetailRow('السعر:', '${NumberFormatter.format(subscription.price)} د.ع'),
-              _buildDetailRow('المبلغ المدفوع:', '${NumberFormatter.format(subscription.paidAmount)} د.ع'),
-              _buildDetailRow('المبلغ المتبقي:', '${NumberFormatter.format(subscription.remainingAmount)} د.ع'),
-              _buildDetailRow('تاريخ البداية:', DateFormatter.formatDisplayDate(subscription.startDate)),
-              _buildDetailRow('تاريخ الانتهاء:', DateFormatter.formatDisplayDate(subscription.endDate)),
-              Row(
-                children: [
-                  const Text('الحالة:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: statusColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      statusText,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-              if (subscription.notes != null && subscription.notes!.isNotEmpty)
-                _buildDetailRow('ملاحظات:', subscription.notes!),
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('إغلاق'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildEmptyState(String message, IconData icon) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(width: 8),
-          Expanded(child: Text(value)),
+          Icon(
+            icon,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey[600],
+            ),
+          ),
         ],
       ),
     );
@@ -1285,23 +1198,6 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('حذف', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Widget to show when there is no data in a tab
-  Widget _buildEmptyState(String message, IconData icon) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            message,
-            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
           ),
         ],
       ),

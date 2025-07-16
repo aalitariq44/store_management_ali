@@ -8,8 +8,13 @@ import '../utils/date_formatter.dart';
 
 class InternetForm extends StatefulWidget {
   final InternetSubscription? subscription;
+  final int? customerId; // أضف هذا السطر
 
-  const InternetForm({super.key, this.subscription});
+  const InternetForm({
+    Key? key,
+    this.subscription,
+    this.customerId, // أضف هذا السطر
+  }) : super(key: key);
 
   @override
   State<InternetForm> createState() => _InternetFormState();
@@ -27,9 +32,14 @@ class _InternetFormState extends State<InternetForm> {
   DateTime _paymentDate = DateTime.now();
   bool _isLoading = false;
 
+  late int? _personId;
+
   @override
   void initState() {
     super.initState();
+    // إذا كان الاشتراك جديداً، استخدم customerId، وإلا استخدم personId من الاشتراك
+    _personId = widget.subscription?.personId ?? widget.customerId;
+
     if (widget.subscription != null) {
       _packageNameController.text = widget.subscription!.packageName;
       _priceController.text = widget.subscription!.price.toString();
@@ -37,7 +47,7 @@ class _InternetFormState extends State<InternetForm> {
       _notesController.text = widget.subscription!.notes ?? '';
       _startDate = widget.subscription!.startDate;
       _paymentDate = widget.subscription!.paymentDate;
-      
+
       // Set selected person
       final personProvider = Provider.of<PersonProvider>(context, listen: false);
       _selectedPerson = personProvider.getPersonById(widget.subscription!.personId);
@@ -79,7 +89,7 @@ class _InternetFormState extends State<InternetForm> {
       if (widget.subscription?.id == null) {
         // إضافة اشتراك جديد
         final subscription = InternetSubscription(
-          personId: _selectedPerson!.id!,
+          personId: _personId!,
           packageName: _packageNameController.text.trim(),
           price: price,
           paidAmount: paidAmount,
