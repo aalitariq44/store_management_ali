@@ -304,7 +304,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${NumberFormatter.format(amount)} ريال',
+                    '${NumberFormatter.format(amount)} د.ع',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -613,11 +613,11 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
-                  DataCell(Text('${NumberFormatter.format(debt.amount)} ريال')),
-                  DataCell(Text('${NumberFormatter.format(debt.paidAmount)} ريال')),
+                  DataCell(Text('${NumberFormatter.format(debt.amount)} د.ع')),
+                  DataCell(Text('${NumberFormatter.format(debt.paidAmount)} د.ع')),
                   DataCell(
                     Text(
-                      '${NumberFormatter.format(debt.remainingAmount)} ريال',
+                      '${NumberFormatter.format(debt.remainingAmount)} د.ع',
                       style: TextStyle(
                         color: debt.isPaid ? Colors.green : Colors.red,
                         fontWeight: FontWeight.bold,
@@ -684,14 +684,14 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('المبلغ المتبقي: ${NumberFormatter.format(debt.remainingAmount)} ريال'),
+            Text('المبلغ المتبقي: ${NumberFormatter.format(debt.remainingAmount)} د.ع'),
             const SizedBox(height: 16),
             TextFormField(
               controller: amountController,
               decoration: const InputDecoration(
                 labelText: 'المبلغ المدفوع',
                 hintText: 'أدخل المبلغ المدفوع',
-                suffixText: 'ريال',
+                suffixText: 'د.ع',
               ),
               keyboardType: TextInputType.number,
             ),
