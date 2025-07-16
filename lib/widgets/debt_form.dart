@@ -7,8 +7,9 @@ import '../models/person_model.dart';
 
 class DebtForm extends StatefulWidget {
   final Debt? debt;
+  final int? personId;
 
-  const DebtForm({super.key, this.debt});
+  const DebtForm({super.key, this.debt, this.personId});
 
   @override
   State<DebtForm> createState() => _DebtFormState();
@@ -26,14 +27,15 @@ class _DebtFormState extends State<DebtForm> {
   @override
   void initState() {
     super.initState();
+    final personProvider = Provider.of<PersonProvider>(context, listen: false);
+
     if (widget.debt != null) {
       _titleController.text = widget.debt!.title ?? '';
       _amountController.text = widget.debt!.amount.toString();
       _notesController.text = widget.debt!.notes ?? '';
-      
-      // Set selected person
-      final personProvider = Provider.of<PersonProvider>(context, listen: false);
       _selectedPerson = personProvider.getPersonById(widget.debt!.personId);
+    } else if (widget.personId != null) {
+      _selectedPerson = personProvider.getPersonById(widget.personId!);
     }
   }
 
@@ -143,11 +145,13 @@ class _DebtFormState extends State<DebtForm> {
                       value: person,
                       child: Text(person.name),
                     )).toList(),
-                    onChanged: (person) {
-                      setState(() {
-                        _selectedPerson = person;
-                      });
-                    },
+                    onChanged: widget.personId != null
+                        ? null
+                        : (person) {
+                            setState(() {
+                              _selectedPerson = person;
+                            });
+                          },
                     validator: (value) {
                       if (value == null) {
                         return 'يرجى اختيار الشخص';

@@ -8,12 +8,12 @@ import '../utils/date_formatter.dart';
 
 class InternetForm extends StatefulWidget {
   final InternetSubscription? subscription;
-  final int? customerId; // أضف هذا السطر
+  final int? customerId;
 
   const InternetForm({
     Key? key,
     this.subscription,
-    this.customerId, // أضف هذا السطر
+    this.customerId,
   }) : super(key: key);
 
   @override
@@ -32,13 +32,10 @@ class _InternetFormState extends State<InternetForm> {
   DateTime _paymentDate = DateTime.now();
   bool _isLoading = false;
 
-  late int? _personId;
-
   @override
   void initState() {
     super.initState();
-    // إذا كان الاشتراك جديداً، استخدم customerId، وإلا استخدم personId من الاشتراك
-    _personId = widget.subscription?.personId ?? widget.customerId;
+    final personProvider = Provider.of<PersonProvider>(context, listen: false);
 
     if (widget.subscription != null) {
       _packageNameController.text = widget.subscription!.packageName;
@@ -47,10 +44,9 @@ class _InternetFormState extends State<InternetForm> {
       _notesController.text = widget.subscription!.notes ?? '';
       _startDate = widget.subscription!.startDate;
       _paymentDate = widget.subscription!.paymentDate;
-
-      // Set selected person
-      final personProvider = Provider.of<PersonProvider>(context, listen: false);
       _selectedPerson = personProvider.getPersonById(widget.subscription!.personId);
+    } else if (widget.customerId != null) {
+      _selectedPerson = personProvider.getPersonById(widget.customerId!);
     }
   }
 
@@ -89,7 +85,7 @@ class _InternetFormState extends State<InternetForm> {
       if (widget.subscription?.id == null) {
         // إضافة اشتراك جديد
         final subscription = InternetSubscription(
-          personId: _personId!,
+          personId: _selectedPerson!.id!,
           packageName: _packageNameController.text.trim(),
           price: price,
           paidAmount: paidAmount,
@@ -194,11 +190,13 @@ class _InternetFormState extends State<InternetForm> {
                         value: person,
                         child: Text(person.name),
                       )).toList(),
-                      onChanged: (person) {
-                        setState(() {
-                          _selectedPerson = person;
-                        });
-                      },
+                      onChanged: widget.customerId != null
+                          ? null
+                          : (person) {
+                              setState(() {
+                                _selectedPerson = person;
+                              });
+                            },
                       validator: (value) {
                         if (value == null) {
                           return 'يرجى اختيار الشخص';

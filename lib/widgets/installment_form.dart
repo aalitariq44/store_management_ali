@@ -7,8 +7,9 @@ import '../models/person_model.dart';
 
 class InstallmentForm extends StatefulWidget {
   final Installment? installment;
+  final int? personId;
 
-  const InstallmentForm({super.key, this.installment});
+  const InstallmentForm({super.key, this.installment, this.personId});
 
   @override
   State<InstallmentForm> createState() => _InstallmentFormState();
@@ -26,14 +27,15 @@ class _InstallmentFormState extends State<InstallmentForm> {
   @override
   void initState() {
     super.initState();
+    final personProvider = Provider.of<PersonProvider>(context, listen: false);
+
     if (widget.installment != null) {
       _productNameController.text = widget.installment!.productName;
       _totalAmountController.text = widget.installment!.totalAmount.toString();
       _notesController.text = widget.installment!.notes ?? '';
-      
-      // Set selected person
-      final personProvider = Provider.of<PersonProvider>(context, listen: false);
       _selectedPerson = personProvider.getPersonById(widget.installment!.personId);
+    } else if (widget.personId != null) {
+      _selectedPerson = personProvider.getPersonById(widget.personId!);
     }
   }
 
@@ -143,11 +145,13 @@ class _InstallmentFormState extends State<InstallmentForm> {
                       value: person,
                       child: Text(person.name),
                     )).toList(),
-                    onChanged: (person) {
-                      setState(() {
-                        _selectedPerson = person;
-                      });
-                    },
+                    onChanged: widget.personId != null
+                        ? null
+                        : (person) {
+                            setState(() {
+                              _selectedPerson = person;
+                            });
+                          },
                     validator: (value) {
                       if (value == null) {
                         return 'يرجى اختيار الشخص';

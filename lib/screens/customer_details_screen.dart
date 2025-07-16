@@ -56,14 +56,20 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   void _showDebtForm({Debt? debt}) {
     showDialog(
       context: context,
-      builder: (context) => DebtForm(debt: debt),
+      builder: (context) => DebtForm(
+        debt: debt,
+        personId: widget.person.id,
+      ),
     );
   }
 
   void _showInstallmentForm({Installment? installment}) {
     showDialog(
       context: context,
-      builder: (context) => InstallmentForm(installment: installment),
+      builder: (context) => InstallmentForm(
+        installment: installment,
+        personId: widget.person.id,
+      ),
     );
   }
 
