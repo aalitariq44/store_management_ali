@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/person_provider.dart';
 import '../models/person_model.dart';
@@ -208,21 +209,23 @@ class _PersonsScreenState extends State<PersonsScreen> {
                   cells: [
                     DataCell(Text((index + 1).toString())),
                     DataCell(
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CustomerDetailsScreen(person: person),
+                      MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CustomerDetailsScreen(person: person),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            person.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
                             ),
-                          );
-                        },
-                        child: Text(
-                          person.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline,
                           ),
                         ),
                       ),
