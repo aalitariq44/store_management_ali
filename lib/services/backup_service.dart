@@ -1,60 +1,33 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:path/path.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/database_helper.dart';
 import '../config/supabase_config.dart';
 
 class BackupService {
-  static const String _backupFileName = 'store_backup.json';
   
-  /// إنشاء نسخة احتياطية من قاعدة البيانات
-  static Future<Map<String, dynamic>> createBackup() async {
-    final db = await DatabaseHelper.instance.database;
-    
-    // جلب البيانات من كل جدول
-    final persons = await db.query('persons');
-    final debts = await db.query('debts');
-    final installments = await db.query('installments');
-    final internetSubscriptions = await db.query('internet_subscriptions');
-    
-    // إنشاء الهيكل الخاص بالنسخة الاحتياطية
-    final backupData = {
-      'timestamp': DateTime.now().toIso8601String(),
-      'version': '1.0.0',
-      'data': {
-        'persons': persons,
-        'debts': debts,
-        'installments': installments,
-        'internet_subscriptions': internetSubscriptions,
-      }
-    };
-    
-    return backupData;
-  }
-
   /// رفع النسخة الاحتياطية إلى Supabase
   static Future<bool> uploadBackup() async {
     try {
-      // إنشاء النسخة الاحتياطية
-      final backupData = await createBackup();
+      // الحصول على مسار قاعدة البيانات
+      final db = await DatabaseHelper.instance.database;
+      final dbPath = db.path;
       
-      // تحويل البيانات إلى JSON
-      final jsonString = jsonEncode(backupData);
-      final bytes = utf8.encode(jsonString);
+      // قراءة ملف قاعدة البيانات
+      final dbFile = File(dbPath);
+      final bytes = await dbFile.readAsBytes();
       
       // إنشاء اسم الملف مع الطابع الزمني
       final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-      final fileName = 'backup_$timestamp.json';
+      final fileName = 'backup_$timestamp.db';
       
-      // رفع الملف إلى Supabase Storage
-      final response = await Supabase.instance.client.storage
+      // رفع قاعدة البيانات إلى Supabase Storage
+      await Supabase.instance.client.storage
           .from(SupabaseConfig.bucketName)
           .uploadBinary(
             fileName,
             bytes,
             fileOptions: const FileOptions(
-              contentType: 'application/json',
+              contentType: 'application/octet-stream',
               upsert: true,
             ),
           );
@@ -74,7 +47,7 @@ class BackupService {
           .list();
       
       // تصفية ملفات النسخ الاحتياطية فقط
-      return response.where((file) => file.name.startsWith('backup_')).toList();
+      return response.where((file) => file.name.startsWith('backup_') && file.name.endsWith('.db')).toList();
     } catch (e) {
       print('خطأ في جلب قائمة النسخ الاحتياطية: $e');
       return [];
@@ -84,56 +57,27 @@ class BackupService {
   /// تحميل واستعادة نسخة احتياطية
   static Future<bool> restoreBackup(String fileName) async {
     try {
-      // تحميل الملف من Supabase
+      // تحميل ملف قاعدة البيانات من Supabase
       final response = await Supabase.instance.client.storage
           .from(SupabaseConfig.bucketName)
           .download(fileName);
       
-      // تحويل البيانات من JSON
-      final jsonString = utf8.decode(response);
-      final backupData = jsonDecode(jsonString);
+      // إغلاق قاعدة البيانات الحالية
+      final db = await DatabaseHelper.instance.database;
+      await db.close();
       
-      // استعادة البيانات إلى قاعدة البيانات
-      await _restoreFromBackupData(backupData);
+      // استبدال ملف قاعدة البيانات الحالي بالملف المستعاد
+      final dbPath = db.path;
+      final dbFile = File(dbPath);
+      await dbFile.writeAsBytes(response);
+      
+      // إعادة تعيين متغير قاعدة البيانات لإعادة فتحها
+      DatabaseHelper.instance.resetDatabase();
       
       return true;
     } catch (e) {
       print('خطأ في استعادة النسخة الاحتياطية: $e');
       return false;
-    }
-  }
-
-  /// استعادة البيانات من النسخة الاحتياطية
-  static Future<void> _restoreFromBackupData(Map<String, dynamic> backupData) async {
-    final db = await DatabaseHelper.instance.database;
-    
-    // مسح البيانات الحالية
-    await db.delete('persons');
-    await db.delete('debts');
-    await db.delete('installments');
-    await db.delete('internet_subscriptions');
-    
-    // استعادة البيانات
-    final data = backupData['data'];
-    
-    // استعادة الأشخاص
-    for (final person in data['persons']) {
-      await db.insert('persons', person);
-    }
-    
-    // استعادة الديون
-    for (final debt in data['debts']) {
-      await db.insert('debts', debt);
-    }
-    
-    // استعادة الأقساط
-    for (final installment in data['installments']) {
-      await db.insert('installments', installment);
-    }
-    
-    // استعادة اشتراكات الإنترنت
-    for (final subscription in data['internet_subscriptions']) {
-      await db.insert('internet_subscriptions', subscription);
     }
   }
 

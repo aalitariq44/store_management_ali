@@ -325,4 +325,9 @@ class DatabaseHelper {
     final db = await database;
     await db.close();
   }
+
+  // Reset database instance
+  void resetDatabase() {
+    _database = null;
+  }
 }
