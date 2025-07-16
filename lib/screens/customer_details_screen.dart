@@ -7,6 +7,7 @@ import '../models/internet_model.dart';
 import '../providers/debt_provider.dart';
 import '../providers/installment_provider.dart';
 import '../providers/internet_provider.dart';
+import '../providers/person_provider.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
 import '../widgets/customer_debt_form.dart';
@@ -506,8 +507,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   }
 
   Widget _buildInstallmentsTab() {
-    return Consumer<InstallmentProvider>(
-      builder: (context, installmentProvider, child) {
+    return Consumer2<InstallmentProvider, PersonProvider>(
+      builder: (context, installmentProvider, personProvider, child) {
         if (installmentProvider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -522,7 +523,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             Expanded(
               child: customerInstallments.isEmpty
                   ? _buildEmptyState('لا توجد أقساط', Icons.payment)
-                  : _buildInstallmentsDataTable(customerInstallments),
+                  : _buildInstallmentsDataTable(customerInstallments, personProvider),
             ),
           ],
         );
@@ -731,38 +732,54 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
   }
 
-  Widget _buildInstallmentsDataTable(List<Installment> installments) {
+  Widget _buildInstallmentsDataTable(List<Installment> installments, PersonProvider personProvider) {
     return Container(
       margin: const EdgeInsets.all(16),
       child: Card(
         child: SingleChildScrollView(
           child: DataTable(
             columns: const [
+              DataColumn(label: Text('الشخص')),
               DataColumn(label: Text('المنتج')),
-              DataColumn(label: Text('المبلغ الكلي')),
-              DataColumn(label: Text('المدفوع')),
-              DataColumn(label: Text('المتبقي')),
+              DataColumn(label: Text('المبلغ الإجمالي')),
+              DataColumn(label: Text('المبلغ المدفوع')),
+              DataColumn(label: Text('المبلغ المتبقي')),
               DataColumn(label: Text('التاريخ')),
               DataColumn(label: Text('الحالة')),
               DataColumn(label: Text('الإجراءات')),
             ],
             rows: installments.map((installment) {
+              final person = personProvider.getPersonById(installment.personId);
               return DataRow(
                 cells: [
+                  DataCell(
+                    Text(
+                      person?.name ?? 'غير محدد',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                   DataCell(Text(installment.productName)),
-                  DataCell(Text(NumberFormatter.format(installment.totalAmount))),
-                  DataCell(Text(NumberFormatter.format(installment.paidAmount))),
-                  DataCell(Text(NumberFormatter.format(installment.remainingAmount))),
+                  DataCell(Text('${NumberFormatter.format(installment.totalAmount)} د.ع')),
+                  DataCell(Text('${NumberFormatter.format(installment.paidAmount)} د.ع')),
+                  DataCell(
+                    Text(
+                      '${NumberFormatter.format(installment.remainingAmount)} د.ع',
+                      style: TextStyle(
+                        color: installment.isCompleted ? Colors.green : Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                   DataCell(Text(DateFormatter.formatDisplayDate(installment.createdAt))),
                   DataCell(
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: installment.isCompleted ? Colors.green : Colors.blue,
+                        color: installment.isCompleted ? Colors.green : Colors.orange,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        installment.isCompleted ? 'مكتمل' : 'جاري',
+                        installment.isCompleted ? 'مكتمل' : 'نشط',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -775,6 +792,18 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        if (!installment.isCompleted) ...[
+                          IconButton(
+                            icon: const Icon(Icons.payment, color: Colors.green),
+                            onPressed: () => _showInstallmentPaymentDialog(installment),
+                            tooltip: 'إضافة دفعة',
+                          ),
+                        ],
+                        IconButton(
+                          icon: const Icon(Icons.history, color: Colors.blue),
+                          onPressed: () => _showPaymentHistory(installment),
+                          tooltip: 'سجل الدفعات',
+                        ),
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () => _showInstallmentForm(installment: installment),
@@ -793,6 +822,160 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             }).toList(),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showInstallmentPaymentDialog(Installment installment) {
+    final TextEditingController amountController = TextEditingController();
+    final TextEditingController notesController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('إضافة دفعة'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('المبلغ المتبقي: ${NumberFormatter.format(installment.remainingAmount)} د.ع'),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: amountController,
+              decoration: const InputDecoration(
+                labelText: 'مبلغ الدفعة',
+                hintText: 'أدخل مبلغ الدفعة',
+                suffixText: 'د.ع',
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: notesController,
+              decoration: const InputDecoration(
+                labelText: 'ملاحظات',
+                hintText: 'أدخل ملاحظات للدفعة',
+              ),
+              maxLines: 2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final amount = double.tryParse(amountController.text);
+              if (amount != null && amount > 0) {
+                final provider = Provider.of<InstallmentProvider>(context, listen: false);
+                final navigator = Navigator.of(context);
+                final messenger = ScaffoldMessenger.of(context);
+
+                try {
+                  final payment = InstallmentPayment(
+                    installmentId: installment.id!,
+                    amount: amount,
+                    notes: notesController.text.trim().isEmpty ? null : notesController.text.trim(),
+                    paymentDate: DateTime.now(),
+                    createdAt: DateTime.now(),
+                  );
+
+                  await provider.addPayment(installment.id!, payment);
+
+                  if (mounted) {
+                    navigator.pop();
+                    messenger.showSnackBar(
+                      const SnackBar(content: Text('تم إضافة الدفعة بنجاح')),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    messenger.showSnackBar(
+                      SnackBar(content: Text('خطأ: ${e.toString()}')),
+                    );
+                  }
+                }
+              }
+            },
+            child: const Text('إضافة'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPaymentHistory(Installment installment) {
+    final installmentProvider = Provider.of<InstallmentProvider>(context, listen: false);
+    final payments = installmentProvider.getInstallmentPayments(installment.id!);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('سجل الدفعات'),
+        content: SizedBox(
+          width: 500,
+          height: 400,
+          child: Column(
+            children: [
+              Text('المنتج: ${installment.productName}'),
+              Text('المبلغ الإجمالي: ${NumberFormatter.format(installment.totalAmount)} د.ع'),
+              Text('المبلغ المدفوع: ${NumberFormatter.format(installment.paidAmount)} د.ع'),
+              Text('المبلغ المتبقي: ${NumberFormatter.format(installment.remainingAmount)} د.ع'),
+              const SizedBox(height: 16),
+              Expanded(
+                child: payments.isEmpty
+                    ? const Center(child: Text('لا توجد دفعات'))
+                    : ListView.builder(
+                        itemCount: payments.length,
+                        itemBuilder: (context, index) {
+                          final payment = payments[index];
+                          return Card(
+                            child: ListTile(
+                              title: Text('${NumberFormatter.format(payment.amount)} د.ع'),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('التاريخ: ${DateFormatter.formatDisplayDateTime(payment.paymentDate)}'),
+                                  if (payment.notes != null) Text('الملاحظات: ${payment.notes}'),
+                                ],
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () async {
+                                  final navigator = Navigator.of(context);
+                                  final messenger = ScaffoldMessenger.of(context);
+                                  try {
+                                    await installmentProvider.deletePayment(installment.id!, payment.id!);
+                                    if (mounted) {
+                                      navigator.pop();
+                                      messenger.showSnackBar(
+                                        const SnackBar(content: Text('تم حذف الدفعة بنجاح')),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (mounted) {
+                                      messenger.showSnackBar(
+                                        SnackBar(content: Text('خطأ: ${e.toString()}')),
+                                      );
+                                    }
+                                  }
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إغلاق'),
+          ),
+        ],
       ),
     );
   }
