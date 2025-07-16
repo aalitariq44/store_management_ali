@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/person_provider.dart';
 import '../models/person_model.dart';
+import '../providers/password_provider.dart';
 import '../widgets/person_form.dart';
 import '../utils/date_formatter.dart';
 import 'customer_details_screen.dart';
@@ -64,14 +65,85 @@ class _PersonsScreenState extends State<PersonsScreen> {
   }
 
   void _confirmDeletePerson(Person person) {
+    _showPasswordConfirmationDialog(person);
+  }
+
+  Future<void> _showPasswordConfirmationDialog(Person person) async {
+    final passwordController = TextEditingController();
+    final passwordProvider = Provider.of<PasswordProvider>(context, listen: false);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('تأكيد كلمة المرور'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('الرجاء إدخال كلمة المرور لحذف "${person.name}".'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'كلمة المرور',
+                  border: OutlineInputBorder(),
+                ),
+                onSubmitted: (value) async {
+                  final password = passwordController.text;
+                  if (password.isEmpty) return;
+
+                  final isCorrect = await passwordProvider.verifyPassword(password);
+                  Navigator.of(context).pop(isCorrect);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(null),
+              child: const Text('إلغاء'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final password = passwordController.text;
+                if (password.isEmpty) return;
+
+                final isCorrect = await passwordProvider.verifyPassword(password);
+                Navigator.of(context).pop(isCorrect);
+              },
+              child: const Text('تأكيد'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      _proceedWithDeletion(person);
+    } else if (confirmed == false) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+          content: Text('كلمة المرور غير صحيحة.'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+    // If confirmed is null (dialog dismissed), do nothing.
+  }
+
+  void _proceedWithDeletion(Person person) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('تأكيد الحذف'),
-        content: Text('هل أنت متأكد من حذف "${person.name}"؟\n\nسيتم حذف جميع البيانات المتعلقة بهذا الشخص من الديون والأقساط واشتراكات الإنترنت.'),
+        title: const Text('تأكيد الحذف النهائي'),
+        content: Text('هل أنت متأكد من حذف "${person.name}"؟\n\nسيتم حذف جميع البيانات المتعلقة بهذا الشخص نهائياً.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('إلغاء'),
           ),
           ElevatedButton(
@@ -79,23 +151,31 @@ class _PersonsScreenState extends State<PersonsScreen> {
               final navigator = Navigator.of(context);
               final scaffoldMessenger = ScaffoldMessenger.of(context);
               
-              navigator.pop(); // Close dialog first
+              navigator.pop(); // Close confirmation dialog
               
               try {
                 await Provider.of<PersonProvider>(context, listen: false)
                     .deletePerson(person.id!);
                 
                 scaffoldMessenger.showSnackBar(
-                  const SnackBar(content: Text('تم حذف الشخص وجميع بياناته بنجاح')),
+                  const SnackBar(
+                    content: Text('تم حذف الشخص وجميع بياناته بنجاح'),
+                    backgroundColor: Colors.green,
+                    behavior: SnackBarBehavior.floating,
+                  ),
                 );
               } catch (e) {
                 scaffoldMessenger.showSnackBar(
-                  SnackBar(content: Text('خطأ في حذف الشخص: ${e.toString()}')),
+                  SnackBar(
+                    content: Text('خطأ في حذف الشخص: ${e.toString()}'),
+                    backgroundColor: Colors.red,
+                    behavior: SnackBarBehavior.floating,
+                  ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('حذف', style: TextStyle(color: Colors.white)),
+            child: const Text('حذف نهائي', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
