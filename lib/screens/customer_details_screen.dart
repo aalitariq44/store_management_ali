@@ -15,6 +15,7 @@ import '../utils/number_formatter.dart';
 import '../widgets/internet_form.dart';
 import '../widgets/debt_form.dart';
 import '../widgets/installment_form.dart';
+import '../widgets/print_options_widget.dart';
 
 class CustomerDetailsScreen extends StatefulWidget {
   final Person person;
@@ -102,6 +103,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 children: [
                   _buildCustomerInfo(),
                   _buildSummaryCards(),
+                  PrintOptionsWidget(person: widget.person),
                   _buildQuickActions(),
                 ],
               ),

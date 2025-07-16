@@ -4,6 +4,7 @@ import '../providers/internet_provider.dart';
 import '../providers/person_provider.dart';
 import '../models/internet_model.dart';
 import '../widgets/internet_form.dart';
+import '../widgets/general_print_widget.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
 
@@ -237,6 +238,7 @@ class _InternetScreenState extends State<InternetScreen> {
         children: [
           _buildFiltersBar(),
           _buildSummaryCards(),
+          const GeneralPrintWidget(type: 'internet'),
           const SizedBox(height: 16),
           Expanded(
             child: _buildSubscriptionsList(),

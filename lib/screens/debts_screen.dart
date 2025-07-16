@@ -5,6 +5,7 @@ import '../providers/person_provider.dart';
 import '../models/debt_model.dart';
 import '../models/person_model.dart';
 import '../widgets/debt_form.dart';
+import '../widgets/general_print_widget.dart';
 import '../widgets/debt_details_dialog.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
@@ -155,6 +156,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
         children: [
           _buildFiltersBar(),
           _buildSummaryCards(),
+          const GeneralPrintWidget(type: 'debts'),
           const SizedBox(height: 16),
           Expanded(
             child: _buildDebtsList(),
