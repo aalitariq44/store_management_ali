@@ -4,6 +4,7 @@ import '../providers/person_provider.dart';
 import '../providers/debt_provider.dart';
 import '../providers/installment_provider.dart';
 import '../providers/internet_provider.dart';
+import '../utils/number_formatter.dart';
 import 'persons_screen.dart';
 import 'debts_screen.dart';
 import 'installments_screen.dart';
@@ -142,13 +143,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 _buildSummaryItem(
                   'الديون المستحقة',
-                  '${debtProvider.getTotalRemainingAmount().toStringAsFixed(2)} د.ع',
+                  '${NumberFormatter.format(debtProvider.getTotalRemainingAmount())} د.ع',
                   Icons.account_balance_wallet,
                   color: Colors.red,
                 ),
                 _buildSummaryItem(
                   'الأقساط المتبقية',
-                  '${installmentProvider.getTotalRemainingAmount().toStringAsFixed(2)} د.ع',
+                  '${NumberFormatter.format(installmentProvider.getTotalRemainingAmount())} د.ع',
                   Icons.payment,
                   color: Colors.orange,
                 ),
