@@ -14,6 +14,7 @@ import '../widgets/customer_debt_form.dart';
 import '../widgets/customer_installment_form.dart';
 import '../widgets/customer_internet_form.dart';
 import '../widgets/debt_form.dart';
+import '../widgets/installment_form.dart';
 
 class CustomerDetailsScreen extends StatefulWidget {
   final Person person;
@@ -62,10 +63,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   void _showInstallmentForm({Installment? installment}) {
     showDialog(
       context: context,
-      builder: (context) => CustomerInstallmentForm(
-        installment: installment,
-        customerId: widget.person.id,
-      ),
+      builder: (context) => InstallmentForm(installment: installment),
     );
   }
 
