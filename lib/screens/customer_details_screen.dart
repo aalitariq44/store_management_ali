@@ -965,7 +965,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   }
 
   void _showPaymentHistory(Installment installment) {
-    final installmentProvider = Provider.of<InstallmentProvider>(context, listen: false);
+    final installmentProvider =
+        Provider.of<InstallmentProvider>(context, listen: false);
     final payments = installmentProvider.getInstallmentPayments(installment.id!);
 
     showDialog(
@@ -976,12 +977,54 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           width: 500,
           height: 400,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('المنتج: ${installment.productName}'),
-              Text('المبلغ الإجمالي: ${NumberFormatter.format(installment.totalAmount)} د.ع'),
-              Text('المبلغ المدفوع: ${NumberFormatter.format(installment.paidAmount)} د.ع'),
-              Text('المبلغ المتبقي: ${NumberFormatter.format(installment.remainingAmount)} د.ع'),
-              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('المنتج: ${installment.productName}',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('المبلغ الإجمالي:'),
+                        Text(
+                            '${NumberFormatter.format(installment.totalAmount)} د.ع',
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('المبلغ المدفوع:'),
+                        Text(
+                            '${NumberFormatter.format(installment.paidAmount)} د.ع',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green)),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('المبلغ المتبقي:'),
+                        Text(
+                            '${NumberFormatter.format(installment.remainingAmount)} د.ع',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, color: Colors.red)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(),
               Expanded(
                 child: payments.isEmpty
                     ? const Center(child: Text('لا توجد دفعات'))
@@ -990,22 +1033,61 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                         itemBuilder: (context, index) {
                           final payment = payments[index];
                           return Card(
-                            child: ListTile(
-                              title: Text('${NumberFormatter.format(payment.amount)} د.ع'),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 4.0, horizontal: 2.0),
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
                                 children: [
-                                  Text('التاريخ: ${DateFormatter.formatDisplayDateTime(payment.paymentDate)}'),
-                                  if (payment.notes != null) Text('الملاحظات: ${payment.notes}'),
+                                  const Icon(Icons.monetization_on,
+                                      color: Colors.green, size: 30),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${NumberFormatter.format(payment.amount)} د.ع',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'التاريخ: ${DateFormatter.formatDisplayDateTime(payment.paymentDate)}',
+                                          style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 12),
+                                        ),
+                                        if (payment.notes != null &&
+                                            payment.notes!.isNotEmpty) ...[
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'الملاحظات: ${payment.notes}',
+                                            style: TextStyle(
+                                                color: Colors.grey[700],
+                                                fontSize: 12),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete,
+                                        color: Colors.red),
+                                    onPressed: () {
+                                      // Close the history dialog first
+                                      Navigator.of(context).pop();
+                                      _confirmDeletePayment(
+                                          installment, payment);
+                                    },
+                                  ),
                                 ],
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  // Close the history dialog first
-                                  Navigator.of(context).pop();
-                                  _confirmDeletePayment(installment, payment);
-                                },
                               ),
                             ),
                           );
