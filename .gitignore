@@ -8,6 +8,9 @@
 .build/
 .buildlog/
 .history
+
+# Configuration files with sensitive data
+lib/config/supabase_config.dart
 .svn/
 .swiftpm/
 migrate_working_dir/

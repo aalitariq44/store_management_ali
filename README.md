@@ -1,16 +1,164 @@
-# store_management_ali
+# تطبيق إدارة المحل
 
-A new Flutter project.
+تطبيق سطح المكتب لإدارة المحل باستخدام Flutter مع النسخ الاحتياطي السحابي.
 
-## Getting Started
+## المميزات
 
-This project is a starting point for a Flutter application.
+- إدارة الزبائن والأشخاص
+- إدارة الديون والمدفوعات
+- إدارة أقساط الدفع
+- إدارة اشتراكات الإنترنت
+- النسخ الاحتياطي السحابي باستخدام Supabase
+- واجهة باللغة العربية
+- دعم أنظمة Windows/Linux/macOS
 
-A few resources to get you started if this is your first Flutter project:
+## البنية التقنية
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### التقنيات المستخدمة
+- **Flutter**: إطار العمل الرئيسي
+- **SQLite**: قاعدة البيانات المحلية
+- **Supabase**: النسخ الاحتياطي السحابي
+- **Provider**: إدارة الحالة
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### هيكل المشروع
+
+```
+lib/
+├── config/
+│   ├── database_helper.dart       # مساعد قاعدة البيانات
+│   └── supabase_config.dart      # إعدادات Supabase
+├── models/
+│   ├── person_model.dart         # نموذج الأشخاص
+│   ├── debt_model.dart           # نموذج الديون
+│   ├── installment_model.dart    # نموذج الأقساط
+│   └── internet_model.dart       # نموذج الإنترنت
+├── providers/
+│   ├── person_provider.dart      # موفر الأشخاص
+│   ├── debt_provider.dart        # موفر الديون
+│   ├── installment_provider.dart # موفر الأقساط
+│   ├── internet_provider.dart    # موفر الإنترنت
+│   └── backup_provider.dart      # موفر النسخ الاحتياطي
+├── screens/
+│   ├── home_screen.dart          # الشاشة الرئيسية
+│   ├── persons_screen.dart       # شاشة الأشخاص
+│   ├── debts_screen.dart         # شاشة الديون
+│   ├── installments_screen.dart  # شاشة الأقساط
+│   ├── internet_screen.dart      # شاشة الإنترنت
+│   └── backup_screen.dart        # شاشة النسخ الاحتياطي
+├── services/
+│   └── backup_service.dart       # خدمة النسخ الاحتياطي
+├── utils/
+│   ├── date_formatter.dart       # تنسيق التواريخ
+│   ├── number_formatter.dart     # تنسيق الأرقام
+│   ├── file_helper.dart          # مساعد الملفات
+│   └── constants.dart            # الثوابت
+└── widgets/
+    └── ...                       # الواجهات المخصصة
+```
+
+## النسخ الاحتياطي السحابي
+
+### المميزات
+- رفع تلقائي للنسخ الاحتياطية إلى Supabase
+- استعادة النسخ الاحتياطية السابقة
+- إدارة وحذف النسخ القديمة
+- تنظيف تلقائي للنسخ (الاحتفاظ بآخر 10 نسخ)
+
+### الاستخدام
+1. اضغط على زر "النسخ الاحتياطي" في شريط التطبيق
+2. اختر "إنشاء نسخة احتياطية" لحفظ البيانات الحالية
+3. اختر "إدارة النسخ الاحتياطية" لعرض النسخ المحفوظة
+4. يمكنك استعادة أو حذف أي نسخة احتياطية
+
+## التثبيت والتشغيل
+
+### المتطلبات
+- Flutter SDK
+- Dart SDK
+- Git
+
+### خطوات التثبيت
+
+1. **استنساخ المشروع**
+   ```bash
+   git clone <repository_url>
+   cd store_management_ali
+   ```
+
+2. **تثبيت التبعيات**
+   ```bash
+   flutter pub get
+   ```
+
+3. **تشغيل التطبيق**
+   ```bash
+   flutter run -d windows
+   ```
+
+### بناء التطبيق للإنتاج
+
+```bash
+# Windows
+flutter build windows
+
+# Linux
+flutter build linux
+
+# macOS
+flutter build macos
+```
+
+## الإعداد
+
+### إعداد Supabase
+1. قم بتحديث ملف `lib/config/supabase_config.dart` بمعلومات مشروعك
+2. تأكد من إنشاء bucket باسم "kadhem" في Supabase Storage
+3. قم بتعيين الصلاحيات المناسبة للـ bucket
+
+### إعداد قاعدة البيانات
+قاعدة البيانات المحلية تُنشأ تلقائياً عند التشغيل الأول.
+
+## الاستخدام
+
+### الشاشة الرئيسية
+- تحتوي على شريط جانبي للتنقل بين الأقسام
+- لوحة معلومات تعرض الإحصائيات السريعة
+- أزرار النسخ الاحتياطي والتحديث في شريط التطبيق
+
+### إدارة الزبائن
+- إضافة وتحرير وحذف الزبائن
+- عرض تفاصيل كل زبون
+- البحث والتصفية
+
+### إدارة الديون
+- تسجيل الديون الجديدة
+- متابعة المدفوعات
+- عرض تاريخ الدفع
+
+### إدارة الأقساط
+- تقسيم الديون إلى أقساط
+- تسجيل المدفوعات
+- تذكيرات الاستحقاق
+
+### إدارة الإنترنت
+- تسجيل الاشتراكات
+- متابعة التجديدات
+- حساب الأرباح
+
+## المساهمة
+
+نرحب بالمساهمات! يرجى:
+
+1. Fork المشروع
+2. إنشاء branch جديد للميزة
+3. Commit التغييرات
+4. Push إلى الـ branch
+5. فتح Pull Request
+
+## الترخيص
+
+هذا المشروع مرخص تحت رخصة MIT. انظر ملف `LICENSE` للمزيد من التفاصيل.
+
+## الدعم
+
+للحصول على الدعم أو الإبلاغ عن مشاكل، يرجى فتح issue في المستودع.

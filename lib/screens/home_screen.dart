@@ -4,11 +4,13 @@ import '../providers/person_provider.dart';
 import '../providers/debt_provider.dart';
 import '../providers/installment_provider.dart';
 import '../providers/internet_provider.dart';
+import '../services/backup_service.dart';
 import '../utils/number_formatter.dart';
 import 'persons_screen.dart';
 import 'debts_screen.dart';
 import 'installments_screen.dart';
 import 'internet_screen.dart';
+import 'backup_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -54,6 +56,111 @@ class _HomeScreenState extends State<HomeScreen> {
     ]);
   }
 
+  void _showBackupOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'خيارات النسخ الاحتياطي',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.backup, color: Colors.green),
+              title: const Text('إنشاء نسخة احتياطية'),
+              subtitle: const Text('حفظ البيانات الحالية في السحابة'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _createQuickBackup();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.folder, color: Colors.blue),
+              title: const Text('إدارة النسخ الاحتياطية'),
+              subtitle: const Text('عرض واستعادة النسخ المحفوظة'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _openBackupScreen();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _createQuickBackup() async {
+    // عرض مؤشر التحميل
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Row(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(width: 20),
+            Text('جاري إنشاء النسخة الاحتياطية...'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final success = await BackupService.uploadBackup();
+      if (mounted) {
+        Navigator.of(context).pop(); // إغلاق مؤشر التحميل
+        
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('تم إنشاء النسخة الاحتياطية بنجاح'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          // تنظيف النسخ القديمة
+          await BackupService.cleanupOldBackups();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('فشل في إنشاء النسخة الاحتياطية'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop(); // إغلاق مؤشر التحميل
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('خطأ في إنشاء النسخة الاحتياطية: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  void _openBackupScreen() async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => const BackupScreen(),
+      ),
+    );
+
+    // إذا تم استعادة نسخة احتياطية، أعد تحميل البيانات
+    if (result == true) {
+      await _loadAllData();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,6 +169,11 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.blue[700], // توحيد اللون مع صفحة التفاصيل
         foregroundColor: Colors.white,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.backup),
+            onPressed: _showBackupOptions,
+            tooltip: 'النسخ الاحتياطية',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadAllData,

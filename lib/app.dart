@@ -5,6 +5,7 @@ import 'providers/person_provider.dart';
 import 'providers/debt_provider.dart';
 import 'providers/installment_provider.dart';
 import 'providers/internet_provider.dart';
+import 'providers/backup_provider.dart';
 import 'screens/home_screen.dart';
 
 class StoreManagementApp extends StatelessWidget {
@@ -18,6 +19,7 @@ class StoreManagementApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => DebtProvider()),
         ChangeNotifierProvider(create: (context) => InstallmentProvider()),
         ChangeNotifierProvider(create: (context) => InternetProvider()),
+        ChangeNotifierProvider(create: (context) => BackupProvider()),
       ],
       child: MaterialApp(
         title: 'إدارة المحل',
