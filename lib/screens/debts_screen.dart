@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import '../providers/debt_provider.dart';
 import '../providers/person_provider.dart';
 import '../models/debt_model.dart';
+import '../models/person_model.dart';
 import '../widgets/debt_form.dart';
+import '../widgets/debt_details_dialog.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
 
@@ -80,6 +82,13 @@ class _DebtsScreenState extends State<DebtsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showDebtDetailsDialog(Debt debt, Person? person) {
+    showDialog(
+      context: context,
+      builder: (context) => DebtDetailsDialog(debt: debt, person: person),
     );
   }
 
@@ -342,6 +351,11 @@ class _DebtsScreenState extends State<DebtsScreen> {
                 final debt = entry.value;
                 final person = personProvider.getPersonById(debt.personId);
                 return DataRow(
+                  onSelectChanged: (selected) {
+                    if (selected != null && selected) {
+                      _showDebtDetailsDialog(debt, person);
+                    }
+                  },
                   cells: [
                     DataCell(Text('${index + 1}')),
                     DataCell(
