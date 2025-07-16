@@ -28,27 +28,44 @@ class _DebtsScreenState extends State<DebtsScreen> {
   }
 
   void _showPaymentDialog(Debt debt) {
+    final _formKey = GlobalKey<FormState>();
     final TextEditingController amountController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('دفع دين'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('المبلغ المتبقي: ${NumberFormatter.format(debt.remainingAmount)} د.ع'),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: amountController,
-              decoration: const InputDecoration(
-                labelText: 'المبلغ المدفوع',
-                hintText: 'أدخل المبلغ المدفوع',
-                suffixText: 'د.ع',
+        content: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('المبلغ المتبقي: ${NumberFormatter.format(debt.remainingAmount)} د.ع'),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: amountController,
+                decoration: const InputDecoration(
+                  labelText: 'المبلغ المدفوع',
+                  hintText: 'أدخل المبلغ المدفوع',
+                  suffixText: 'د.ع',
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'يرجى إدخال المبلغ';
+                  }
+                  final amount = double.tryParse(value);
+                  if (amount == null || amount <= 0) {
+                    return 'يرجى إدخال مبلغ صحيح';
+                  }
+                  if (amount > debt.remainingAmount) {
+                    return 'المبلغ المدفوع أكبر من المبلغ المتبقي';
+                  }
+                  return null;
+                },
               ),
-              keyboardType: TextInputType.number,
-            ),
-          ],
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -57,8 +74,8 @@ class _DebtsScreenState extends State<DebtsScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              final amount = double.tryParse(amountController.text);
-              if (amount != null && amount > 0) {
+              if (_formKey.currentState!.validate()) {
+                final amount = double.parse(amountController.text);
                 final debtProvider = Provider.of<DebtProvider>(context, listen: false);
                 final scaffoldMessenger = ScaffoldMessenger.of(context);
                 try {
