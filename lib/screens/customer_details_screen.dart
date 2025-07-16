@@ -12,6 +12,7 @@ import '../utils/number_formatter.dart';
 import '../widgets/customer_debt_form.dart';
 import '../widgets/customer_installment_form.dart';
 import '../widgets/customer_internet_form.dart';
+import '../widgets/debt_form.dart';
 
 class CustomerDetailsScreen extends StatefulWidget {
   final Person person;
@@ -53,10 +54,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   void _showDebtForm({Debt? debt}) {
     showDialog(
       context: context,
-      builder: (context) => CustomerDebtForm(
-        debt: debt,
-        customerId: widget.person.id,
-      ),
+      builder: (context) => DebtForm(debt: debt),
     );
   }
 
@@ -591,16 +589,17 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   }
 
   Widget _buildDebtsDataTable(List<Debt> debts) {
+    final personName = widget.person.name;
     return Container(
       margin: const EdgeInsets.all(16),
       child: Card(
         child: SingleChildScrollView(
           child: DataTable(
             columns: const [
-              DataColumn(label: Text('العنوان')),
-              DataColumn(label: Text('المبلغ')),
-              DataColumn(label: Text('المدفوع')),
-              DataColumn(label: Text('المتبقي')),
+              DataColumn(label: Text('الشخص')),
+              DataColumn(label: Text('المبلغ الأصلي')),
+              DataColumn(label: Text('المبلغ المدفوع')),
+              DataColumn(label: Text('المبلغ المتبقي')),
               DataColumn(label: Text('التاريخ')),
               DataColumn(label: Text('الحالة')),
               DataColumn(label: Text('الإجراءات')),
@@ -608,20 +607,33 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             rows: debts.map((debt) {
               return DataRow(
                 cells: [
-                  DataCell(Text(debt.title ?? 'دين')),
-                  DataCell(Text(NumberFormatter.format(debt.amount))),
-                  DataCell(Text(NumberFormatter.format(debt.paidAmount))),
-                  DataCell(Text(NumberFormatter.format(debt.remainingAmount))),
+                  DataCell(
+                    Text(
+                      personName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataCell(Text('${NumberFormatter.format(debt.amount)} ريال')),
+                  DataCell(Text('${NumberFormatter.format(debt.paidAmount)} ريال')),
+                  DataCell(
+                    Text(
+                      '${NumberFormatter.format(debt.remainingAmount)} ريال',
+                      style: TextStyle(
+                        color: debt.isPaid ? Colors.green : Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                   DataCell(Text(DateFormatter.formatDisplayDate(debt.createdAt))),
                   DataCell(
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: debt.isPaid ? Colors.green : Colors.orange,
+                        color: debt.isPaid ? Colors.green : Colors.red,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        debt.isPaid ? 'مكتمل' : 'غير مكتمل',
+                        debt.isPaid ? 'مدفوع' : 'مستحق',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -634,6 +646,13 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        if (!debt.isPaid) ...[
+                          IconButton(
+                            icon: const Icon(Icons.payment, color: Colors.green),
+                            onPressed: () => _showPaymentDialog(debt),
+                            tooltip: 'دفع',
+                          ),
+                        ],
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () => _showDebtForm(debt: debt),
@@ -652,6 +671,62 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             }).toList(),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showPaymentDialog(Debt debt) {
+    final TextEditingController amountController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('دفع دين'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('المبلغ المتبقي: ${NumberFormatter.format(debt.remainingAmount)} ريال'),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: amountController,
+              decoration: const InputDecoration(
+                labelText: 'المبلغ المدفوع',
+                hintText: 'أدخل المبلغ المدفوع',
+                suffixText: 'ريال',
+              ),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final amount = double.tryParse(amountController.text);
+              if (amount != null && amount > 0) {
+                try {
+                  await Provider.of<DebtProvider>(context, listen: false)
+                      .payDebt(debt.id!, amount);
+                  if (mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('تم دفع المبلغ بنجاح')),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('خطأ: ${e.toString()}')),
+                    );
+                  }
+                }
+              }
+            },
+            child: const Text('دفع'),
+          ),
+        ],
       ),
     );
   }
