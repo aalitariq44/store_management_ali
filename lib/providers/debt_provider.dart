@@ -29,7 +29,7 @@ class DebtProvider with ChangeNotifier {
     try {
       final id = await _dbHelper.insertDebt(debt);
       final newDebt = debt.copyWith(id: id);
-      _debts.add(newDebt);
+      _debts.insert(0, newDebt);
       notifyListeners();
     } catch (e) {
       debugPrint('Error adding debt: $e');
