@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_titles[_selectedIndex]),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Colors.blue[700], // توحيد اللون مع صفحة التفاصيل
         foregroundColor: Colors.white,
         actions: [
           IconButton(

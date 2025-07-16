@@ -91,7 +91,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         children: [
           // Left sidebar with customer info and summary
           SizedBox(
-            width: 400,
+            width: 320, // كان 400، تم تصغيره
             child: SingleChildScrollView( // أضف هذا الـ Scroll
               child: Column(
                 children: [
