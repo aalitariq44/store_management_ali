@@ -103,15 +103,15 @@ class InternetProvider with ChangeNotifier {
   }
 
   List<InternetSubscription> getActiveSubscriptions() {
-    return _subscriptions.where((subscription) => subscription.isActive).toList();
+    return _subscriptions.where((subscription) => !subscription.isExpired).toList();
   }
 
   List<InternetSubscription> getExpiredSubscriptions() {
-    return _subscriptions.where((subscription) => subscription.isExpired && subscription.isActive).toList();
+    return _subscriptions.where((subscription) => subscription.isExpired).toList();
   }
 
   List<InternetSubscription> getExpiringSoonSubscriptions() {
-    return _subscriptions.where((subscription) => subscription.isExpiringSoon && subscription.isActive && !subscription.isExpired).toList();
+    return _subscriptions.where((subscription) => subscription.isExpiringSoon && !subscription.isExpired).toList();
   }
 
   double getTotalActiveSubscriptionsRevenue() {
@@ -120,13 +120,13 @@ class InternetProvider with ChangeNotifier {
 
   double getPersonTotalActiveSubscriptions(int personId) {
     return _subscriptions
-        .where((subscription) => subscription.personId == personId && subscription.isActive)
+        .where((subscription) => subscription.personId == personId && !subscription.isExpired)
         .fold(0.0, (sum, subscription) => sum + subscription.price);
   }
 
   int getPersonActiveSubscriptionsCount(int personId) {
     return _subscriptions
-        .where((subscription) => subscription.personId == personId && subscription.isActive)
+        .where((subscription) => subscription.personId == personId && !subscription.isExpired)
         .length;
   }
 }
