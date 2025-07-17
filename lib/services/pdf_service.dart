@@ -797,4 +797,130 @@ class PDFService {
       );
     }
   }
+
+  // طباعة تفاصيل قسط واحد مع دفعاته
+  static Future<void> printInstallmentDetails({
+    required Installment installment,
+    required Person person,
+    required List<InstallmentPayment> payments,
+  }) async {
+    try {
+      await _loadArabicFonts();
+      
+      final pdf = pw.Document();
+
+      pdf.addPage(
+        pw.MultiPage(
+          textDirection: pw.TextDirection.rtl,
+          pageFormat: PdfPageFormat.a4,
+          build: (pw.Context context) {
+            return [
+              _buildHeader('تفاصيل القسط'),
+              pw.SizedBox(height: 20),
+              _buildCustomerInfo(person),
+              pw.SizedBox(height: 20),
+              _buildSingleInstallmentSummary(installment),
+              pw.SizedBox(height: 20),
+              if (payments.isNotEmpty) ...[
+                _buildInstallmentPaymentsSection(payments),
+              ],
+            ];
+          },
+        ),
+      );
+
+      await _printOrSavePDF(pdf, 'تفاصيل_قسط_${person.name}_${installment.productName}');
+    } catch (e) {
+      throw Exception('خطأ في طباعة تفاصيل القسط: $e');
+    }
+  }
+
+  // بناء ملخص قسط واحد
+  static pw.Widget _buildSingleInstallmentSummary(Installment installment) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(15),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.grey300),
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            'تفاصيل القسط: ${installment.productName}',
+            style: _arabicTextStyle(
+              fontSize: 16,
+              isBold: true,
+              color: PdfColors.blue800,
+            ),
+            textDirection: pw.TextDirection.rtl,
+          ),
+          pw.SizedBox(height: 10),
+          _buildSummaryRow('المبلغ الإجمالي:', '${NumberFormatter.format(installment.totalAmount)} د.ع'),
+          _buildSummaryRow('المبلغ المدفوع:', '${NumberFormatter.format(installment.paidAmount)} د.ع', color: PdfColors.green),
+          _buildSummaryRow('المبلغ المتبقي:', '${NumberFormatter.format(installment.remainingAmount)} د.ع', color: PdfColors.red),
+          _buildSummaryRow('الحالة:', installment.isCompleted ? 'مكتمل' : 'نشط'),
+          _buildSummaryRow('تاريخ الإنشاء:', DateFormatter.formatDisplayDate(installment.createdAt)),
+        ],
+      ),
+    );
+  }
+
+  // بناء قسم دفعات القسط
+  static pw.Widget _buildInstallmentPaymentsSection(List<InstallmentPayment> payments) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          'سجل الدفعات',
+          style: _arabicTextStyle(
+            fontSize: 16,
+            isBold: true,
+            color: PdfColors.green800,
+          ),
+          textDirection: pw.TextDirection.rtl,
+        ),
+        pw.SizedBox(height: 10),
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey300),
+          columnWidths: {
+            0: const pw.FlexColumnWidth(2),
+            1: const pw.FlexColumnWidth(1.5),
+            2: const pw.FlexColumnWidth(3),
+          },
+          children: [
+            pw.TableRow(
+              decoration: const pw.BoxDecoration(color: PdfColors.grey100),
+              children: [
+                _buildTableCell('تاريخ الدفعة', isHeader: true),
+                _buildTableCell('المبلغ', isHeader: true),
+                _buildTableCell('الملاحظات', isHeader: true),
+              ],
+            ),
+            ...payments.map((payment) => pw.TableRow(
+              children: [
+                _buildTableCell(DateFormatter.formatDisplayDateTime(payment.paymentDate)),
+                _buildTableCell('${NumberFormatter.format(payment.amount)} د.ع'),
+                _buildTableCell(payment.notes ?? 'لا توجد'),
+              ],
+            )),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Helper for summary rows
+  static pw.Widget _buildSummaryRow(String title, String value, {PdfColor? color}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(title, style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+          pw.Text(value, style: _arabicTextStyle(fontSize: 12, color: color), textDirection: pw.TextDirection.rtl),
+        ],
+      ),
+    );
+  }
 }

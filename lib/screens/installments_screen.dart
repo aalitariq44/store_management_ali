@@ -7,6 +7,7 @@ import '../providers/password_provider.dart';
 import '../models/installment_model.dart';
 import '../widgets/installment_form.dart';
 import '../widgets/general_print_widget.dart';
+import '../widgets/installment_print_widget.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
 
@@ -704,6 +705,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                             onPressed: () => _confirmDeleteInstallment(installment),
                             tooltip: 'حذف',
                           ),
+                          InstallmentPrintWidget(installment: installment),
                         ],
                       ),
                     ),
