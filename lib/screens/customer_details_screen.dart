@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/person_model.dart';
 import '../models/debt_model.dart';
@@ -17,6 +16,7 @@ import '../widgets/debt_form.dart';
 import '../widgets/installment_form.dart';
 import '../widgets/installment_print_widget.dart';
 import '../widgets/print_options_widget.dart';
+import '../widgets/debt_details_dialog.dart';
 
 class CustomerDetailsScreen extends StatefulWidget {
   final Person person;
@@ -85,6 +85,13 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         customerId: widget.person.id,
         person: widget.person,
       ),
+    );
+  }
+
+  void _showDebtDetailsDialog(Debt debt) {
+    showDialog(
+      context: context,
+      builder: (context) => DebtDetailsDialog(debt: debt, person: widget.person),
     );
   }
 
@@ -601,6 +608,78 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
 
   Widget _buildDebtsDataTable(List<Debt> debts) {
     final personName = widget.person.name;
+
+    final rows = debts.map((debt) {
+      return DataRow(
+        onSelectChanged: (selected) {
+          if (selected != null && selected) {
+            _showDebtDetailsDialog(debt);
+          }
+        },
+        cells: [
+          DataCell(
+            Text(
+              personName,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          DataCell(Text('${NumberFormatter.format(debt.amount)} د.ع')),
+          DataCell(Text('${NumberFormatter.format(debt.paidAmount)} د.ع')),
+          DataCell(
+            Text(
+              '${NumberFormatter.format(debt.remainingAmount)} د.ع',
+              style: TextStyle(
+                color: debt.isPaid ? Colors.green : Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          DataCell(Text(DateFormatter.formatDisplayDate(debt.createdAt))),
+          DataCell(
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: debt.isPaid ? Colors.green : Colors.red,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                debt.isPaid ? 'مدفوع' : 'مستحق',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          DataCell(
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!debt.isPaid) ...[
+                  IconButton(
+                    icon: const Icon(Icons.payment, color: Colors.green),
+                    onPressed: () => _showPaymentDialog(debt),
+                    tooltip: 'دفع',
+                  ),
+                ],
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.blue),
+                  onPressed: () => _showDebtForm(debt: debt),
+                  tooltip: 'تعديل',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _confirmDeleteDebt(debt),
+                  tooltip: 'حذف',
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }).toList();
+
     return Container(
       margin: const EdgeInsets.all(16),
       child: Card(
@@ -615,71 +694,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               DataColumn(label: Text('الحالة')),
               DataColumn(label: Text('الإجراءات')),
             ],
-            rows: debts.map((debt) {
-              return DataRow(
-                cells: [
-                  DataCell(
-                    Text(
-                      personName,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  DataCell(Text('${NumberFormatter.format(debt.amount)} د.ع')),
-                  DataCell(Text('${NumberFormatter.format(debt.paidAmount)} د.ع')),
-                  DataCell(
-                    Text(
-                      '${NumberFormatter.format(debt.remainingAmount)} د.ع',
-                      style: TextStyle(
-                        color: debt.isPaid ? Colors.green : Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  DataCell(Text(DateFormatter.formatDisplayDate(debt.createdAt))),
-                  DataCell(
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: debt.isPaid ? Colors.green : Colors.red,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        debt.isPaid ? 'مدفوع' : 'مستحق',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  DataCell(
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (!debt.isPaid) ...[
-                          IconButton(
-                            icon: const Icon(Icons.payment, color: Colors.green),
-                            onPressed: () => _showPaymentDialog(debt),
-                            tooltip: 'دفع',
-                          ),
-                        ],
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _showDebtForm(debt: debt),
-                          tooltip: 'تعديل',
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _confirmDeleteDebt(debt),
-                          tooltip: 'حذف',
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            }).toList(),
+            rows: rows,
           ),
         ),
       ),
