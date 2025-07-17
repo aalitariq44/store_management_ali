@@ -9,8 +9,9 @@ import '../models/person_model.dart';
 class InstallmentForm extends StatefulWidget {
   final Installment? installment;
   final int? personId;
+  final Person? person;
 
-  const InstallmentForm({super.key, this.installment, this.personId});
+  const InstallmentForm({super.key, this.installment, this.personId, this.person});
 
   @override
   State<InstallmentForm> createState() => _InstallmentFormState();
@@ -35,6 +36,8 @@ class _InstallmentFormState extends State<InstallmentForm> {
       _totalAmountController.text = widget.installment!.totalAmount.toString();
       _notesController.text = widget.installment!.notes ?? '';
       _selectedPerson = personProvider.getPersonById(widget.installment!.personId);
+    } else if (widget.person != null) {
+      _selectedPerson = widget.person;
     } else if (widget.personId != null) {
       _selectedPerson = personProvider.getPersonById(widget.personId!);
     }
@@ -134,35 +137,45 @@ class _InstallmentFormState extends State<InstallmentForm> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Consumer<PersonProvider>(
-                builder: (context, personProvider, child) {
-                  return DropdownSearch<Person>(
-                    popupProps: PopupProps.menu(
-                      showSearchBox: true,
-                      searchFieldProps: TextFieldProps(
-                        controller: TextEditingController(),
-                        decoration: const InputDecoration(
-                          hintText: "ابحث عن شخص",
+              if (widget.person != null)
+                TextFormField(
+                  initialValue: widget.person!.name,
+                  readOnly: true,
+                  decoration: const InputDecoration(
+                    labelText: 'الشخص',
+                    border: OutlineInputBorder(),
+                  ),
+                )
+              else
+                Consumer<PersonProvider>(
+                  builder: (context, personProvider, child) {
+                    return DropdownSearch<Person>(
+                      popupProps: PopupProps.menu(
+                        showSearchBox: true,
+                        searchFieldProps: TextFieldProps(
+                          controller: TextEditingController(),
+                          decoration: const InputDecoration(
+                            hintText: "ابحث عن شخص",
+                          ),
                         ),
                       ),
-                    ),
-                    items: personProvider.persons,
-                    itemAsString: (Person u) => u.name,
-                    onChanged: (Person? data) {
-                      setState(() {
-                        _selectedPerson = data;
-                      });
-                    },
-                    selectedItem: _selectedPerson,
-                    validator: (value) {
-                      if (value == null) {
-                        return 'يرجى اختيار الشخص';
-                      }
-                      return null;
-                    },
-                  );
-                },
-              ),
+                      items: personProvider.persons,
+                      itemAsString: (Person u) => u.name,
+                      onChanged: (Person? data) {
+                        setState(() {
+                          _selectedPerson = data;
+                        });
+                      },
+                      selectedItem: _selectedPerson,
+                      validator: (value) {
+                        if (value == null) {
+                          return 'يرجى اختيار الشخص';
+                        }
+                        return null;
+                      },
+                    );
+                  },
+                ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _productNameController,

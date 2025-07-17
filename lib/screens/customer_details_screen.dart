@@ -61,6 +61,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       builder: (context) => DebtForm(
         debt: debt,
         personId: widget.person.id,
+        person: widget.person,
       ),
     );
   }
@@ -71,6 +72,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       builder: (context) => InstallmentForm(
         installment: installment,
         personId: widget.person.id,
+        person: widget.person,
       ),
     );
   }
@@ -81,6 +83,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       builder: (context) => InternetForm(
         subscription: subscription,
         customerId: widget.person.id,
+        person: widget.person,
       ),
     );
   }

@@ -10,11 +10,13 @@ import '../utils/date_formatter.dart';
 class InternetForm extends StatefulWidget {
   final InternetSubscription? subscription;
   final int? customerId;
+  final Person? person;
 
   const InternetForm({
     Key? key,
     this.subscription,
     this.customerId,
+    this.person,
   }) : super(key: key);
 
   @override
@@ -46,6 +48,8 @@ class _InternetFormState extends State<InternetForm> {
       _startDate = widget.subscription!.startDate;
       _paymentDate = widget.subscription!.paymentDate;
       _selectedPerson = personProvider.getPersonById(widget.subscription!.personId);
+    } else if (widget.person != null) {
+      _selectedPerson = widget.person;
     } else if (widget.customerId != null) {
       _selectedPerson = personProvider.getPersonById(widget.customerId!);
     }
@@ -179,35 +183,45 @@ class _InternetFormState extends State<InternetForm> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-              Consumer<PersonProvider>(
-                builder: (context, personProvider, child) {
-                  return DropdownSearch<Person>(
-                    popupProps: PopupProps.menu(
-                      showSearchBox: true,
-                      searchFieldProps: TextFieldProps(
-                        controller: TextEditingController(),
-                        decoration: const InputDecoration(
-                          hintText: "ابحث عن شخص",
+              if (widget.person != null)
+                TextFormField(
+                  initialValue: widget.person!.name,
+                  readOnly: true,
+                  decoration: const InputDecoration(
+                    labelText: 'الشخص',
+                    border: OutlineInputBorder(),
+                  ),
+                )
+              else
+                Consumer<PersonProvider>(
+                  builder: (context, personProvider, child) {
+                    return DropdownSearch<Person>(
+                      popupProps: PopupProps.menu(
+                        showSearchBox: true,
+                        searchFieldProps: TextFieldProps(
+                          controller: TextEditingController(),
+                          decoration: const InputDecoration(
+                            hintText: "ابحث عن شخص",
+                          ),
                         ),
                       ),
-                    ),
-                    items: personProvider.persons,
-                    itemAsString: (Person u) => u.name,
-                    onChanged: (Person? data) {
-                      setState(() {
-                        _selectedPerson = data;
-                      });
-                    },
-                    selectedItem: _selectedPerson,
-                    validator: (value) {
-                      if (value == null) {
-                        return 'يرجى اختيار الشخص';
-                      }
-                      return null;
-                    },
-                  );
-                },
-              ),
+                      items: personProvider.persons,
+                      itemAsString: (Person u) => u.name,
+                      onChanged: (Person? data) {
+                        setState(() {
+                          _selectedPerson = data;
+                        });
+                      },
+                      selectedItem: _selectedPerson,
+                      validator: (value) {
+                        if (value == null) {
+                          return 'يرجى اختيار الشخص';
+                        }
+                        return null;
+                      },
+                    );
+                  },
+                ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _packageNameController,
