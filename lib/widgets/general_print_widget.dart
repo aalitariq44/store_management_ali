@@ -6,7 +6,7 @@ import '../models/internet_model.dart';
 import '../providers/debt_provider.dart';
 import '../providers/installment_provider.dart';
 import '../providers/internet_provider.dart';
-import '../services/pdf_service.dart';
+import '../services/pdf_service.dart' as pdf_service;
 
 class GeneralPrintWidget extends StatefulWidget {
   final String type; // 'debts', 'installments', 'internet'
@@ -108,7 +108,7 @@ class _GeneralPrintWidgetState extends State<GeneralPrintWidget> {
       return false;
     }
 
-    await PDFService.printDebts(debts);
+    await pdf_service.PDFService.printDebts(debts);
     return true;
   }
 
@@ -122,7 +122,7 @@ class _GeneralPrintWidgetState extends State<GeneralPrintWidget> {
       return false;
     }
 
-    await PDFService.printInstallments(installments);
+    await pdf_service.PDFService.printInstallments(installments);
     return true;
   }
 
@@ -136,7 +136,7 @@ class _GeneralPrintWidgetState extends State<GeneralPrintWidget> {
       return false;
     }
 
-    await PDFService.printInternetSubscriptions(subscriptions);
+    await pdf_service.PDFService.printInternetSubscriptions(subscriptions);
     return true;
   }
 
@@ -231,7 +231,7 @@ class _GeneralPrintWidgetState extends State<GeneralPrintWidget> {
           if (paidDebts.isEmpty) {
             _showInfoSnackBar(context, 'لا توجد ديون مدفوعة');
           } else {
-            await PDFService.printDebts(paidDebts);
+            await pdf_service.PDFService.printDebts(paidDebts);
             dataFound = true;
           }
           break;
@@ -244,7 +244,7 @@ class _GeneralPrintWidgetState extends State<GeneralPrintWidget> {
           if (completedInstallments.isEmpty) {
             _showInfoSnackBar(context, 'لا توجد أقساط مكتملة');
           } else {
-            await PDFService.printInstallments(completedInstallments);
+            await pdf_service.PDFService.printInstallments(completedInstallments);
             dataFound = true;
           }
           break;
@@ -257,7 +257,7 @@ class _GeneralPrintWidgetState extends State<GeneralPrintWidget> {
           if (paidSubscriptions.isEmpty) {
             _showInfoSnackBar(context, 'لا توجد اشتراكات مدفوعة بالكامل');
           } else {
-            await PDFService.printInternetSubscriptions(paidSubscriptions);
+            await pdf_service.PDFService.printInternetSubscriptions(paidSubscriptions);
             dataFound = true;
           }
           break;
@@ -288,7 +288,7 @@ class _GeneralPrintWidgetState extends State<GeneralPrintWidget> {
           if (unpaidDebts.isEmpty) {
             _showInfoSnackBar(context, 'لا توجد ديون غير مدفوعة');
           } else {
-            await PDFService.printDebts(unpaidDebts);
+            await pdf_service.PDFService.printDebts(unpaidDebts);
             dataFound = true;
           }
           break;
@@ -301,7 +301,7 @@ class _GeneralPrintWidgetState extends State<GeneralPrintWidget> {
           if (incompleteInstallments.isEmpty) {
             _showInfoSnackBar(context, 'لا توجد أقساط غير مكتملة');
           } else {
-            await PDFService.printInstallments(incompleteInstallments);
+            await pdf_service.PDFService.printInstallments(incompleteInstallments);
             dataFound = true;
           }
           break;
@@ -314,7 +314,7 @@ class _GeneralPrintWidgetState extends State<GeneralPrintWidget> {
           if (unpaidSubscriptions.isEmpty) {
             _showInfoSnackBar(context, 'لا توجد اشتراكات غير مدفوعة');
           } else {
-            await PDFService.printInternetSubscriptions(unpaidSubscriptions);
+            await pdf_service.PDFService.printInternetSubscriptions(unpaidSubscriptions);
             dataFound = true;
           }
           break;
@@ -362,7 +362,7 @@ class _GeneralPrintWidgetState extends State<GeneralPrintWidget> {
           if (debtsInRange.isEmpty) {
             _showInfoSnackBar(context, 'لا توجد ديون في الفترة المحددة');
           } else {
-            await PDFService.printDebts(debtsInRange);
+            await pdf_service.PDFService.printDebts(debtsInRange);
             dataFound = true;
           }
           break;
@@ -378,7 +378,7 @@ class _GeneralPrintWidgetState extends State<GeneralPrintWidget> {
           if (installmentsInRange.isEmpty) {
             _showInfoSnackBar(context, 'لا توجد أقساط في الفترة المحددة');
           } else {
-            await PDFService.printInstallments(installmentsInRange);
+            await pdf_service.PDFService.printInstallments(installmentsInRange);
             dataFound = true;
           }
           break;
@@ -394,7 +394,7 @@ class _GeneralPrintWidgetState extends State<GeneralPrintWidget> {
           if (subscriptionsInRange.isEmpty) {
             _showInfoSnackBar(context, 'لا توجد اشتراكات في الفترة المحددة');
           } else {
-            await PDFService.printInternetSubscriptions(subscriptionsInRange);
+            await pdf_service.PDFService.printInternetSubscriptions(subscriptionsInRange);
             dataFound = true;
           }
           break;

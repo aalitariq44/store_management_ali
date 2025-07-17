@@ -7,7 +7,7 @@ import '../models/internet_model.dart';
 import '../providers/debt_provider.dart';
 import '../providers/installment_provider.dart';
 import '../providers/internet_provider.dart';
-import '../services/pdf_service.dart';
+import '../services/pdf_service.dart' as pdf_service;
 
 class PrintOptionsWidget extends StatelessWidget {
   final Person person;
@@ -134,7 +134,7 @@ class PrintOptionsWidget extends StatelessWidget {
       final installments = installmentProvider.getInstallmentsByPersonId(person.id!);
       final internetSubscriptions = internetProvider.getSubscriptionsByPersonId(person.id!);
 
-      await PDFService.printCustomerDetails(
+      await pdf_service.PDFService.printCustomerDetails(
         person: person,
         debts: debts,
         installments: installments,
@@ -162,7 +162,7 @@ class PrintOptionsWidget extends StatelessWidget {
         return;
       }
 
-      await PDFService.printDebts(debts, customerName: person.name);
+      await pdf_service.PDFService.printDebts(debts, customerName: person.name);
 
       Navigator.of(context).pop(); // إغلاق نافذة التحميل
       _showSuccessSnackBar(context, 'تم تحضير تقرير الديون بنجاح');
@@ -185,7 +185,7 @@ class PrintOptionsWidget extends StatelessWidget {
         return;
       }
 
-      await PDFService.printInstallments(installments, customerName: person.name);
+      await pdf_service.PDFService.printInstallments(installments, customerName: person.name);
 
       Navigator.of(context).pop(); // إغلاق نافذة التحميل
       _showSuccessSnackBar(context, 'تم تحضير تقرير الأقساط بنجاح');
@@ -208,7 +208,7 @@ class PrintOptionsWidget extends StatelessWidget {
         return;
       }
 
-      await PDFService.printInternetSubscriptions(internetSubscriptions, customerName: person.name);
+      await pdf_service.PDFService.printInternetSubscriptions(internetSubscriptions, customerName: person.name);
 
       Navigator.of(context).pop(); // إغلاق نافذة التحميل
       _showSuccessSnackBar(context, 'تم تحضير تقرير الإنترنت بنجاح');
