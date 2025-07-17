@@ -1480,18 +1480,19 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               ),
               ElevatedButton(
                 onPressed: () async {
+                  final provider = Provider.of<DebtProvider>(context, listen: false);
+                  final messenger = ScaffoldMessenger.of(context);
                   Navigator.pop(context);
                   try {
-                    await Provider.of<DebtProvider>(context, listen: false)
-                        .deleteDebt(debt.id!);
+                    await provider.deleteDebt(debt.id!);
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      messenger.showSnackBar(
                         const SnackBar(content: Text('تم حذف الدين بنجاح')),
                       );
                     }
                   } catch (e) {
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      messenger.showSnackBar(
                         SnackBar(content: Text('خطأ: ${e.toString()}')),
                       );
                     }
@@ -1524,18 +1525,19 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               ),
               ElevatedButton(
                 onPressed: () async {
+                  final provider = Provider.of<InstallmentProvider>(context, listen: false);
+                  final messenger = ScaffoldMessenger.of(context);
                   Navigator.pop(context);
                   try {
-                    await Provider.of<InstallmentProvider>(context, listen: false)
-                        .deleteInstallment(installment.id!);
+                    await provider.deleteInstallment(installment.id!);
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      messenger.showSnackBar(
                         const SnackBar(content: Text('تم حذف القسط بنجاح')),
                       );
                     }
                   } catch (e) {
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      messenger.showSnackBar(
                         SnackBar(content: Text('خطأ: ${e.toString()}')),
                       );
                     }
@@ -1568,18 +1570,19 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               ),
               ElevatedButton(
                 onPressed: () async {
+                  final provider = Provider.of<InternetProvider>(context, listen: false);
+                  final messenger = ScaffoldMessenger.of(context);
                   Navigator.pop(context);
                   try {
-                    await Provider.of<InternetProvider>(context, listen: false)
-                        .deleteSubscription(subscription.id!);
+                    await provider.deleteSubscription(subscription.id!);
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      messenger.showSnackBar(
                         const SnackBar(content: Text('تم حذف الاشتراك بنجاح')),
                       );
                     }
                   } catch (e) {
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      messenger.showSnackBar(
                         SnackBar(content: Text('خطأ: ${e.toString()}')),
                       );
                     }
