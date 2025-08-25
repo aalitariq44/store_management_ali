@@ -5,7 +5,8 @@ import '../providers/person_provider.dart';
 import '../providers/password_provider.dart';
 import '../models/installment_model.dart';
 import '../widgets/installment_form.dart';
-import '../widgets/general_print_widget.dart';
+// تمت إزالة أزرار الطباعة من جسم الصفحة ونقلها إلى AppBar
+import '../widgets/print_actions.dart';
 // تمت إزالة ودجت الطباعة كزر منفصل، والآن الطباعة ضمن قائمة الزر الأيمن
 import '../services/pdf_service.dart';
 import '../utils/date_formatter.dart';
@@ -476,12 +477,26 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('الأقساط'),
+        actions: [
+          IconButton(
+            tooltip: 'طباعة الكل',
+            icon: const Icon(Icons.print),
+            onPressed: () => PrintActions.printAll(context, 'installments'),
+          ),
+          IconButton(
+            tooltip: 'طباعة المحدد',
+            icon: const Icon(Icons.print_outlined),
+            onPressed: () =>
+                PrintActions.showSelectionDialog(context, 'installments'),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           _buildFiltersBar(),
           _buildSummaryCards(),
-          const GeneralPrintWidget(type: 'installments'),
-          const SizedBox(height: 16),
           Expanded(child: _buildInstallmentsList()),
         ],
       ),

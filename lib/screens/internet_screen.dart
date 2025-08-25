@@ -4,7 +4,8 @@ import '../providers/internet_provider.dart';
 import '../providers/person_provider.dart';
 import '../models/internet_model.dart';
 import '../widgets/internet_form.dart';
-import '../widgets/general_print_widget.dart';
+// تمت إزالة أزرار الطباعة من جسم الصفحة ونقلها إلى AppBar
+import '../widgets/print_actions.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
 
@@ -52,7 +53,9 @@ class _InternetScreenState extends State<InternetScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('المبلغ المتبقي: ${NumberFormatter.format(subscription.remainingAmount)} د.ع'),
+              Text(
+                'المبلغ المتبقي: ${NumberFormatter.format(subscription.remainingAmount)} د.ع',
+              ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: amountController,
@@ -88,10 +91,16 @@ class _InternetScreenState extends State<InternetScreen> {
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 final amount = double.parse(amountController.text);
-                final internetProvider = Provider.of<InternetProvider>(context, listen: false);
+                final internetProvider = Provider.of<InternetProvider>(
+                  context,
+                  listen: false,
+                );
                 final scaffoldMessenger = ScaffoldMessenger.of(context);
                 try {
-                  await internetProvider.payForSubscription(subscription.id!, amount);
+                  await internetProvider.payForSubscription(
+                    subscription.id!,
+                    amount,
+                  );
                   if (mounted) {
                     Navigator.pop(context);
                     scaffoldMessenger.showSnackBar(
@@ -127,7 +136,10 @@ class _InternetScreenState extends State<InternetScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              final internetProvider = Provider.of<InternetProvider>(context, listen: false);
+              final internetProvider = Provider.of<InternetProvider>(
+                context,
+                listen: false,
+              );
               final scaffoldMessenger = ScaffoldMessenger.of(context);
               Navigator.pop(context);
               try {
@@ -153,7 +165,10 @@ class _InternetScreenState extends State<InternetScreen> {
     );
   }
 
-  void _showSubscriptionDetails(BuildContext context, InternetSubscription subscription) {
+  void _showSubscriptionDetails(
+    BuildContext context,
+    InternetSubscription subscription,
+  ) {
     final personProvider = Provider.of<PersonProvider>(context, listen: false);
     final person = personProvider.getPersonById(subscription.personId);
 
@@ -179,24 +194,48 @@ class _InternetScreenState extends State<InternetScreen> {
             children: <Widget>[
               _buildDetailRow('الشخص:', person?.name ?? 'غير محدد'),
               _buildDetailRow('الباقة:', subscription.packageName),
-              _buildDetailRow('السعر:', '${NumberFormatter.format(subscription.price)} د.ع'),
-              _buildDetailRow('المبلغ المدفوع:', '${NumberFormatter.format(subscription.paidAmount)} د.ع'),
-              _buildDetailRow('المبلغ المتبقي:', '${NumberFormatter.format(subscription.remainingAmount)} د.ع'),
-              _buildDetailRow('تاريخ البداية:', DateFormatter.formatDisplayDate(subscription.startDate)),
-              _buildDetailRow('تاريخ الانتهاء:', DateFormatter.formatDisplayDate(subscription.endDate)),
+              _buildDetailRow(
+                'السعر:',
+                '${NumberFormatter.format(subscription.price)} د.ع',
+              ),
+              _buildDetailRow(
+                'المبلغ المدفوع:',
+                '${NumberFormatter.format(subscription.paidAmount)} د.ع',
+              ),
+              _buildDetailRow(
+                'المبلغ المتبقي:',
+                '${NumberFormatter.format(subscription.remainingAmount)} د.ع',
+              ),
+              _buildDetailRow(
+                'تاريخ البداية:',
+                DateFormatter.formatDisplayDate(subscription.startDate),
+              ),
+              _buildDetailRow(
+                'تاريخ الانتهاء:',
+                DateFormatter.formatDisplayDate(subscription.endDate),
+              ),
               Row(
                 children: [
-                  const Text('الحالة:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'الحالة:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       statusText,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -235,15 +274,27 @@ class _InternetScreenState extends State<InternetScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('اشتراكات الإنترنت'),
+        actions: [
+          IconButton(
+            tooltip: 'طباعة الكل',
+            icon: const Icon(Icons.print),
+            onPressed: () => PrintActions.printAll(context, 'internet'),
+          ),
+          IconButton(
+            tooltip: 'طباعة المحدد',
+            icon: const Icon(Icons.print_outlined),
+            onPressed: () =>
+                PrintActions.showSelectionDialog(context, 'internet'),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           _buildFiltersBar(),
           _buildSummaryCards(),
-          const GeneralPrintWidget(type: 'internet'),
-          const SizedBox(height: 16),
-          Expanded(
-            child: _buildSubscriptionsList(),
-          ),
+          Expanded(child: _buildSubscriptionsList()),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -273,10 +324,12 @@ class _InternetScreenState extends State<InternetScreen> {
                       value: null,
                       child: Text('جميع الزبائن'),
                     ),
-                    ...personProvider.persons.map((person) => DropdownMenuItem<int>(
-                      value: person.id,
-                      child: Text(person.name),
-                    )),
+                    ...personProvider.persons.map(
+                      (person) => DropdownMenuItem<int>(
+                        value: person.id,
+                        child: Text(person.name),
+                      ),
+                    ),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -293,18 +346,24 @@ class _InternetScreenState extends State<InternetScreen> {
               value: _selectedFilter,
               decoration: const InputDecoration(
                 labelText: 'فلترة حسب الحالة',
-              border: OutlineInputBorder(),
-            ),
-            items: const [
-              DropdownMenuItem(value: 'all', child: Text('جميع الاشتراكات')),
-              DropdownMenuItem(value: 'active', child: Text('الاشتراكات النشطة')),
-              DropdownMenuItem(value: 'expired', child: Text('الاشتراكات المنتهية')),
-            ],
-            onChanged: (value) {
-              setState(() {
-                _selectedFilter = value!;
-              });
-            },
+                border: OutlineInputBorder(),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'all', child: Text('جميع الاشتراكات')),
+                DropdownMenuItem(
+                  value: 'active',
+                  child: Text('الاشتراكات النشطة'),
+                ),
+                DropdownMenuItem(
+                  value: 'expired',
+                  child: Text('الاشتراكات المنتهية'),
+                ),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedFilter = value!;
+                });
+              },
             ),
           ),
           const SizedBox(width: 16),
@@ -338,9 +397,8 @@ class _InternetScreenState extends State<InternetScreen> {
                         const SizedBox(height: 8),
                         Text(
                           '${internetProvider.getActiveSubscriptions().length}',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.green,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(color: Colors.green),
                         ),
                       ],
                     ),
@@ -361,9 +419,8 @@ class _InternetScreenState extends State<InternetScreen> {
                         const SizedBox(height: 8),
                         Text(
                           '${internetProvider.getExpiredSubscriptions().length}',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.red,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(color: Colors.red),
                         ),
                       ],
                     ),
@@ -384,9 +441,8 @@ class _InternetScreenState extends State<InternetScreen> {
                         const SizedBox(height: 8),
                         Text(
                           '${NumberFormatter.format(internetProvider.getTotalActiveSubscriptionsRevenue())} د.ع',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.blue,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(color: Colors.blue),
                         ),
                       ],
                     ),
@@ -420,7 +476,11 @@ class _InternetScreenState extends State<InternetScreen> {
         }
 
         if (_selectedPersonId != null) {
-          subscriptions = subscriptions.where((subscription) => subscription.personId == _selectedPersonId).toList();
+          subscriptions = subscriptions
+              .where(
+                (subscription) => subscription.personId == _selectedPersonId,
+              )
+              .toList();
         }
 
         if (subscriptions.isEmpty) {
@@ -428,18 +488,11 @@ class _InternetScreenState extends State<InternetScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.wifi_outlined,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.wifi_outlined, size: 64, color: Colors.grey[400]),
                 const SizedBox(height: 16),
                 Text(
                   'لا توجد اشتراكات',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
@@ -465,11 +518,13 @@ class _InternetScreenState extends State<InternetScreen> {
                 DataColumn(label: Text('الإجراءات')),
               ],
               rows: subscriptions.map((subscription) {
-                final person = personProvider.getPersonById(subscription.personId);
-                
+                final person = personProvider.getPersonById(
+                  subscription.personId,
+                );
+
                 Color statusColor;
                 String statusText;
-                
+
                 if (subscription.isExpired) {
                   statusColor = Colors.red;
                   statusText = 'منتهي';
@@ -488,17 +543,19 @@ class _InternetScreenState extends State<InternetScreen> {
                       _showSubscriptionDetails(context, subscription);
                     }
                   },
-                  color: MaterialStateProperty.resolveWith<Color?>(
-                    (Set<MaterialState> states) {
-                      if (states.contains(MaterialState.selected)) {
-                        return Theme.of(context).colorScheme.primary.withOpacity(0.2);
-                      }
-                      if (isFullyPaid) {
-                        return Colors.green.shade100;
-                      }
-                      return null;
-                    },
-                  ),
+                  color: MaterialStateProperty.resolveWith<Color?>((
+                    Set<MaterialState> states,
+                  ) {
+                    if (states.contains(MaterialState.selected)) {
+                      return Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.2);
+                    }
+                    if (isFullyPaid) {
+                      return Colors.green.shade100;
+                    }
+                    return null;
+                  }),
                   cells: [
                     DataCell(
                       Text(
@@ -507,16 +564,29 @@ class _InternetScreenState extends State<InternetScreen> {
                       ),
                     ),
                     DataCell(
-                        Text('${NumberFormatter.format(subscription.price)} د.ع')),
-                    DataCell(Text(
-                        '${NumberFormatter.format(subscription.paidAmount)} د.ع')),
-                    DataCell(Text(
-                        '${NumberFormatter.format(subscription.remainingAmount)} د.ع')),
-                    DataCell(Text(
-                        DateFormatter.formatDisplayDate(subscription.startDate))),
+                      Text('${NumberFormatter.format(subscription.price)} د.ع'),
+                    ),
+                    DataCell(
+                      Text(
+                        '${NumberFormatter.format(subscription.paidAmount)} د.ع',
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        '${NumberFormatter.format(subscription.remainingAmount)} د.ع',
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        DateFormatter.formatDisplayDate(subscription.startDate),
+                      ),
+                    ),
                     DataCell(
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: statusColor,
                           borderRadius: BorderRadius.circular(12),
@@ -537,17 +607,25 @@ class _InternetScreenState extends State<InternetScreen> {
                         children: [
                           if (!isFullyPaid)
                             IconButton(
-                              icon: const Icon(Icons.payment, color: Colors.green),
+                              icon: const Icon(
+                                Icons.payment,
+                                color: Colors.green,
+                              ),
                               onPressed: () => _showPaymentDialog(subscription),
                               tooltip: 'دفع',
                             ),
                           IconButton(
-                            icon: const Icon(Icons.add_circle_outline, color: Colors.green),
+                            icon: const Icon(
+                              Icons.add_circle_outline,
+                              color: Colors.green,
+                            ),
                             onPressed: () => _showInternetForm(
                               subscription: InternetSubscription(
                                 personId: subscription.personId,
                                 startDate: DateTime.now(),
-                                endDate: DateTime.now().add(const Duration(days: 30)),
+                                endDate: DateTime.now().add(
+                                  const Duration(days: 30),
+                                ),
                                 price: subscription.price,
                                 paidAmount: 0,
                                 packageName: subscription.packageName,
@@ -562,12 +640,14 @@ class _InternetScreenState extends State<InternetScreen> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () => _showInternetForm(subscription: subscription),
+                            onPressed: () =>
+                                _showInternetForm(subscription: subscription),
                             tooltip: 'تعديل',
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _confirmDeleteSubscription(subscription),
+                            onPressed: () =>
+                                _confirmDeleteSubscription(subscription),
                             tooltip: 'حذف',
                           ),
                         ],

@@ -751,17 +751,19 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               final debtIndex = rows.indexOf(row);
               final debt = debts[debtIndex];
               // غلف كل خلية بإيماءة النقر بالزر الأيمن
-              return DataRow(cells: row.cells.take(5).map((cell) {
-                return DataCell(
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onSecondaryTapDown: (details) {
-                      _showDebtContextMenu(details.globalPosition, debt);
-                    },
-                    child: cell.child,
-                  ),
-                );
-              }).toList());
+              return DataRow(
+                cells: row.cells.take(5).map((cell) {
+                  return DataCell(
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onSecondaryTapDown: (details) {
+                        _showDebtContextMenu(details.globalPosition, debt);
+                      },
+                      child: cell.child,
+                    ),
+                  );
+                }).toList(),
+              );
             }).toList(),
           ),
         ),
@@ -844,45 +846,91 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               final person = personProvider.getPersonById(installment.personId);
               return DataRow(
                 cells: [
-                  DataCell(_wrapContextMenu(installment, person, Text(
-                    person?.name ?? 'غير محدد',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ))),
-                  DataCell(_wrapContextMenu(installment, person, Text(installment.productName))),
-                  DataCell(_wrapContextMenu(installment, person, Text(
-                    '${NumberFormatter.format(installment.totalAmount)} د.ع',
-                  ))),
-                  DataCell(_wrapContextMenu(installment, person, Text(
-                    '${NumberFormatter.format(installment.paidAmount)} د.ع',
-                  ))),
-                  DataCell(_wrapContextMenu(installment, person, Text(
-                    '${NumberFormatter.format(installment.remainingAmount)} د.ع',
-                    style: TextStyle(
-                      color: installment.isCompleted ? Colors.green : Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ))),
-                  DataCell(_wrapContextMenu(installment, person, Text(
-                    DateFormatter.formatDisplayDate(installment.createdAt),
-                  ))),
-                  DataCell(_wrapContextMenu(installment, person, Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: installment.isCompleted ? Colors.green : Colors.orange,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      installment.isCompleted ? 'مكتمل' : 'نشط',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                  DataCell(
+                    _wrapContextMenu(
+                      installment,
+                      person,
+                      Text(
+                        person?.name ?? 'غير محدد',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                  ))),
+                  ),
+                  DataCell(
+                    _wrapContextMenu(
+                      installment,
+                      person,
+                      Text(installment.productName),
+                    ),
+                  ),
+                  DataCell(
+                    _wrapContextMenu(
+                      installment,
+                      person,
+                      Text(
+                        '${NumberFormatter.format(installment.totalAmount)} د.ع',
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    _wrapContextMenu(
+                      installment,
+                      person,
+                      Text(
+                        '${NumberFormatter.format(installment.paidAmount)} د.ع',
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    _wrapContextMenu(
+                      installment,
+                      person,
+                      Text(
+                        '${NumberFormatter.format(installment.remainingAmount)} د.ع',
+                        style: TextStyle(
+                          color: installment.isCompleted
+                              ? Colors.green
+                              : Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    _wrapContextMenu(
+                      installment,
+                      person,
+                      Text(
+                        DateFormatter.formatDisplayDate(installment.createdAt),
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    _wrapContextMenu(
+                      installment,
+                      person,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: installment.isCompleted
+                              ? Colors.green
+                              : Colors.orange,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          installment.isCompleted ? 'مكتمل' : 'نشط',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               );
             }).toList(),
@@ -1260,32 +1308,74 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                   return null;
                 }),
                 cells: [
-                  DataCell(_wrapSubscriptionContextMenu(subscription, person, Text(
-                    person?.name ?? 'غير محدد',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ))),
-                  DataCell(_wrapSubscriptionContextMenu(subscription, person, Text('${NumberFormatter.format(subscription.price)} د.ع'))),
-                  DataCell(_wrapSubscriptionContextMenu(subscription, person, Text('${NumberFormatter.format(subscription.paidAmount)} د.ع'))),
-                  DataCell(_wrapSubscriptionContextMenu(subscription, person, Text('${NumberFormatter.format(subscription.remainingAmount)} د.ع'))),
-                  DataCell(_wrapSubscriptionContextMenu(subscription, person, Text(DateFormatter.formatDisplayDate(subscription.startDate)))),
-                  DataCell(_wrapSubscriptionContextMenu(subscription, person, Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      statusText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                  DataCell(
+                    _wrapSubscriptionContextMenu(
+                      subscription,
+                      person,
+                      Text(
+                        person?.name ?? 'غير محدد',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                  ))),
+                  ),
+                  DataCell(
+                    _wrapSubscriptionContextMenu(
+                      subscription,
+                      person,
+                      Text('${NumberFormatter.format(subscription.price)} د.ع'),
+                    ),
+                  ),
+                  DataCell(
+                    _wrapSubscriptionContextMenu(
+                      subscription,
+                      person,
+                      Text(
+                        '${NumberFormatter.format(subscription.paidAmount)} د.ع',
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    _wrapSubscriptionContextMenu(
+                      subscription,
+                      person,
+                      Text(
+                        '${NumberFormatter.format(subscription.remainingAmount)} د.ع',
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    _wrapSubscriptionContextMenu(
+                      subscription,
+                      person,
+                      Text(
+                        DateFormatter.formatDisplayDate(subscription.startDate),
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    _wrapSubscriptionContextMenu(
+                      subscription,
+                      person,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          statusText,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               );
             }).toList(),
@@ -1389,7 +1479,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   Future<void> _showDebtContextMenu(Offset position, Debt debt) async {
     final selected = await showMenu<String>(
       context: context,
-      position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx + 1, position.dy + 1),
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx + 1,
+        position.dy + 1,
+      ),
       items: [
         if (!debt.isPaid)
           const PopupMenuItem<String>(
@@ -1440,20 +1535,37 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   }
 
   // ===== قوائم السياق (الأقساط) =====
-  Widget _wrapContextMenu(Installment installment, Person? person, Widget child) {
+  Widget _wrapContextMenu(
+    Installment installment,
+    Person? person,
+    Widget child,
+  ) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onSecondaryTapDown: (details) {
-        _showInstallmentContextMenu(details.globalPosition, installment, person);
+        _showInstallmentContextMenu(
+          details.globalPosition,
+          installment,
+          person,
+        );
       },
       child: child,
     );
   }
 
-  Future<void> _showInstallmentContextMenu(Offset position, Installment installment, Person? person) async {
+  Future<void> _showInstallmentContextMenu(
+    Offset position,
+    Installment installment,
+    Person? person,
+  ) async {
     final selected = await showMenu<String>(
       context: context,
-      position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx + 1, position.dy + 1),
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx + 1,
+        position.dy + 1,
+      ),
       items: [
         if (!installment.isCompleted)
           const PopupMenuItem<String>(
@@ -1514,39 +1626,72 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   }
 
   Future<void> _printInstallment(Installment installment) async {
-    final installmentProvider = Provider.of<InstallmentProvider>(context, listen: false);
+    final installmentProvider = Provider.of<InstallmentProvider>(
+      context,
+      listen: false,
+    );
     final personProvider = Provider.of<PersonProvider>(context, listen: false);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final person = personProvider.getPersonById(installment.personId) ?? widget.person;
-    final payments = installmentProvider.getInstallmentPayments(installment.id!);
+    final person =
+        personProvider.getPersonById(installment.personId) ?? widget.person;
+    final payments = installmentProvider.getInstallmentPayments(
+      installment.id!,
+    );
     try {
       await PDFService.printInstallmentDetails(
         installment: installment,
         person: person,
         payments: payments,
       );
-      scaffoldMessenger.showSnackBar(const SnackBar(content: Text('تم إنشاء تقرير القسط بنجاح'), backgroundColor: Colors.green));
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+          content: Text('تم إنشاء تقرير القسط بنجاح'),
+          backgroundColor: Colors.green,
+        ),
+      );
     } catch (e) {
-      scaffoldMessenger.showSnackBar(SnackBar(content: Text('خطأ في طباعة القسط: $e'), backgroundColor: Colors.red));
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('خطأ في طباعة القسط: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
   // ===== قوائم السياق (الاشتراكات) =====
-  Widget _wrapSubscriptionContextMenu(InternetSubscription subscription, Person? person, Widget child) {
+  Widget _wrapSubscriptionContextMenu(
+    InternetSubscription subscription,
+    Person? person,
+    Widget child,
+  ) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onSecondaryTapDown: (details) {
-        _showSubscriptionContextMenu(details.globalPosition, subscription, person);
+        _showSubscriptionContextMenu(
+          details.globalPosition,
+          subscription,
+          person,
+        );
       },
       child: child,
     );
   }
 
-  Future<void> _showSubscriptionContextMenu(Offset position, InternetSubscription subscription, Person? person) async {
+  Future<void> _showSubscriptionContextMenu(
+    Offset position,
+    InternetSubscription subscription,
+    Person? person,
+  ) async {
     final bool isFullyPaid = subscription.remainingAmount == 0;
     final selected = await showMenu<String>(
       context: context,
-      position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx + 1, position.dy + 1),
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx + 1,
+        position.dy + 1,
+      ),
       items: [
         if (!isFullyPaid)
           const PopupMenuItem<String>(

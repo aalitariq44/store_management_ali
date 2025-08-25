@@ -5,7 +5,8 @@ import '../providers/person_provider.dart';
 import '../models/debt_model.dart';
 import '../models/person_model.dart';
 import '../widgets/debt_form.dart';
-import '../widgets/general_print_widget.dart';
+// تمت إزالة أزرار الطباعة من جسم الصفحة ونقلها إلى AppBar
+import '../widgets/print_actions.dart';
 import '../widgets/debt_details_dialog.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
@@ -135,12 +136,25 @@ class _DebtsScreenState extends State<DebtsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('الديون'),
+        actions: [
+          IconButton(
+            tooltip: 'طباعة الكل',
+            icon: const Icon(Icons.print),
+            onPressed: () => PrintActions.printAll(context, 'debts'),
+          ),
+          IconButton(
+            tooltip: 'طباعة المحدد',
+            icon: const Icon(Icons.print_outlined),
+            onPressed: () => PrintActions.showSelectionDialog(context, 'debts'),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           _buildFiltersBar(),
           _buildSummaryCards(),
-          const GeneralPrintWidget(type: 'debts'),
-          const SizedBox(height: 16),
           Expanded(child: _buildDebtsList()),
         ],
       ),
