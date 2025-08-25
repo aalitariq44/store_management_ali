@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../config/database_helper.dart';
 import '../models/password_model.dart';
+import '../utils/database_migration_helper.dart';
 
 class PasswordProvider with ChangeNotifier {
   bool _isFirstTime = true;
@@ -11,6 +12,14 @@ class PasswordProvider with ChangeNotifier {
 
   Future<void> initialize() async {
     try {
+      // التحقق من حاجة قاعدة البيانات للترقية
+      final status = await DatabaseMigrationHelper.checkDatabaseStatus();
+      
+      if (status['needsMigration'] == true) {
+        print('قاعدة البيانات تحتاج ترقية...');
+        await DatabaseMigrationHelper.migratePasswordToPlainText();
+      }
+      
       final db = await DatabaseHelper.instance.database;
       final result = await db.query('app_password', limit: 1);
       _isFirstTime = result.isEmpty;
@@ -21,7 +30,7 @@ class PasswordProvider with ChangeNotifier {
         await db.execute('''
           CREATE TABLE app_password (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            hashed_password TEXT NOT NULL,
+            password TEXT NOT NULL,
             created_at INTEGER NOT NULL,
             updated_at INTEGER NOT NULL
           )
@@ -39,7 +48,6 @@ class PasswordProvider with ChangeNotifier {
   Future<bool> setPassword(String password) async {
     try {
       final db = await DatabaseHelper.instance.database;
-      final hashedPassword = PasswordModel.hashPassword(password);
       final timestamp = DateTime.now().millisecondsSinceEpoch;
 
       final result = await db.query('app_password', limit: 1);
@@ -47,7 +55,7 @@ class PasswordProvider with ChangeNotifier {
       if (result.isEmpty) {
         // إنشاء كلمة مرور جديدة
         await db.insert('app_password', {
-          'hashed_password': hashedPassword,
+          'password': password,
           'created_at': timestamp,
           'updated_at': timestamp,
         });
@@ -56,7 +64,7 @@ class PasswordProvider with ChangeNotifier {
         await db.update(
           'app_password',
           {
-            'hashed_password': hashedPassword,
+            'password': password,
             'updated_at': timestamp,
           },
           where: 'id = ?',
@@ -83,8 +91,8 @@ class PasswordProvider with ChangeNotifier {
         return false;
       }
 
-      final hashedPassword = result.first['hashed_password'] as String;
-      final isValid = PasswordModel.verifyPassword(password, hashedPassword);
+      final storedPassword = result.first['password'] as String;
+      final isValid = PasswordModel.verifyPassword(password, storedPassword);
       
       if (isValid) {
         _isAuthenticated = true;

@@ -1,33 +1,24 @@
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
-
 class PasswordModel {
   final int id;
-  final String hashedPassword;
+  final String password;
   final int createdAt;
   final int updatedAt;
 
   PasswordModel({
     required this.id,
-    required this.hashedPassword,
+    required this.password,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  static String hashPassword(String password) {
-    final bytes = utf8.encode(password);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
-  }
-
-  static bool verifyPassword(String password, String hashedPassword) {
-    return hashPassword(password) == hashedPassword;
+  static bool verifyPassword(String inputPassword, String storedPassword) {
+    return inputPassword == storedPassword;
   }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'hashed_password': hashedPassword,
+      'password': password,
       'created_at': createdAt,
       'updated_at': updatedAt,
     };
@@ -36,7 +27,7 @@ class PasswordModel {
   factory PasswordModel.fromMap(Map<String, dynamic> map) {
     return PasswordModel(
       id: map['id'],
-      hashedPassword: map['hashed_password'],
+      password: map['password'],
       createdAt: map['created_at'],
       updatedAt: map['updated_at'],
     );

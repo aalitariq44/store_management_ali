@@ -57,7 +57,7 @@ class DatabaseHelper {
       await db.execute('''
         CREATE TABLE app_password (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          hashed_password TEXT NOT NULL,
+          password TEXT NOT NULL,
           created_at INTEGER NOT NULL,
           updated_at INTEGER NOT NULL
         )
@@ -189,7 +189,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE app_password (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        hashed_password TEXT NOT NULL,
+        password TEXT NOT NULL,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       )
