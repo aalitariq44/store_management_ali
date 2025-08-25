@@ -207,6 +207,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                         itemCount: payments.length,
                         itemBuilder: (context, index) {
                           final payment = payments[index];
+                          final paymentNumber = index + 1; // Add payment number
                           return Card(
                             margin: const EdgeInsets.symmetric(
                               vertical: 4.0,
@@ -220,6 +221,25 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                               padding: const EdgeInsets.all(12.0),
                               child: Row(
                                 children: [
+                                  // Display payment number
+                                  Container(
+                                    width: 30,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).primaryColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '$paymentNumber',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
                                   const Icon(
                                     Icons.monetization_on,
                                     color: Colors.green,
