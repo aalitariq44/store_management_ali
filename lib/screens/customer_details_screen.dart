@@ -215,6 +215,13 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 'الملاحظات',
                 widget.person.notes ?? 'لا توجد ملاحظات',
               ),
+              const SizedBox(height: 12),
+              // Add customer ID row
+              _buildInfoRow(
+                Icons.perm_identity,
+                'رقم الزبون',
+                widget.person.id.toString(),
+              ),
             ],
           ),
         ),
