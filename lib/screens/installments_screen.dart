@@ -6,7 +6,8 @@ import '../providers/password_provider.dart';
 import '../models/installment_model.dart';
 import '../widgets/installment_form.dart';
 import '../widgets/general_print_widget.dart';
-import '../widgets/installment_print_widget.dart';
+// تمت إزالة ودجت الطباعة كزر منفصل، والآن الطباعة ضمن قائمة الزر الأيمن
+import '../services/pdf_service.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
 
@@ -31,7 +32,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
   void _showPaymentDialog(Installment installment) {
     final TextEditingController amountController = TextEditingController();
     final TextEditingController notesController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -39,7 +40,9 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('المبلغ المتبقي: ${NumberFormatter.format(installment.remainingAmount)} د.ع'),
+            Text(
+              'المبلغ المتبقي: ${NumberFormatter.format(installment.remainingAmount)} د.ع',
+            ),
             const SizedBox(height: 16),
             TextFormField(
               controller: amountController,
@@ -73,12 +76,17 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                 if (amount > installment.remainingAmount) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content: Text(
-                            'المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ المتبقي')),
+                      content: Text(
+                        'المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ المتبقي',
+                      ),
+                    ),
                   );
                   return;
                 }
-                final provider = Provider.of<InstallmentProvider>(context, listen: false);
+                final provider = Provider.of<InstallmentProvider>(
+                  context,
+                  listen: false,
+                );
                 final navigator = Navigator.of(context);
                 final messenger = ScaffoldMessenger.of(context);
 
@@ -86,13 +94,15 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                   final payment = InstallmentPayment(
                     installmentId: installment.id!,
                     amount: amount,
-                    notes: notesController.text.trim().isEmpty ? null : notesController.text.trim(),
+                    notes: notesController.text.trim().isEmpty
+                        ? null
+                        : notesController.text.trim(),
                     paymentDate: DateTime.now(),
                     createdAt: DateTime.now(),
                   );
-                  
+
                   await provider.addPayment(installment.id!, payment);
-                  
+
                   if (mounted) {
                     navigator.pop();
                     messenger.showSnackBar(
@@ -116,9 +126,13 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
   }
 
   void _showPaymentHistory(Installment installment) {
-    final installmentProvider =
-        Provider.of<InstallmentProvider>(context, listen: false);
-    final payments = installmentProvider.getInstallmentPayments(installment.id!);
+    final installmentProvider = Provider.of<InstallmentProvider>(
+      context,
+      listen: false,
+    );
+    final payments = installmentProvider.getInstallmentPayments(
+      installment.id!,
+    );
 
     showDialog(
       context: context,
@@ -135,18 +149,22 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('المنتج: ${installment.productName}',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(
+                      'المنتج: ${installment.productName}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('المبلغ الإجمالي:'),
                         Text(
-                            '${NumberFormatter.format(installment.totalAmount)} د.ع',
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold)),
+                          '${NumberFormatter.format(installment.totalAmount)} د.ع',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -155,10 +173,12 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                       children: [
                         const Text('المبلغ المدفوع:'),
                         Text(
-                            '${NumberFormatter.format(installment.paidAmount)} د.ع',
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green)),
+                          '${NumberFormatter.format(installment.paidAmount)} د.ع',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -167,9 +187,12 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                       children: [
                         const Text('المبلغ المتبقي:'),
                         Text(
-                            '${NumberFormatter.format(installment.remainingAmount)} د.ع',
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, color: Colors.red)),
+                          '${NumberFormatter.format(installment.remainingAmount)} د.ع',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -185,16 +208,22 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                           final payment = payments[index];
                           return Card(
                             margin: const EdgeInsets.symmetric(
-                                vertical: 4.0, horizontal: 2.0),
+                              vertical: 4.0,
+                              horizontal: 2.0,
+                            ),
                             elevation: 2,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.monetization_on,
-                                      color: Colors.green, size: 30),
+                                  const Icon(
+                                    Icons.monetization_on,
+                                    color: Colors.green,
+                                    size: 30,
+                                  ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
@@ -212,8 +241,9 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                                         Text(
                                           'التاريخ: ${DateFormatter.formatDisplayDateTime(payment.paymentDate)}',
                                           style: TextStyle(
-                                              color: Colors.grey[600],
-                                              fontSize: 12),
+                                            color: Colors.grey[600],
+                                            fontSize: 12,
+                                          ),
                                         ),
                                         if (payment.notes != null &&
                                             payment.notes!.isNotEmpty) ...[
@@ -221,21 +251,26 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                                           Text(
                                             'الملاحظات: ${payment.notes}',
                                             style: TextStyle(
-                                                color: Colors.grey[700],
-                                                fontSize: 12),
+                                              color: Colors.grey[700],
+                                              fontSize: 12,
+                                            ),
                                           ),
                                         ],
                                       ],
                                     ),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.delete,
-                                        color: Colors.red),
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
                                     onPressed: () {
                                       // Close the history dialog first
                                       Navigator.of(context).pop();
                                       _confirmDeletePayment(
-                                          installment, payment);
+                                        installment,
+                                        payment,
+                                      );
                                     },
                                   ),
                                 ],
@@ -264,7 +299,10 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
     required VoidCallback onConfirmed,
   }) async {
     final passwordController = TextEditingController();
-    final passwordProvider = Provider.of<PasswordProvider>(context, listen: false);
+    final passwordProvider = Provider.of<PasswordProvider>(
+      context,
+      listen: false,
+    );
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     final confirmed = await showDialog<bool>(
@@ -289,7 +327,9 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                   final password = passwordController.text;
                   if (password.isEmpty) return;
 
-                  final isCorrect = await passwordProvider.verifyPassword(password);
+                  final isCorrect = await passwordProvider.verifyPassword(
+                    password,
+                  );
                   Navigator.of(context).pop(isCorrect);
                 },
               ),
@@ -305,7 +345,9 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                 final password = passwordController.text;
                 if (password.isEmpty) return;
 
-                final isCorrect = await passwordProvider.verifyPassword(password);
+                final isCorrect = await passwordProvider.verifyPassword(
+                  password,
+                );
                 Navigator.of(context).pop(isCorrect);
               },
               child: const Text('تأكيد'),
@@ -328,7 +370,10 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
     }
   }
 
-  void _confirmDeletePayment(Installment installment, InstallmentPayment payment) {
+  void _confirmDeletePayment(
+    Installment installment,
+    InstallmentPayment payment,
+  ) {
     _showPasswordConfirmationDialog(
       title: 'تأكيد كلمة المرور',
       content: 'الرجاء إدخال كلمة المرور لحذف هذه الدفعة.',
@@ -345,7 +390,10 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final provider = Provider.of<InstallmentProvider>(context, listen: false);
+                  final provider = Provider.of<InstallmentProvider>(
+                    context,
+                    listen: false,
+                  );
                   final navigator = Navigator.of(context);
                   final messenger = ScaffoldMessenger.of(context);
 
@@ -392,7 +440,10 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final provider = Provider.of<InstallmentProvider>(context, listen: false);
+                  final provider = Provider.of<InstallmentProvider>(
+                    context,
+                    listen: false,
+                  );
                   final navigator = Navigator.of(context);
                   final messenger = ScaffoldMessenger.of(context);
 
@@ -431,9 +482,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
           _buildSummaryCards(),
           const GeneralPrintWidget(type: 'installments'),
           const SizedBox(height: 16),
-          Expanded(
-            child: _buildInstallmentsList(),
-          ),
+          Expanded(child: _buildInstallmentsList()),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -463,10 +512,12 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                       value: null,
                       child: Text('جميع الزبائن'),
                     ),
-                    ...personProvider.persons.map((person) => DropdownMenuItem<int>(
-                      value: person.id,
-                      child: Text(person.name),
-                    )),
+                    ...personProvider.persons.map(
+                      (person) => DropdownMenuItem<int>(
+                        value: person.id,
+                        child: Text(person.name),
+                      ),
+                    ),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -539,9 +590,8 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                         const SizedBox(height: 8),
                         Text(
                           '${NumberFormatter.format(installmentProvider.getTotalPaidAmount())} د.ع',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.green,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(color: Colors.green),
                         ),
                       ],
                     ),
@@ -562,9 +612,8 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                         const SizedBox(height: 8),
                         Text(
                           '${NumberFormatter.format(installmentProvider.getTotalRemainingAmount())} د.ع',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.red,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(color: Colors.red),
                         ),
                       ],
                     ),
@@ -589,11 +638,15 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
 
         // تطبيق الفلاتر
         if (_showOnlyActive) {
-          installments = installments.where((installment) => !installment.isCompleted).toList();
+          installments = installments
+              .where((installment) => !installment.isCompleted)
+              .toList();
         }
 
         if (_selectedPersonId != null) {
-          installments = installments.where((installment) => installment.personId == _selectedPersonId).toList();
+          installments = installments
+              .where((installment) => installment.personId == _selectedPersonId)
+              .toList();
         }
 
         if (installments.isEmpty) {
@@ -601,18 +654,11 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.payment_outlined,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.payment_outlined, size: 64, color: Colors.grey[400]),
                 const SizedBox(height: 16),
                 Text(
                   'لا توجد أقساط',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
@@ -636,36 +682,70 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                 DataColumn(label: Text('المبلغ المتبقي')),
                 DataColumn(label: Text('التاريخ')),
                 DataColumn(label: Text('الحالة')),
-                DataColumn(label: Text('الإجراءات')),
               ],
               rows: installments.map((installment) {
-                final person = personProvider.getPersonById(installment.personId);
+                final person = personProvider.getPersonById(
+                  installment.personId,
+                );
                 return DataRow(
                   cells: [
-                    DataCell(
+                    _contextMenuCell(
                       Text(
                         person?.name ?? 'غير محدد',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      installment,
+                      person,
                     ),
-                    DataCell(Text(installment.productName)),
-                    DataCell(Text('${NumberFormatter.format(installment.totalAmount)} د.ع')),
-                    DataCell(Text('${NumberFormatter.format(installment.paidAmount)} د.ع')),
-                    DataCell(
+                    _contextMenuCell(
+                      Text(installment.productName),
+                      installment,
+                      person,
+                    ),
+                    _contextMenuCell(
+                      Text(
+                        '${NumberFormatter.format(installment.totalAmount)} د.ع',
+                      ),
+                      installment,
+                      person,
+                    ),
+                    _contextMenuCell(
+                      Text(
+                        '${NumberFormatter.format(installment.paidAmount)} د.ع',
+                      ),
+                      installment,
+                      person,
+                    ),
+                    _contextMenuCell(
                       Text(
                         '${NumberFormatter.format(installment.remainingAmount)} د.ع',
                         style: TextStyle(
-                          color: installment.isCompleted ? Colors.green : Colors.red,
+                          color: installment.isCompleted
+                              ? Colors.green
+                              : Colors.red,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      installment,
+                      person,
                     ),
-                    DataCell(Text(DateFormatter.formatDisplayDate(installment.createdAt))),
-                    DataCell(
+                    _contextMenuCell(
+                      Text(
+                        DateFormatter.formatDisplayDate(installment.createdAt),
+                      ),
+                      installment,
+                      person,
+                    ),
+                    _contextMenuCell(
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: installment.isCompleted ? Colors.green : Colors.orange,
+                          color: installment.isCompleted
+                              ? Colors.green
+                              : Colors.orange,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -677,36 +757,8 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                           ),
                         ),
                       ),
-                    ),
-                    DataCell(
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (!installment.isCompleted) ...[
-                            IconButton(
-                              icon: const Icon(Icons.payment, color: Colors.green),
-                              onPressed: () => _showPaymentDialog(installment),
-                              tooltip: 'إضافة دفعة',
-                            ),
-                          ],
-                          IconButton(
-                            icon: const Icon(Icons.history, color: Colors.blue),
-                            onPressed: () => _showPaymentHistory(installment),
-                            tooltip: 'سجل الدفعات',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () => _showInstallmentForm(installment: installment),
-                            tooltip: 'تعديل',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _confirmDeleteInstallment(installment),
-                            tooltip: 'حذف',
-                          ),
-                          InstallmentPrintWidget(installment: installment),
-                        ],
-                      ),
+                      installment,
+                      person,
                     ),
                   ],
                 );
@@ -716,5 +768,144 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
         );
       },
     );
+  }
+
+  DataCell _contextMenuCell(
+    Widget child,
+    Installment installment,
+    dynamic person,
+  ) {
+    return DataCell(
+      GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onSecondaryTapDown: (details) {
+          _showInstallmentContextMenu(
+            details.globalPosition,
+            installment,
+            person,
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showInstallmentContextMenu(
+    Offset position,
+    Installment installment,
+    dynamic person,
+  ) async {
+    final selected = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx + 1,
+        position.dy + 1,
+      ),
+      items: [
+        if (!installment.isCompleted)
+          const PopupMenuItem<String>(
+            value: 'add_payment',
+            child: ListTile(
+              leading: Icon(Icons.payment, color: Colors.green),
+              title: Text('إضافة دفعة'),
+            ),
+          ),
+        const PopupMenuItem<String>(
+          value: 'history',
+          child: ListTile(
+            leading: Icon(Icons.history, color: Colors.blue),
+            title: Text('سجل الدفعات'),
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: 'edit',
+          child: ListTile(
+            leading: Icon(Icons.edit, color: Colors.blue),
+            title: Text('تعديل'),
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: 'delete',
+          child: ListTile(
+            leading: Icon(Icons.delete, color: Colors.red),
+            title: Text('حذف'),
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: 'print',
+          child: ListTile(
+            leading: Icon(Icons.print, color: Colors.teal),
+            title: Text('طباعة'),
+          ),
+        ),
+      ],
+    );
+
+    if (selected == null) return;
+
+    switch (selected) {
+      case 'add_payment':
+        _showPaymentDialog(installment);
+        break;
+      case 'history':
+        _showPaymentHistory(installment);
+        break;
+      case 'edit':
+        _showInstallmentForm(installment: installment);
+        break;
+      case 'delete':
+        _confirmDeleteInstallment(installment);
+        break;
+      case 'print':
+        _printInstallment(installment);
+        break;
+    }
+  }
+
+  Future<void> _printInstallment(Installment installment) async {
+    final personProvider = Provider.of<PersonProvider>(context, listen: false);
+    final installmentProvider = Provider.of<InstallmentProvider>(
+      context,
+      listen: false,
+    );
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    final person = personProvider.getPersonById(installment.personId);
+    if (person == null) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('لم يتم العثور على صاحب القسط')),
+      );
+      return;
+    }
+
+    final payments = installmentProvider.getInstallmentPayments(
+      installment.id!,
+    );
+
+    try {
+      await PDFService.printInstallmentDetails(
+        installment: installment,
+        person: person,
+        payments: payments,
+      );
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+          content: Text('تم إنشاء تقرير القسط بنجاح'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('خطأ في طباعة القسط: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }
