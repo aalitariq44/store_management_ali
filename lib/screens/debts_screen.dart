@@ -29,44 +29,20 @@ class _DebtsScreenState extends State<DebtsScreen> {
   }
 
   void _showPaymentDialog(Debt debt) {
-    final _formKey = GlobalKey<FormState>();
-    final TextEditingController amountController = TextEditingController();
-
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('دفع دين'),
-        content: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('المبلغ المتبقي: ${NumberFormatter.format(debt.remainingAmount)} د.ع'),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: amountController,
-                decoration: const InputDecoration(
-                  labelText: 'المبلغ المدفوع',
-                  hintText: 'أدخل المبلغ المدفوع',
-                  suffixText: 'د.ع',
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'يرجى إدخال المبلغ';
-                  }
-                  final amount = double.tryParse(value);
-                  if (amount == null || amount <= 0) {
-                    return 'يرجى إدخال مبلغ صحيح';
-                  }
-                  if (amount > debt.remainingAmount) {
-                    return 'المبلغ المدفوع أكبر من المبلغ المتبقي';
-                  }
-                  return null;
-                },
-              ),
-            ],
-          ),
+        title: const Text('تأكيد دفع الدين'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('هل أنت متأكد من دفع هذا الدين كاملاً؟'),
+            const SizedBox(height: 16),
+            Text(
+              'المبلغ: ${NumberFormatter.format(debt.amount)} د.ع',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -75,28 +51,32 @@ class _DebtsScreenState extends State<DebtsScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              if (_formKey.currentState!.validate()) {
-                final amount = double.parse(amountController.text);
-                final debtProvider = Provider.of<DebtProvider>(context, listen: false);
-                final scaffoldMessenger = ScaffoldMessenger.of(context);
-                try {
-                  await debtProvider.payDebt(debt.id!, amount);
-                  if (mounted) {
-                    Navigator.pop(context);
-                    scaffoldMessenger.showSnackBar(
-                      const SnackBar(content: Text('تم دفع المبلغ بنجاح')),
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    scaffoldMessenger.showSnackBar(
-                      SnackBar(content: Text('خطأ: ${e.toString()}')),
-                    );
-                  }
+              final debtProvider = Provider.of<DebtProvider>(
+                context,
+                listen: false,
+              );
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              try {
+                await debtProvider.payDebt(debt.id!);
+                if (mounted) {
+                  Navigator.pop(context);
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(content: Text('تم دفع الدين بنجاح')),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(content: Text('خطأ: ${e.toString()}')),
+                  );
                 }
               }
             },
-            child: const Text('دفع'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            child: const Text(
+              'تأكيد الدفع',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -123,7 +103,10 @@ class _DebtsScreenState extends State<DebtsScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              final debtProvider = Provider.of<DebtProvider>(context, listen: false);
+              final debtProvider = Provider.of<DebtProvider>(
+                context,
+                listen: false,
+              );
               final scaffoldMessenger = ScaffoldMessenger.of(context);
               Navigator.pop(context);
               try {
@@ -158,9 +141,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
           _buildSummaryCards(),
           const GeneralPrintWidget(type: 'debts'),
           const SizedBox(height: 16),
-          Expanded(
-            child: _buildDebtsList(),
-          ),
+          Expanded(child: _buildDebtsList()),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -190,10 +171,12 @@ class _DebtsScreenState extends State<DebtsScreen> {
                       value: null,
                       child: Text('جميع الزبائن'),
                     ),
-                    ...personProvider.persons.map((person) => DropdownMenuItem<int>(
-                      value: person.id,
-                      child: Text(person.name),
-                    )),
+                    ...personProvider.persons.map(
+                      (person) => DropdownMenuItem<int>(
+                        value: person.id,
+                        child: Text(person.name),
+                      ),
+                    ),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -266,9 +249,8 @@ class _DebtsScreenState extends State<DebtsScreen> {
                         const SizedBox(height: 8),
                         Text(
                           '${NumberFormatter.format(debtProvider.getTotalPaidAmount())} د.ع',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.green,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(color: Colors.green),
                         ),
                       ],
                     ),
@@ -283,15 +265,14 @@ class _DebtsScreenState extends State<DebtsScreen> {
                     child: Column(
                       children: [
                         Text(
-                          'المبلغ المتبقي',
+                          'المبلغ المستحق',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           '${NumberFormatter.format(debtProvider.getTotalRemainingAmount())} د.ع',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.red,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(color: Colors.red),
                         ),
                       ],
                     ),
@@ -320,7 +301,9 @@ class _DebtsScreenState extends State<DebtsScreen> {
         }
 
         if (_selectedPersonId != null) {
-          debts = debts.where((debt) => debt.personId == _selectedPersonId).toList();
+          debts = debts
+              .where((debt) => debt.personId == _selectedPersonId)
+              .toList();
         }
 
         if (debts.isEmpty) {
@@ -336,10 +319,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'لا توجد ديون',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
@@ -358,10 +338,9 @@ class _DebtsScreenState extends State<DebtsScreen> {
               columns: const [
                 DataColumn(label: Text('ت')),
                 DataColumn(label: Text('الشخص')),
-                DataColumn(label: Text('المبلغ الأصلي')),
-                DataColumn(label: Text('المبلغ المدفوع')),
-                DataColumn(label: Text('المبلغ المتبقي')),
-                DataColumn(label: Text('التاريخ')),
+                DataColumn(label: Text('المبلغ')),
+                DataColumn(label: Text('تاريخ الإنشاء')),
+                DataColumn(label: Text('تاريخ الدفع')),
                 DataColumn(label: Text('الحالة')),
                 DataColumn(label: Text('الإجراءات')),
               ],
@@ -383,21 +362,28 @@ class _DebtsScreenState extends State<DebtsScreen> {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    DataCell(Text('${NumberFormatter.format(debt.amount)} د.ع')),
-                    DataCell(Text('${NumberFormatter.format(debt.paidAmount)} د.ع')),
+                    DataCell(
+                      Text('${NumberFormatter.format(debt.amount)} د.ع'),
+                    ),
+                    DataCell(
+                      Text(DateFormatter.formatDisplayDate(debt.createdAt)),
+                    ),
                     DataCell(
                       Text(
-                        '${NumberFormatter.format(debt.remainingAmount)} د.ع',
+                        debt.paymentDate != null
+                            ? DateFormatter.formatDisplayDate(debt.paymentDate!)
+                            : 'لم يدفع بعد',
                         style: TextStyle(
-                          color: debt.isPaid ? Colors.green : Colors.red,
-                          fontWeight: FontWeight.bold,
+                          color: debt.isPaid ? Colors.green : Colors.grey,
                         ),
                       ),
                     ),
-                    DataCell(Text(DateFormatter.formatDisplayDate(debt.createdAt))),
                     DataCell(
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: debt.isPaid ? Colors.green : Colors.red,
                           borderRadius: BorderRadius.circular(12),
@@ -418,7 +404,10 @@ class _DebtsScreenState extends State<DebtsScreen> {
                         children: [
                           if (!debt.isPaid) ...[
                             IconButton(
-                              icon: const Icon(Icons.payment, color: Colors.green),
+                              icon: const Icon(
+                                Icons.payment,
+                                color: Colors.green,
+                              ),
                               onPressed: () => _showPaymentDialog(debt),
                               tooltip: 'دفع',
                             ),

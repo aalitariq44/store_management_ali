@@ -21,10 +21,7 @@ import '../widgets/debt_details_dialog.dart';
 class CustomerDetailsScreen extends StatefulWidget {
   final Person person;
 
-  const CustomerDetailsScreen({
-    super.key,
-    required this.person,
-  });
+  const CustomerDetailsScreen({super.key, required this.person});
 
   @override
   State<CustomerDetailsScreen> createState() => _CustomerDetailsScreenState();
@@ -50,7 +47,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   Future<void> _loadData() async {
     await Future.wait([
       Provider.of<DebtProvider>(context, listen: false).loadDebts(),
-      Provider.of<InstallmentProvider>(context, listen: false).loadInstallments(),
+      Provider.of<InstallmentProvider>(
+        context,
+        listen: false,
+      ).loadInstallments(),
       Provider.of<InternetProvider>(context, listen: false).loadSubscriptions(),
     ]);
   }
@@ -91,7 +91,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   void _showDebtDetailsDialog(Debt debt) {
     showDialog(
       context: context,
-      builder: (context) => DebtDetailsDialog(debt: debt, person: widget.person),
+      builder: (context) =>
+          DebtDetailsDialog(debt: debt, person: widget.person),
     );
   }
 
@@ -109,7 +110,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           // Left sidebar with customer info and summary
           SizedBox(
             width: 320, // كان 400، تم تصغيره
-            child: SingleChildScrollView( // أضف هذا الـ Scroll
+            child: SingleChildScrollView(
+              // أضف هذا الـ Scroll
               child: Column(
                 children: [
                   _buildCustomerInfo(),
@@ -194,11 +196,23 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               const SizedBox(height: 20),
               const Divider(),
               const SizedBox(height: 12),
-              _buildInfoRow(Icons.phone, 'الهاتف', widget.person.phone ?? 'غير محدد'),
+              _buildInfoRow(
+                Icons.phone,
+                'الهاتف',
+                widget.person.phone ?? 'غير محدد',
+              ),
               const SizedBox(height: 12),
-              _buildInfoRow(Icons.location_on, 'العنوان', widget.person.address ?? 'غير محدد'),
+              _buildInfoRow(
+                Icons.location_on,
+                'العنوان',
+                widget.person.address ?? 'غير محدد',
+              ),
               const SizedBox(height: 12),
-              _buildInfoRow(Icons.note, 'الملاحظات', widget.person.notes ?? 'لا توجد ملاحظات'),
+              _buildInfoRow(
+                Icons.note,
+                'الملاحظات',
+                widget.person.notes ?? 'لا توجد ملاحظات',
+              ),
             ],
           ),
         ),
@@ -243,67 +257,99 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       child: Consumer3<DebtProvider, InstallmentProvider, InternetProvider>(
-        builder: (context, debtProvider, installmentProvider, internetProvider, child) {
-          final customerDebts = debtProvider.debts
-              .where((debt) => debt.personId == widget.person.id)
-              .toList();
-          final customerInstallments = installmentProvider.installments
-              .where((installment) => installment.personId == widget.person.id)
-              .toList();
-          final customerSubscriptions = internetProvider.subscriptions
-              .where((subscription) => subscription.personId == widget.person.id)
-              .toList();
+        builder:
+            (
+              context,
+              debtProvider,
+              installmentProvider,
+              internetProvider,
+              child,
+            ) {
+              final customerDebts = debtProvider.debts
+                  .where((debt) => debt.personId == widget.person.id)
+                  .toList();
+              final customerInstallments = installmentProvider.installments
+                  .where(
+                    (installment) => installment.personId == widget.person.id,
+                  )
+                  .toList();
+              final customerSubscriptions = internetProvider.subscriptions
+                  .where(
+                    (subscription) => subscription.personId == widget.person.id,
+                  )
+                  .toList();
 
-          final totalDebts = customerDebts.fold(0.0, (sum, debt) => sum + debt.remainingAmount);
-          final totalInstallments = customerInstallments.fold(0.0, (sum, installment) => sum + installment.remainingAmount);
-          final totalInternet = customerSubscriptions.fold(0.0, (sum, subscription) => sum + subscription.remainingAmount);
-          final totalOutstanding = totalDebts + totalInstallments + totalInternet;
+              final totalDebts = customerDebts.fold(
+                0.0,
+                (sum, debt) => sum + debt.remainingAmount,
+              );
+              final totalInstallments = customerInstallments.fold(
+                0.0,
+                (sum, installment) => sum + installment.remainingAmount,
+              );
+              final totalInternet = customerSubscriptions.fold(
+                0.0,
+                (sum, subscription) => sum + subscription.remainingAmount,
+              );
+              final totalOutstanding =
+                  totalDebts + totalInstallments + totalInternet;
 
-          return Column(
-            children: [
-              _buildSummaryCard(
-                'إجمالي الديون المتبقية',
-                totalDebts,
-                customerDebts.length,
-                Icons.money_off,
-                Colors.red,
-              ),
-              const SizedBox(height: 8),
-              _buildSummaryCard(
-                'إجمالي الأقساط المتبقية',
-                totalInstallments,
-                customerInstallments.length,
-                Icons.payment,
-                Colors.blue,
-              ),
-              const SizedBox(height: 8),
-              _buildSummaryCard(
-                'إجمالي الإنترنت المتبقي',
-                totalInternet,
-                customerSubscriptions.length,
-                Icons.wifi,
-                Colors.green,
-              ),
-              const SizedBox(height: 8),
-              _buildSummaryCard(
-                'إجمالي المبلغ المتبقي',
-                totalOutstanding,
-                customerDebts.length + customerInstallments.length + customerSubscriptions.length,
-                Icons.account_balance_wallet,
-                Colors.orange,
-              ),
-            ],
-          );
-        },
+              return Column(
+                children: [
+                  _buildSummaryCard(
+                    'إجمالي الديون المتبقية',
+                    totalDebts,
+                    customerDebts.length,
+                    Icons.money_off,
+                    Colors.red,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildSummaryCard(
+                    'إجمالي الأقساط المتبقية',
+                    totalInstallments,
+                    customerInstallments.length,
+                    Icons.payment,
+                    Colors.blue,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildSummaryCard(
+                    'إجمالي الإنترنت المتبقي',
+                    totalInternet,
+                    customerSubscriptions.length,
+                    Icons.wifi,
+                    Colors.green,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildSummaryCard(
+                    'إجمالي المبلغ المتبقي',
+                    totalOutstanding,
+                    customerDebts.length +
+                        customerInstallments.length +
+                        customerSubscriptions.length,
+                    Icons.account_balance_wallet,
+                    Colors.orange,
+                  ),
+                ],
+              );
+            },
       ),
     );
   }
 
-  Widget _buildSummaryCard(String title, double amount, int count, IconData icon, Color color) {
+  Widget _buildSummaryCard(
+    String title,
+    double amount,
+    int count,
+    IconData icon,
+    Color color,
+  ) {
     return Card(
       color: color.withOpacity(0.1),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12), // تم تصغير البادينج
+        padding: const EdgeInsets.symmetric(
+          vertical: 8,
+          horizontal: 12,
+        ), // تم تصغير البادينج
         child: Row(
           children: [
             Icon(icon, color: color, size: 24),
@@ -364,10 +410,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             children: [
               const Text(
                 'إجراءات سريعة',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildQuickActionButton(
@@ -397,7 +440,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
   }
 
-  Widget _buildQuickActionButton(String title, IconData icon, Color color, VoidCallback onPressed) {
+  Widget _buildQuickActionButton(
+    String title,
+    IconData icon,
+    Color color,
+    VoidCallback onPressed,
+  ) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
@@ -418,9 +466,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.grey[100],
-        border: Border(
-          bottom: BorderSide(color: Colors.grey[300]!),
-        ),
+        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
       ),
       child: Row(
         children: [
@@ -431,35 +477,54 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           _buildDesktopTab('الإنترنت', Icons.wifi, 2),
           const Spacer(),
           Consumer3<DebtProvider, InstallmentProvider, InternetProvider>(
-            builder: (context, debtProvider, installmentProvider, internetProvider, child) {
-              final customerDebts = debtProvider.debts
-                  .where((debt) => debt.personId == widget.person.id)
-                  .toList();
-              final customerInstallments = installmentProvider.installments
-                  .where((installment) => installment.personId == widget.person.id)
-                  .toList();
-              final customerSubscriptions = internetProvider.subscriptions
-                  .where((subscription) => subscription.personId == widget.person.id)
-                  .toList();
+            builder:
+                (
+                  context,
+                  debtProvider,
+                  installmentProvider,
+                  internetProvider,
+                  child,
+                ) {
+                  final customerDebts = debtProvider.debts
+                      .where((debt) => debt.personId == widget.person.id)
+                      .toList();
+                  final customerInstallments = installmentProvider.installments
+                      .where(
+                        (installment) =>
+                            installment.personId == widget.person.id,
+                      )
+                      .toList();
+                  final customerSubscriptions = internetProvider.subscriptions
+                      .where(
+                        (subscription) =>
+                            subscription.personId == widget.person.id,
+                      )
+                      .toList();
 
-              final totalCount = customerDebts.length + customerInstallments.length + customerSubscriptions.length;
+                  final totalCount =
+                      customerDebts.length +
+                      customerInstallments.length +
+                      customerSubscriptions.length;
 
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  'إجمالي العناصر: $totalCount',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.blue[700],
-                  ),
-                ),
-              );
-            },
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      'إجمالي العناصر: $totalCount',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.blue[700],
+                      ),
+                    ),
+                  );
+                },
           ),
         ],
       ),
@@ -511,7 +576,11 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
 
         return Column(
           children: [
-            _buildDesktopTabHeader('الديون', customerDebts.length, () => _showDebtForm()),
+            _buildDesktopTabHeader(
+              'الديون',
+              customerDebts.length,
+              () => _showDebtForm(),
+            ),
             Expanded(
               child: customerDebts.isEmpty
                   ? _buildEmptyState('لا توجد ديون', Icons.money_off)
@@ -536,11 +605,18 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
 
         return Column(
           children: [
-            _buildDesktopTabHeader('الأقساط', customerInstallments.length, () => _showInstallmentForm()),
+            _buildDesktopTabHeader(
+              'الأقساط',
+              customerInstallments.length,
+              () => _showInstallmentForm(),
+            ),
             Expanded(
               child: customerInstallments.isEmpty
                   ? _buildEmptyState('لا توجد أقساط', Icons.payment)
-                  : _buildInstallmentsDataTable(customerInstallments, personProvider),
+                  : _buildInstallmentsDataTable(
+                      customerInstallments,
+                      personProvider,
+                    ),
             ),
           ],
         );
@@ -561,11 +637,18 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
 
         return Column(
           children: [
-            _buildDesktopTabHeader('اشتراكات الإنترنت', customerSubscriptions.length, () => _showInternetForm()),
+            _buildDesktopTabHeader(
+              'اشتراكات الإنترنت',
+              customerSubscriptions.length,
+              () => _showInternetForm(),
+            ),
             Expanded(
               child: customerSubscriptions.isEmpty
                   ? _buildEmptyState('لا توجد اشتراكات', Icons.wifi)
-                  : _buildInternetDataTable(customerSubscriptions, personProvider),
+                  : _buildInternetDataTable(
+                      customerSubscriptions,
+                      personProvider,
+                    ),
             ),
           ],
         );
@@ -578,19 +661,14 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.grey[50],
-        border: Border(
-          bottom: BorderSide(color: Colors.grey[300]!),
-        ),
+        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             '$title ($count)',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           ElevatedButton.icon(
             onPressed: onAdd,
@@ -624,17 +702,15 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             ),
           ),
           DataCell(Text('${NumberFormatter.format(debt.amount)} د.ع')),
-          DataCell(Text('${NumberFormatter.format(debt.paidAmount)} د.ع')),
+          DataCell(Text(DateFormatter.formatDisplayDate(debt.createdAt))),
           DataCell(
             Text(
-              '${NumberFormatter.format(debt.remainingAmount)} د.ع',
-              style: TextStyle(
-                color: debt.isPaid ? Colors.green : Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
+              debt.paymentDate != null
+                  ? DateFormatter.formatDisplayDate(debt.paymentDate!)
+                  : 'لم يدفع بعد',
+              style: TextStyle(color: debt.isPaid ? Colors.green : Colors.grey),
             ),
           ),
-          DataCell(Text(DateFormatter.formatDisplayDate(debt.createdAt))),
           DataCell(
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -687,10 +763,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           child: DataTable(
             columns: const [
               DataColumn(label: Text('الشخص')),
-              DataColumn(label: Text('المبلغ الأصلي')),
-              DataColumn(label: Text('المبلغ المدفوع')),
-              DataColumn(label: Text('المبلغ المتبقي')),
-              DataColumn(label: Text('التاريخ')),
+              DataColumn(label: Text('المبلغ')),
+              DataColumn(label: Text('تاريخ الإنشاء')),
+              DataColumn(label: Text('تاريخ الدفع')),
               DataColumn(label: Text('الحالة')),
               DataColumn(label: Text('الإجراءات')),
             ],
@@ -702,24 +777,18 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   }
 
   void _showPaymentDialog(Debt debt) {
-    final TextEditingController amountController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('دفع دين'),
+        title: const Text('تأكيد دفع الدين'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('المبلغ المتبقي: ${NumberFormatter.format(debt.remainingAmount)} د.ع'),
+            Text('هل أنت متأكد من دفع هذا الدين كاملاً؟'),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: amountController,
-              decoration: const InputDecoration(
-                labelText: 'المبلغ المدفوع',
-                hintText: 'أدخل المبلغ المدفوع',
-                suffixText: 'د.ع',
-              ),
-              keyboardType: TextInputType.number,
+            Text(
+              'المبلغ: ${NumberFormatter.format(debt.amount)} د.ع',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -730,42 +799,40 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           ),
           ElevatedButton(
             onPressed: () async {
-              final amount = double.tryParse(amountController.text);
-              if (amount != null && amount > 0) {
-                if (amount > debt.remainingAmount) {
+              try {
+                await Provider.of<DebtProvider>(
+                  context,
+                  listen: false,
+                ).payDebt(debt.id!);
+                if (mounted) {
+                  Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ المتبقي')),
+                    const SnackBar(content: Text('تم دفع الدين بنجاح')),
                   );
-                  return;
                 }
-                try {
-                  await Provider.of<DebtProvider>(context, listen: false)
-                      .payDebt(debt.id!, amount);
-                  if (mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('تم دفع المبلغ بنجاح')),
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('خطأ: ${e.toString()}')),
-                    );
-                  }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('خطأ: ${e.toString()}')),
+                  );
                 }
               }
             },
-            child: const Text('دفع'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            child: const Text(
+              'تأكيد الدفع',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildInstallmentsDataTable(List<Installment> installments, PersonProvider personProvider) {
+  Widget _buildInstallmentsDataTable(
+    List<Installment> installments,
+    PersonProvider personProvider,
+  ) {
     return Container(
       margin: const EdgeInsets.all(16),
       child: Card(
@@ -792,23 +859,42 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     ),
                   ),
                   DataCell(Text(installment.productName)),
-                  DataCell(Text('${NumberFormatter.format(installment.totalAmount)} د.ع')),
-                  DataCell(Text('${NumberFormatter.format(installment.paidAmount)} د.ع')),
+                  DataCell(
+                    Text(
+                      '${NumberFormatter.format(installment.totalAmount)} د.ع',
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      '${NumberFormatter.format(installment.paidAmount)} د.ع',
+                    ),
+                  ),
                   DataCell(
                     Text(
                       '${NumberFormatter.format(installment.remainingAmount)} د.ع',
                       style: TextStyle(
-                        color: installment.isCompleted ? Colors.green : Colors.red,
+                        color: installment.isCompleted
+                            ? Colors.green
+                            : Colors.red,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  DataCell(Text(DateFormatter.formatDisplayDate(installment.createdAt))),
+                  DataCell(
+                    Text(
+                      DateFormatter.formatDisplayDate(installment.createdAt),
+                    ),
+                  ),
                   DataCell(
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: installment.isCompleted ? Colors.green : Colors.orange,
+                        color: installment.isCompleted
+                            ? Colors.green
+                            : Colors.orange,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -827,8 +913,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       children: [
                         if (!installment.isCompleted) ...[
                           IconButton(
-                            icon: const Icon(Icons.payment, color: Colors.green),
-                            onPressed: () => _showInstallmentPaymentDialog(installment),
+                            icon: const Icon(
+                              Icons.payment,
+                              color: Colors.green,
+                            ),
+                            onPressed: () =>
+                                _showInstallmentPaymentDialog(installment),
                             tooltip: 'إضافة دفعة',
                           ),
                         ],
@@ -839,12 +929,14 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                         ),
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _showInstallmentForm(installment: installment),
+                          onPressed: () =>
+                              _showInstallmentForm(installment: installment),
                           tooltip: 'تعديل',
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _confirmDeleteInstallment(installment),
+                          onPressed: () =>
+                              _confirmDeleteInstallment(installment),
                           tooltip: 'حذف',
                         ),
                         InstallmentPrintWidget(installment: installment),
@@ -871,7 +963,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('المبلغ المتبقي: ${NumberFormatter.format(installment.remainingAmount)} د.ع'),
+            Text(
+              'المبلغ المتبقي: ${NumberFormatter.format(installment.remainingAmount)} د.ع',
+            ),
             const SizedBox(height: 16),
             TextFormField(
               controller: amountController,
@@ -905,12 +999,17 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 if (amount > installment.remainingAmount) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content: Text(
-                            'المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ المتبقي')),
+                      content: Text(
+                        'المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ المتبقي',
+                      ),
+                    ),
                   );
                   return;
                 }
-                final provider = Provider.of<InstallmentProvider>(context, listen: false);
+                final provider = Provider.of<InstallmentProvider>(
+                  context,
+                  listen: false,
+                );
                 final navigator = Navigator.of(context);
                 final messenger = ScaffoldMessenger.of(context);
 
@@ -918,7 +1017,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                   final payment = InstallmentPayment(
                     installmentId: installment.id!,
                     amount: amount,
-                    notes: notesController.text.trim().isEmpty ? null : notesController.text.trim(),
+                    notes: notesController.text.trim().isEmpty
+                        ? null
+                        : notesController.text.trim(),
                     paymentDate: DateTime.now(),
                     createdAt: DateTime.now(),
                   );
@@ -947,7 +1048,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
   }
 
-  void _confirmDeletePayment(Installment installment, InstallmentPayment payment) {
+  void _confirmDeletePayment(
+    Installment installment,
+    InstallmentPayment payment,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -960,7 +1064,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           ),
           ElevatedButton(
             onPressed: () async {
-              final provider = Provider.of<InstallmentProvider>(context, listen: false);
+              final provider = Provider.of<InstallmentProvider>(
+                context,
+                listen: false,
+              );
               final navigator = Navigator.of(context);
               final messenger = ScaffoldMessenger.of(context);
 
@@ -989,9 +1096,13 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   }
 
   void _showPaymentHistory(Installment installment) {
-    final installmentProvider =
-        Provider.of<InstallmentProvider>(context, listen: false);
-    final payments = installmentProvider.getInstallmentPayments(installment.id!);
+    final installmentProvider = Provider.of<InstallmentProvider>(
+      context,
+      listen: false,
+    );
+    final payments = installmentProvider.getInstallmentPayments(
+      installment.id!,
+    );
 
     showDialog(
       context: context,
@@ -1008,18 +1119,22 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('المنتج: ${installment.productName}',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(
+                      'المنتج: ${installment.productName}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('المبلغ الإجمالي:'),
                         Text(
-                            '${NumberFormatter.format(installment.totalAmount)} د.ع',
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold)),
+                          '${NumberFormatter.format(installment.totalAmount)} د.ع',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -1028,10 +1143,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       children: [
                         const Text('المبلغ المدفوع:'),
                         Text(
-                            '${NumberFormatter.format(installment.paidAmount)} د.ع',
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green)),
+                          '${NumberFormatter.format(installment.paidAmount)} د.ع',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -1040,9 +1157,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       children: [
                         const Text('المبلغ المتبقي:'),
                         Text(
-                            '${NumberFormatter.format(installment.remainingAmount)} د.ع',
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, color: Colors.red)),
+                          '${NumberFormatter.format(installment.remainingAmount)} د.ع',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -1058,16 +1178,22 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                           final payment = payments[index];
                           return Card(
                             margin: const EdgeInsets.symmetric(
-                                vertical: 4.0, horizontal: 2.0),
+                              vertical: 4.0,
+                              horizontal: 2.0,
+                            ),
                             elevation: 2,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.monetization_on,
-                                      color: Colors.green, size: 30),
+                                  const Icon(
+                                    Icons.monetization_on,
+                                    color: Colors.green,
+                                    size: 30,
+                                  ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
@@ -1085,8 +1211,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                                         Text(
                                           'التاريخ: ${DateFormatter.formatDisplayDateTime(payment.paymentDate)}',
                                           style: TextStyle(
-                                              color: Colors.grey[600],
-                                              fontSize: 12),
+                                            color: Colors.grey[600],
+                                            fontSize: 12,
+                                          ),
                                         ),
                                         if (payment.notes != null &&
                                             payment.notes!.isNotEmpty) ...[
@@ -1094,21 +1221,26 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                                           Text(
                                             'الملاحظات: ${payment.notes}',
                                             style: TextStyle(
-                                                color: Colors.grey[700],
-                                                fontSize: 12),
+                                              color: Colors.grey[700],
+                                              fontSize: 12,
+                                            ),
                                           ),
                                         ],
                                       ],
                                     ),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.delete,
-                                        color: Colors.red),
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
                                     onPressed: () {
                                       // Close the history dialog first
                                       Navigator.of(context).pop();
                                       _confirmDeletePayment(
-                                          installment, payment);
+                                        installment,
+                                        payment,
+                                      );
                                     },
                                   ),
                                 ],
@@ -1131,7 +1263,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
   }
 
-  Widget _buildInternetDataTable(List<InternetSubscription> subscriptions, PersonProvider personProvider) {
+  Widget _buildInternetDataTable(
+    List<InternetSubscription> subscriptions,
+    PersonProvider personProvider,
+  ) {
     // نفس الأعمدة والشكل الموجود في internet_screen
     return Container(
       margin: const EdgeInsets.all(16),
@@ -1148,7 +1283,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               DataColumn(label: Text('الإجراءات')),
             ],
             rows: subscriptions.map((subscription) {
-              final person = personProvider.getPersonById(subscription.personId);
+              final person = personProvider.getPersonById(
+                subscription.personId,
+              );
 
               Color statusColor;
               String statusText;
@@ -1170,17 +1307,19 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     _showSubscriptionDetails(context, subscription, person);
                   }
                 },
-                color: MaterialStateProperty.resolveWith<Color?>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.selected)) {
-                      return Theme.of(context).colorScheme.primary.withOpacity(0.2);
-                    }
-                    if (isFullyPaid) {
-                      return Colors.green.shade100;
-                    }
-                    return null;
-                  },
-                ),
+                color: MaterialStateProperty.resolveWith<Color?>((
+                  Set<MaterialState> states,
+                ) {
+                  if (states.contains(MaterialState.selected)) {
+                    return Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.2);
+                  }
+                  if (isFullyPaid) {
+                    return Colors.green.shade100;
+                  }
+                  return null;
+                }),
                 cells: [
                   DataCell(
                     Text(
@@ -1188,13 +1327,30 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
-                  DataCell(Text('${NumberFormatter.format(subscription.price)} د.ع')),
-                  DataCell(Text('${NumberFormatter.format(subscription.paidAmount)} د.ع')),
-                  DataCell(Text('${NumberFormatter.format(subscription.remainingAmount)} د.ع')),
-                  DataCell(Text(DateFormatter.formatDisplayDate(subscription.startDate))),
+                  DataCell(
+                    Text('${NumberFormatter.format(subscription.price)} د.ع'),
+                  ),
+                  DataCell(
+                    Text(
+                      '${NumberFormatter.format(subscription.paidAmount)} د.ع',
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      '${NumberFormatter.format(subscription.remainingAmount)} د.ع',
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      DateFormatter.formatDisplayDate(subscription.startDate),
+                    ),
+                  ),
                   DataCell(
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: statusColor,
                         borderRadius: BorderRadius.circular(12),
@@ -1215,17 +1371,26 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       children: [
                         if (!isFullyPaid)
                           IconButton(
-                            icon: const Icon(Icons.payment, color: Colors.green),
-                            onPressed: () => _showInternetPaymentDialog(subscription),
+                            icon: const Icon(
+                              Icons.payment,
+                              color: Colors.green,
+                            ),
+                            onPressed: () =>
+                                _showInternetPaymentDialog(subscription),
                             tooltip: 'دفع',
                           ),
                         IconButton(
-                          icon: const Icon(Icons.add_circle_outline, color: Colors.green),
+                          icon: const Icon(
+                            Icons.add_circle_outline,
+                            color: Colors.green,
+                          ),
                           onPressed: () => _showInternetForm(
                             subscription: InternetSubscription(
                               personId: subscription.personId,
                               startDate: DateTime.now(),
-                              endDate: DateTime.now().add(const Duration(days: 30)),
+                              endDate: DateTime.now().add(
+                                const Duration(days: 30),
+                              ),
                               price: subscription.price,
                               paidAmount: 0,
                               packageName: subscription.packageName,
@@ -1240,12 +1405,14 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                         ),
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _showInternetForm(subscription: subscription),
+                          onPressed: () =>
+                              _showInternetForm(subscription: subscription),
                           tooltip: 'تعديل',
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _confirmDeleteSubscription(subscription),
+                          onPressed: () =>
+                              _confirmDeleteSubscription(subscription),
                           tooltip: 'حذف',
                         ),
                       ],
@@ -1260,7 +1427,11 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
   }
 
-  void _showSubscriptionDetails(BuildContext context, InternetSubscription subscription, Person? person) {
+  void _showSubscriptionDetails(
+    BuildContext context,
+    InternetSubscription subscription,
+    Person? person,
+  ) {
     String statusText;
     Color statusColor;
     if (subscription.isExpired) {
@@ -1283,24 +1454,48 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             children: <Widget>[
               _buildDetailRow('الشخص:', person?.name ?? 'غير محدد'),
               _buildDetailRow('الباقة:', subscription.packageName),
-              _buildDetailRow('السعر:', '${NumberFormatter.format(subscription.price)} د.ع'),
-              _buildDetailRow('المبلغ المدفوع:', '${NumberFormatter.format(subscription.paidAmount)} د.ع'),
-              _buildDetailRow('المبلغ المتبقي:', '${NumberFormatter.format(subscription.remainingAmount)} د.ع'),
-              _buildDetailRow('تاريخ البداية:', DateFormatter.formatDisplayDate(subscription.startDate)),
-              _buildDetailRow('تاريخ الانتهاء:', DateFormatter.formatDisplayDate(subscription.endDate)),
+              _buildDetailRow(
+                'السعر:',
+                '${NumberFormatter.format(subscription.price)} د.ع',
+              ),
+              _buildDetailRow(
+                'المبلغ المدفوع:',
+                '${NumberFormatter.format(subscription.paidAmount)} د.ع',
+              ),
+              _buildDetailRow(
+                'المبلغ المتبقي:',
+                '${NumberFormatter.format(subscription.remainingAmount)} د.ع',
+              ),
+              _buildDetailRow(
+                'تاريخ البداية:',
+                DateFormatter.formatDisplayDate(subscription.startDate),
+              ),
+              _buildDetailRow(
+                'تاريخ الانتهاء:',
+                DateFormatter.formatDisplayDate(subscription.endDate),
+              ),
               Row(
                 children: [
-                  const Text('الحالة:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'الحالة:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       statusText,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -1335,7 +1530,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('المبلغ المتبقي: ${NumberFormatter.format(subscription.remainingAmount)} د.ع'),
+              Text(
+                'المبلغ المتبقي: ${NumberFormatter.format(subscription.remainingAmount)} د.ع',
+              ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: amountController,
@@ -1371,10 +1568,16 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 final amount = double.parse(amountController.text);
-                final internetProvider = Provider.of<InternetProvider>(context, listen: false);
+                final internetProvider = Provider.of<InternetProvider>(
+                  context,
+                  listen: false,
+                );
                 final scaffoldMessenger = ScaffoldMessenger.of(context);
                 try {
-                  await internetProvider.payForSubscription(subscription.id!, amount);
+                  await internetProvider.payForSubscription(
+                    subscription.id!,
+                    amount,
+                  );
                   if (mounted) {
                     Navigator.pop(context);
                     scaffoldMessenger.showSnackBar(
@@ -1417,7 +1620,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     required VoidCallback onConfirmed,
   }) async {
     final passwordController = TextEditingController();
-    final passwordProvider = Provider.of<PasswordProvider>(context, listen: false);
+    final passwordProvider = Provider.of<PasswordProvider>(
+      context,
+      listen: false,
+    );
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     final confirmed = await showDialog<bool>(
@@ -1442,7 +1648,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                   final password = passwordController.text;
                   if (password.isEmpty) return;
 
-                  final isCorrect = await passwordProvider.verifyPassword(password);
+                  final isCorrect = await passwordProvider.verifyPassword(
+                    password,
+                  );
                   Navigator.of(context).pop(isCorrect);
                 },
               ),
@@ -1458,7 +1666,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 final password = passwordController.text;
                 if (password.isEmpty) return;
 
-                final isCorrect = await passwordProvider.verifyPassword(password);
+                final isCorrect = await passwordProvider.verifyPassword(
+                  password,
+                );
                 Navigator.of(context).pop(isCorrect);
               },
               child: const Text('تأكيد'),
@@ -1498,7 +1708,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final provider = Provider.of<DebtProvider>(context, listen: false);
+                  final provider = Provider.of<DebtProvider>(
+                    context,
+                    listen: false,
+                  );
                   final messenger = ScaffoldMessenger.of(context);
                   Navigator.pop(context);
                   try {
@@ -1543,7 +1756,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final provider = Provider.of<InstallmentProvider>(context, listen: false);
+                  final provider = Provider.of<InstallmentProvider>(
+                    context,
+                    listen: false,
+                  );
                   final messenger = ScaffoldMessenger.of(context);
                   Navigator.pop(context);
                   try {
@@ -1588,7 +1804,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final provider = Provider.of<InternetProvider>(context, listen: false);
+                  final provider = Provider.of<InternetProvider>(
+                    context,
+                    listen: false,
+                  );
                   final messenger = ScaffoldMessenger.of(context);
                   Navigator.pop(context);
                   try {

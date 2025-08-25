@@ -26,6 +26,7 @@ class _InternetScreenState extends State<InternetScreen> {
     );
   }
 
+  // ignore: unused_element
   void _showRenewDialog(InternetSubscription subscription) {
     final newSubscription = subscription.copyWith(
       id: null,

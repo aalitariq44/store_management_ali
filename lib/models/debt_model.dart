@@ -3,25 +3,25 @@ class Debt {
   final String? title;
   final int personId;
   final double amount;
-  final double paidAmount;
   final String? notes;
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isPaid;
+  final DateTime? paymentDate;
 
   Debt({
     this.id,
     this.title,
     required this.personId,
     required this.amount,
-    this.paidAmount = 0.0,
     this.notes,
     required this.createdAt,
     required this.updatedAt,
     this.isPaid = false,
+    this.paymentDate,
   });
 
-  double get remainingAmount => amount - paidAmount;
+  double get remainingAmount => isPaid ? 0.0 : amount;
 
   Map<String, dynamic> toMap() {
     return {
@@ -29,11 +29,11 @@ class Debt {
       'title': title,
       'person_id': personId,
       'amount': amount,
-      'paid_amount': paidAmount,
       'notes': notes,
       'created_at': createdAt.millisecondsSinceEpoch,
       'updated_at': updatedAt.millisecondsSinceEpoch,
       'is_paid': isPaid ? 1 : 0,
+      'payment_date': paymentDate?.millisecondsSinceEpoch,
     };
   }
 
@@ -43,11 +43,13 @@ class Debt {
       title: map['title'],
       personId: map['person_id'],
       amount: map['amount'].toDouble(),
-      paidAmount: map['paid_amount'].toDouble(),
       notes: map['notes'],
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['created_at']),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updated_at']),
       isPaid: map['is_paid'] == 1,
+      paymentDate: map['payment_date'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['payment_date'])
+          : null,
     );
   }
 
@@ -56,27 +58,27 @@ class Debt {
     String? title,
     int? personId,
     double? amount,
-    double? paidAmount,
     String? notes,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isPaid,
+    DateTime? paymentDate,
   }) {
     return Debt(
       id: id ?? this.id,
       title: title ?? this.title,
       personId: personId ?? this.personId,
       amount: amount ?? this.amount,
-      paidAmount: paidAmount ?? this.paidAmount,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isPaid: isPaid ?? this.isPaid,
+      paymentDate: paymentDate ?? this.paymentDate,
     );
   }
 
   @override
   String toString() {
-    return 'Debt(id: $id, title: $title, personId: $personId, amount: $amount, paidAmount: $paidAmount, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, isPaid: $isPaid)';
+    return 'Debt(id: $id, title: $title, personId: $personId, amount: $amount, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, isPaid: $isPaid, paymentDate: $paymentDate)';
   }
 }

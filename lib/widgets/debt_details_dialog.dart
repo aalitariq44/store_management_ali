@@ -25,21 +25,44 @@ class DebtDetailsDialog extends StatelessWidget {
           children: [
             _buildDetailRow(context, 'الزبون:', person?.name ?? 'غير محدد'),
             _buildDetailRow(context, 'العنوان:', debt.title ?? 'لا يوجد'),
-            _buildDetailRow(context, 'المبلغ الأصلي:', '${NumberFormatter.format(debt.amount)} د.ع'),
-            _buildDetailRow(context, 'المبلغ المدفوع:', '${NumberFormatter.format(debt.paidAmount)} د.ع'),
             _buildDetailRow(
               context,
-              'المبلغ المتبقي:',
-              '${NumberFormatter.format(debt.remainingAmount)} د.ع',
-              valueColor: debt.isPaid ? Colors.green : Colors.red,
+              'المبلغ:',
+              '${NumberFormatter.format(debt.amount)} د.ع',
             ),
-            _buildDetailRow(context, 'الحالة:', debt.isPaid ? 'مدفوع' : 'مستحق'),
-            _buildDetailRow(context, 'تاريخ الإنشاء:', DateFormatter.formatDateTime(debt.createdAt)),
-            _buildDetailRow(context, 'آخر تحديث:', DateFormatter.formatDateTime(debt.updatedAt)),
+            _buildDetailRow(
+              context,
+              'الحالة:',
+              debt.isPaid ? 'مدفوع' : 'مستحق',
+            ),
+            _buildDetailRow(
+              context,
+              'تاريخ الإنشاء:',
+              DateFormatter.formatDateTime(debt.createdAt),
+            ),
+            if (debt.paymentDate != null)
+              _buildDetailRow(
+                context,
+                'تاريخ الدفع:',
+                DateFormatter.formatDateTime(debt.paymentDate!),
+                valueColor: Colors.green,
+              ),
+            _buildDetailRow(
+              context,
+              'آخر تحديث:',
+              DateFormatter.formatDateTime(debt.updatedAt),
+            ),
             const SizedBox(height: 16),
-            const Text('الملاحظات:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'الملاحظات:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 4),
-            Text(debt.notes != null && debt.notes!.isNotEmpty ? debt.notes! : 'لا توجد ملاحظات'),
+            Text(
+              debt.notes != null && debt.notes!.isNotEmpty
+                  ? debt.notes!
+                  : 'لا توجد ملاحظات',
+            ),
           ],
         ),
       ),
@@ -52,22 +75,21 @@ class DebtDetailsDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(BuildContext context, String label, String value, {Color? valueColor}) {
+  Widget _buildDetailRow(
+    BuildContext context,
+    String label,
+    String value, {
+    Color? valueColor,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              value,
-              style: TextStyle(color: valueColor),
-            ),
+            child: Text(value, style: TextStyle(color: valueColor)),
           ),
         ],
       ),

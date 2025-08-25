@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/person_model.dart';
-import '../models/debt_model.dart';
-import '../models/installment_model.dart';
-import '../models/internet_model.dart';
 import '../providers/debt_provider.dart';
 import '../providers/installment_provider.dart';
 import '../providers/internet_provider.dart';

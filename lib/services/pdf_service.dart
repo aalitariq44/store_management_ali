@@ -1,4 +1,5 @@
 import 'dart:io';
+// ignore: unused_shown_name
 import 'package:flutter/services.dart' show ByteData, rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -15,29 +16,35 @@ class PDFService {
   // متغيرات الخطوط العربية
   static pw.Font? _arabicFont;
   static pw.Font? _arabicBoldFont;
-  
+
   // تحميل الخطوط العربية
   static Future<void> _loadArabicFonts() async {
     if (_arabicFont == null || _arabicBoldFont == null) {
       try {
         // تحميل خط Amiri العادي والعريض
-        final regularFont = await rootBundle.load("assets/fonts/Amiri-Regular.ttf");
+        final regularFont = await rootBundle.load(
+          "assets/fonts/Amiri-Regular.ttf",
+        );
         final boldFont = await rootBundle.load("assets/fonts/Amiri-Bold.ttf");
-        
+
         _arabicFont = pw.Font.ttf(regularFont);
         _arabicBoldFont = pw.Font.ttf(boldFont);
       } catch (e) {
         // في حالة فشل تحميل خط Amiri، نجرب Cairo
         try {
-          final regularFont = await rootBundle.load("assets/fonts/Cairo-Regular.ttf");
+          final regularFont = await rootBundle.load(
+            "assets/fonts/Cairo-Regular.ttf",
+          );
           final boldFont = await rootBundle.load("assets/fonts/Cairo-Bold.ttf");
-          
+
           _arabicFont = pw.Font.ttf(regularFont);
           _arabicBoldFont = pw.Font.ttf(boldFont);
         } catch (e2) {
           // في حالة فشل جميع الخطوط، نجرب NotoSansArabic
           try {
-            final arabicFont = await rootBundle.load("assets/fonts/NotoSansArabic-Regular.ttf");
+            final arabicFont = await rootBundle.load(
+              "assets/fonts/NotoSansArabic-Regular.ttf",
+            );
             _arabicFont = pw.Font.ttf(arabicFont);
             _arabicBoldFont = _arabicFont; // نستخدم نفس الخط للعريض
           } catch (e3) {
@@ -48,7 +55,7 @@ class PDFService {
       }
     }
   }
-  
+
   // دالة مساعدة لإنشاء نمط النص العربي
   static pw.TextStyle _arabicTextStyle({
     double fontSize = 12,
@@ -62,6 +69,7 @@ class PDFService {
       color: color,
     );
   }
+
   // طباعة تفاصيل الزبون كاملة
   static Future<void> printCustomerDetails({
     required Person person,
@@ -72,7 +80,7 @@ class PDFService {
     try {
       // تحميل الخطوط العربية أولاً
       await _loadArabicFonts();
-      
+
       final pdf = pw.Document();
 
       pdf.addPage(
@@ -85,7 +93,11 @@ class PDFService {
               pw.SizedBox(height: 20),
               _buildCustomerInfo(person),
               pw.SizedBox(height: 20),
-              _buildFinancialSummary(debts, installments, internetSubscriptions),
+              _buildFinancialSummary(
+                debts,
+                installments,
+                internetSubscriptions,
+              ),
               pw.SizedBox(height: 20),
               if (debts.isNotEmpty) ...[
                 _buildDebtsSection(debts),
@@ -110,11 +122,14 @@ class PDFService {
   }
 
   // طباعة الديون فقط
-  static Future<void> printDebts(List<Debt> debts, {String? customerName}) async {
+  static Future<void> printDebts(
+    List<Debt> debts, {
+    String? customerName,
+  }) async {
     try {
       // تحميل الخطوط العربية أولاً
       await _loadArabicFonts();
-      
+
       final pdf = pw.Document();
 
       pdf.addPage(
@@ -123,7 +138,11 @@ class PDFService {
           pageFormat: PdfPageFormat.a4,
           build: (pw.Context context) {
             return [
-              _buildHeader(customerName != null ? 'ديون الزبون: $customerName' : 'تقرير الديون'),
+              _buildHeader(
+                customerName != null
+                    ? 'ديون الزبون: $customerName'
+                    : 'تقرير الديون',
+              ),
               pw.SizedBox(height: 20),
               _buildDebtsSection(debts),
               pw.SizedBox(height: 20),
@@ -133,18 +152,24 @@ class PDFService {
         ),
       );
 
-      await _printOrSavePDF(pdf, customerName != null ? 'ديون_${customerName}' : 'تقرير_الديون');
+      await _printOrSavePDF(
+        pdf,
+        customerName != null ? 'ديون_${customerName}' : 'تقرير_الديون',
+      );
     } catch (e) {
       throw Exception('خطأ في طباعة الديون: $e');
     }
   }
 
   // طباعة الأقساط فقط
-  static Future<void> printInstallments(List<Installment> installments, {String? customerName}) async {
+  static Future<void> printInstallments(
+    List<Installment> installments, {
+    String? customerName,
+  }) async {
     try {
       // تحميل الخطوط العربية أولاً
       await _loadArabicFonts();
-      
+
       final pdf = pw.Document();
 
       pdf.addPage(
@@ -153,7 +178,11 @@ class PDFService {
           pageFormat: PdfPageFormat.a4,
           build: (pw.Context context) {
             return [
-              _buildHeader(customerName != null ? 'أقساط الزبون: $customerName' : 'تقرير الأقساط'),
+              _buildHeader(
+                customerName != null
+                    ? 'أقساط الزبون: $customerName'
+                    : 'تقرير الأقساط',
+              ),
               pw.SizedBox(height: 20),
               _buildInstallmentsSection(installments),
               pw.SizedBox(height: 20),
@@ -163,18 +192,24 @@ class PDFService {
         ),
       );
 
-      await _printOrSavePDF(pdf, customerName != null ? 'أقساط_${customerName}' : 'تقرير_الأقساط');
+      await _printOrSavePDF(
+        pdf,
+        customerName != null ? 'أقساط_${customerName}' : 'تقرير_الأقساط',
+      );
     } catch (e) {
       throw Exception('خطأ في طباعة الأقساط: $e');
     }
   }
 
   // طباعة اشتراكات الإنترنت فقط
-  static Future<void> printInternetSubscriptions(List<InternetSubscription> subscriptions, {String? customerName}) async {
+  static Future<void> printInternetSubscriptions(
+    List<InternetSubscription> subscriptions, {
+    String? customerName,
+  }) async {
     try {
       // تحميل الخطوط العربية أولاً
       await _loadArabicFonts();
-      
+
       final pdf = pw.Document();
 
       pdf.addPage(
@@ -183,7 +218,11 @@ class PDFService {
           pageFormat: PdfPageFormat.a4,
           build: (pw.Context context) {
             return [
-              _buildHeader(customerName != null ? 'اشتراكات الإنترنت للزبون: $customerName' : 'تقرير اشتراكات الإنترنت'),
+              _buildHeader(
+                customerName != null
+                    ? 'اشتراكات الإنترنت للزبون: $customerName'
+                    : 'تقرير اشتراكات الإنترنت',
+              ),
               pw.SizedBox(height: 20),
               _buildInternetSection(subscriptions),
               pw.SizedBox(height: 20),
@@ -193,7 +232,12 @@ class PDFService {
         ),
       );
 
-      await _printOrSavePDF(pdf, customerName != null ? 'اشتراكات_${customerName}' : 'تقرير_اشتراكات_الإنترنت');
+      await _printOrSavePDF(
+        pdf,
+        customerName != null
+            ? 'اشتراكات_${customerName}'
+            : 'تقرير_اشتراكات_الإنترنت',
+      );
     } catch (e) {
       throw Exception('خطأ في طباعة اشتراكات الإنترنت: $e');
     }
@@ -271,8 +315,16 @@ class PDFService {
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('الاسم:', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
-              pw.Text(person.name, style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'الاسم:',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                person.name,
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           if (person.phone != null) ...[
@@ -280,8 +332,16 @@ class PDFService {
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('الهاتف:', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
-                pw.Text(person.phone!, style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
+                pw.Text(
+                  'الهاتف:',
+                  style: _arabicTextStyle(fontSize: 12, isBold: true),
+                  textDirection: pw.TextDirection.rtl,
+                ),
+                pw.Text(
+                  person.phone!,
+                  style: _arabicTextStyle(fontSize: 12),
+                  textDirection: pw.TextDirection.rtl,
+                ),
               ],
             ),
           ],
@@ -290,8 +350,16 @@ class PDFService {
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('العنوان:', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
-                pw.Text(person.address!, style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
+                pw.Text(
+                  'العنوان:',
+                  style: _arabicTextStyle(fontSize: 12, isBold: true),
+                  textDirection: pw.TextDirection.rtl,
+                ),
+                pw.Text(
+                  person.address!,
+                  style: _arabicTextStyle(fontSize: 12),
+                  textDirection: pw.TextDirection.rtl,
+                ),
               ],
             ),
           ],
@@ -300,8 +368,16 @@ class PDFService {
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text('الملاحظات:', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
-                pw.Text(person.notes!, style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
+                pw.Text(
+                  'الملاحظات:',
+                  style: _arabicTextStyle(fontSize: 12, isBold: true),
+                  textDirection: pw.TextDirection.rtl,
+                ),
+                pw.Text(
+                  person.notes!,
+                  style: _arabicTextStyle(fontSize: 12),
+                  textDirection: pw.TextDirection.rtl,
+                ),
               ],
             ),
           ],
@@ -316,9 +392,18 @@ class PDFService {
     List<Installment> installments,
     List<InternetSubscription> internetSubscriptions,
   ) {
-    double totalDebts = debts.fold(0, (sum, debt) => sum + debt.remainingAmount);
-    double totalInstallments = installments.fold(0, (sum, installment) => sum + installment.remainingAmount);
-    double totalInternet = internetSubscriptions.fold(0, (sum, subscription) => sum + subscription.remainingAmount);
+    double totalDebts = debts.fold(
+      0,
+      (sum, debt) => sum + debt.remainingAmount,
+    );
+    double totalInstallments = installments.fold(
+      0,
+      (sum, installment) => sum + installment.remainingAmount,
+    );
+    double totalInternet = internetSubscriptions.fold(
+      0,
+      (sum, subscription) => sum + subscription.remainingAmount,
+    );
     double grandTotal = totalDebts + totalInstallments + totalInternet;
 
     return pw.Container(
@@ -344,33 +429,68 @@ class PDFService {
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('إجمالي الديون المتبقية:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(totalDebts)} د.ع', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'إجمالي الديون المتبقية:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(totalDebts)} د.ع',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('إجمالي الأقساط المتبقية:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(totalInstallments)} د.ع', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'إجمالي الأقساط المتبقية:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(totalInstallments)} د.ع',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('إجمالي اشتراكات الإنترنت المتبقية:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(totalInternet)} د.ع', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'إجمالي اشتراكات الإنترنت المتبقية:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(totalInternet)} د.ع',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.Divider(color: PdfColors.orange300),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('إجمالي المبلغ المتبقي:', style: _arabicTextStyle(fontSize: 14, isBold: true), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(grandTotal)} د.ع', 
-                style: _arabicTextStyle(fontSize: 14, isBold: true, color: PdfColors.red), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'إجمالي المبلغ المتبقي:',
+                style: _arabicTextStyle(fontSize: 14, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(grandTotal)} د.ع',
+                style: _arabicTextStyle(
+                  fontSize: 14,
+                  isBold: true,
+                  color: PdfColors.red,
+                ),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
         ],
@@ -408,23 +528,29 @@ class PDFService {
               decoration: const pw.BoxDecoration(color: PdfColors.grey100),
               children: [
                 _buildTableCell('العنوان', isHeader: true),
-                _buildTableCell('المبلغ الكلي', isHeader: true),
-                _buildTableCell('المبلغ المدفوع', isHeader: true),
-                _buildTableCell('المبلغ المتبقي', isHeader: true),
+                _buildTableCell('المبلغ', isHeader: true),
                 _buildTableCell('الحالة', isHeader: true),
-                _buildTableCell('التاريخ', isHeader: true),
+                _buildTableCell('تاريخ الإنشاء', isHeader: true),
+                _buildTableCell('تاريخ الدفع', isHeader: true),
               ],
             ),
-            ...debts.map((debt) => pw.TableRow(
-              children: [
-                _buildTableCell(debt.title ?? 'بدون عنوان'),
-                _buildTableCell('${NumberFormatter.format(debt.amount)} د.ع'),
-                _buildTableCell('${NumberFormatter.format(debt.paidAmount)} د.ع'),
-                _buildTableCell('${NumberFormatter.format(debt.remainingAmount)} د.ع'),
-                _buildTableCell(debt.isPaid ? 'مدفوع' : 'غير مدفوع'),
-                _buildTableCell(DateFormatter.formatDisplayDate(debt.createdAt)),
-              ],
-            )),
+            ...debts.map(
+              (debt) => pw.TableRow(
+                children: [
+                  _buildTableCell(debt.title ?? 'بدون عنوان'),
+                  _buildTableCell('${NumberFormatter.format(debt.amount)} د.ع'),
+                  _buildTableCell(debt.isPaid ? 'مدفوع' : 'غير مدفوع'),
+                  _buildTableCell(
+                    DateFormatter.formatDisplayDate(debt.createdAt),
+                  ),
+                  _buildTableCell(
+                    debt.paymentDate != null
+                        ? DateFormatter.formatDisplayDate(debt.paymentDate!)
+                        : 'لم يدفع بعد',
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ],
@@ -468,16 +594,28 @@ class PDFService {
                 _buildTableCell('التاريخ', isHeader: true),
               ],
             ),
-            ...installments.map((installment) => pw.TableRow(
-              children: [
-                _buildTableCell(installment.productName),
-                _buildTableCell('${NumberFormatter.format(installment.totalAmount)} د.ع'),
-                _buildTableCell('${NumberFormatter.format(installment.paidAmount)} د.ع'),
-                _buildTableCell('${NumberFormatter.format(installment.remainingAmount)} د.ع'),
-                _buildTableCell(installment.isCompleted ? 'مكتمل' : 'غير مكتمل'),
-                _buildTableCell(DateFormatter.formatDisplayDate(installment.createdAt)),
-              ],
-            )),
+            ...installments.map(
+              (installment) => pw.TableRow(
+                children: [
+                  _buildTableCell(installment.productName),
+                  _buildTableCell(
+                    '${NumberFormatter.format(installment.totalAmount)} د.ع',
+                  ),
+                  _buildTableCell(
+                    '${NumberFormatter.format(installment.paidAmount)} د.ع',
+                  ),
+                  _buildTableCell(
+                    '${NumberFormatter.format(installment.remainingAmount)} د.ع',
+                  ),
+                  _buildTableCell(
+                    installment.isCompleted ? 'مكتمل' : 'غير مكتمل',
+                  ),
+                  _buildTableCell(
+                    DateFormatter.formatDisplayDate(installment.createdAt),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ],
@@ -485,7 +623,9 @@ class PDFService {
   }
 
   // بناء قسم الإنترنت
-  static pw.Widget _buildInternetSection(List<InternetSubscription> subscriptions) {
+  static pw.Widget _buildInternetSection(
+    List<InternetSubscription> subscriptions,
+  ) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -521,16 +661,26 @@ class PDFService {
                 _buildTableCell('تاريخ الانتهاء', isHeader: true),
               ],
             ),
-            ...subscriptions.map((subscription) => pw.TableRow(
-              children: [
-                _buildTableCell(subscription.packageName),
-                _buildTableCell('${NumberFormatter.format(subscription.price)} د.ع'),
-                _buildTableCell('${NumberFormatter.format(subscription.paidAmount)} د.ع'),
-                _buildTableCell('${NumberFormatter.format(subscription.remainingAmount)} د.ع'),
-                _buildTableCell(subscription.isExpired ? 'منتهي' : 'نشط'),
-                _buildTableCell(DateFormatter.formatDisplayDate(subscription.endDate)),
-              ],
-            )),
+            ...subscriptions.map(
+              (subscription) => pw.TableRow(
+                children: [
+                  _buildTableCell(subscription.packageName),
+                  _buildTableCell(
+                    '${NumberFormatter.format(subscription.price)} د.ع',
+                  ),
+                  _buildTableCell(
+                    '${NumberFormatter.format(subscription.paidAmount)} د.ع',
+                  ),
+                  _buildTableCell(
+                    '${NumberFormatter.format(subscription.remainingAmount)} د.ع',
+                  ),
+                  _buildTableCell(subscription.isExpired ? 'منتهي' : 'نشط'),
+                  _buildTableCell(
+                    DateFormatter.formatDisplayDate(subscription.endDate),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ],
@@ -540,8 +690,12 @@ class PDFService {
   // بناء ملخص الديون
   static pw.Widget _buildDebtsSummary(List<Debt> debts) {
     double totalAmount = debts.fold(0, (sum, debt) => sum + debt.amount);
-    double paidAmount = debts.fold(0, (sum, debt) => sum + debt.paidAmount);
-    double remainingAmount = debts.fold(0, (sum, debt) => sum + debt.remainingAmount);
+    double paidAmount = debts
+        .where((debt) => debt.isPaid)
+        .fold(0, (sum, debt) => sum + debt.amount);
+    double remainingAmount = debts
+        .where((debt) => !debt.isPaid)
+        .fold(0, (sum, debt) => sum + debt.amount);
     int paidCount = debts.where((debt) => debt.isPaid).length;
 
     return pw.Container(
@@ -567,41 +721,83 @@ class PDFService {
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('عدد الديون الكلي:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${debts.length}', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'عدد الديون الكلي:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${debts.length}',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('عدد الديون المدفوعة:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('$paidCount', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'عدد الديون المدفوعة:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '$paidCount',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('إجمالي المبلغ:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(totalAmount)} د.ع', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'إجمالي المبلغ:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(totalAmount)} د.ع',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('المبلغ المدفوع:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(paidAmount)} د.ع', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'المبلغ المدفوع:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(paidAmount)} د.ع',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('المبلغ المتبقي:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(remainingAmount)} د.ع', 
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12, color: PdfColors.red)),
+              pw.Text(
+                'المبلغ المتبقي:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(remainingAmount)} د.ع',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 12,
+                  color: PdfColors.red,
+                ),
+              ),
             ],
           ),
         ],
@@ -611,10 +807,21 @@ class PDFService {
 
   // بناء ملخص الأقساط
   static pw.Widget _buildInstallmentsSummary(List<Installment> installments) {
-    double totalAmount = installments.fold(0, (sum, installment) => sum + installment.totalAmount);
-    double paidAmount = installments.fold(0, (sum, installment) => sum + installment.paidAmount);
-    double remainingAmount = installments.fold(0, (sum, installment) => sum + installment.remainingAmount);
-    int completedCount = installments.where((installment) => installment.isCompleted).length;
+    double totalAmount = installments.fold(
+      0,
+      (sum, installment) => sum + installment.totalAmount,
+    );
+    double paidAmount = installments.fold(
+      0,
+      (sum, installment) => sum + installment.paidAmount,
+    );
+    double remainingAmount = installments.fold(
+      0,
+      (sum, installment) => sum + installment.remainingAmount,
+    );
+    int completedCount = installments
+        .where((installment) => installment.isCompleted)
+        .length;
 
     return pw.Container(
       padding: const pw.EdgeInsets.all(15),
@@ -639,41 +846,83 @@ class PDFService {
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('عدد الأقساط الكلي:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${installments.length}', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'عدد الأقساط الكلي:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${installments.length}',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('عدد الأقساط المكتملة:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('$completedCount', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'عدد الأقساط المكتملة:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '$completedCount',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('إجمالي المبلغ:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(totalAmount)} د.ع', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'إجمالي المبلغ:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(totalAmount)} د.ع',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('المبلغ المدفوع:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(paidAmount)} د.ع', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'المبلغ المدفوع:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(paidAmount)} د.ع',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('المبلغ المتبقي:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(remainingAmount)} د.ع', 
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12, color: PdfColors.red)),
+              pw.Text(
+                'المبلغ المتبقي:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(remainingAmount)} د.ع',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 12,
+                  color: PdfColors.red,
+                ),
+              ),
             ],
           ),
         ],
@@ -682,12 +931,29 @@ class PDFService {
   }
 
   // بناء ملخص الإنترنت
-  static pw.Widget _buildInternetSummary(List<InternetSubscription> subscriptions) {
-    double totalAmount = subscriptions.fold(0, (sum, subscription) => sum + subscription.price);
-    double paidAmount = subscriptions.fold(0, (sum, subscription) => sum + subscription.paidAmount);
-    double remainingAmount = subscriptions.fold(0, (sum, subscription) => sum + subscription.remainingAmount);
-    int activeCount = subscriptions.where((subscription) => subscription.isActive && !subscription.isExpired).length;
-    int expiredCount = subscriptions.where((subscription) => subscription.isExpired).length;
+  static pw.Widget _buildInternetSummary(
+    List<InternetSubscription> subscriptions,
+  ) {
+    double totalAmount = subscriptions.fold(
+      0,
+      (sum, subscription) => sum + subscription.price,
+    );
+    double paidAmount = subscriptions.fold(
+      0,
+      (sum, subscription) => sum + subscription.paidAmount,
+    );
+    double remainingAmount = subscriptions.fold(
+      0,
+      (sum, subscription) => sum + subscription.remainingAmount,
+    );
+    int activeCount = subscriptions
+        .where(
+          (subscription) => subscription.isActive && !subscription.isExpired,
+        )
+        .length;
+    int expiredCount = subscriptions
+        .where((subscription) => subscription.isExpired)
+        .length;
 
     return pw.Container(
       padding: const pw.EdgeInsets.all(15),
@@ -712,49 +978,99 @@ class PDFService {
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('عدد الاشتراكات الكلي:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${subscriptions.length}', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'عدد الاشتراكات الكلي:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${subscriptions.length}',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('الاشتراكات النشطة:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('$activeCount', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'الاشتراكات النشطة:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '$activeCount',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('الاشتراكات المنتهية:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('$expiredCount', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'الاشتراكات المنتهية:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '$expiredCount',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('إجمالي المبلغ:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(totalAmount)} د.ع', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'إجمالي المبلغ:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(totalAmount)} د.ع',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('المبلغ المدفوع:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(paidAmount)} د.ع', style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
+              pw.Text(
+                'المبلغ المدفوع:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(paidAmount)} د.ع',
+                style: _arabicTextStyle(fontSize: 12, isBold: true),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ],
           ),
           pw.SizedBox(height: 5),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('المبلغ المتبقي:', style: _arabicTextStyle(fontSize: 12), textDirection: pw.TextDirection.rtl),
-              pw.Text('${NumberFormatter.format(remainingAmount)} د.ع', 
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12, color: PdfColors.red)),
+              pw.Text(
+                'المبلغ المتبقي:',
+                style: _arabicTextStyle(fontSize: 12),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                '${NumberFormatter.format(remainingAmount)} د.ع',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 12,
+                  color: PdfColors.red,
+                ),
+              ),
             ],
           ),
         ],
@@ -768,10 +1084,7 @@ class PDFService {
       padding: const pw.EdgeInsets.all(8),
       child: pw.Text(
         text,
-        style: _arabicTextStyle(
-          fontSize: isHeader ? 11 : 10,
-          isBold: isHeader,
-        ),
+        style: _arabicTextStyle(fontSize: isHeader ? 11 : 10, isBold: isHeader),
         textAlign: pw.TextAlign.center,
         textDirection: pw.TextDirection.rtl,
       ),
@@ -785,7 +1098,7 @@ class PDFService {
       final output = await getExternalStorageDirectory();
       final file = File('${output?.path}/$fileName.pdf');
       await file.writeAsBytes(await pdf.save());
-      
+
       // إظهار خيار الطباعة
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save(),
@@ -806,7 +1119,7 @@ class PDFService {
   }) async {
     try {
       await _loadArabicFonts();
-      
+
       final pdf = pw.Document();
 
       pdf.addPage(
@@ -829,7 +1142,10 @@ class PDFService {
         ),
       );
 
-      await _printOrSavePDF(pdf, 'تفاصيل_قسط_${person.name}_${installment.productName}');
+      await _printOrSavePDF(
+        pdf,
+        'تفاصيل_قسط_${person.name}_${installment.productName}',
+      );
     } catch (e) {
       throw Exception('خطأ في طباعة تفاصيل القسط: $e');
     }
@@ -856,18 +1172,37 @@ class PDFService {
             textDirection: pw.TextDirection.rtl,
           ),
           pw.SizedBox(height: 10),
-          _buildSummaryRow('المبلغ الإجمالي:', '${NumberFormatter.format(installment.totalAmount)} د.ع'),
-          _buildSummaryRow('المبلغ المدفوع:', '${NumberFormatter.format(installment.paidAmount)} د.ع', color: PdfColors.green),
-          _buildSummaryRow('المبلغ المتبقي:', '${NumberFormatter.format(installment.remainingAmount)} د.ع', color: PdfColors.red),
-          _buildSummaryRow('الحالة:', installment.isCompleted ? 'مكتمل' : 'نشط'),
-          _buildSummaryRow('تاريخ الإنشاء:', DateFormatter.formatDisplayDate(installment.createdAt)),
+          _buildSummaryRow(
+            'المبلغ الإجمالي:',
+            '${NumberFormatter.format(installment.totalAmount)} د.ع',
+          ),
+          _buildSummaryRow(
+            'المبلغ المدفوع:',
+            '${NumberFormatter.format(installment.paidAmount)} د.ع',
+            color: PdfColors.green,
+          ),
+          _buildSummaryRow(
+            'المبلغ المتبقي:',
+            '${NumberFormatter.format(installment.remainingAmount)} د.ع',
+            color: PdfColors.red,
+          ),
+          _buildSummaryRow(
+            'الحالة:',
+            installment.isCompleted ? 'مكتمل' : 'نشط',
+          ),
+          _buildSummaryRow(
+            'تاريخ الإنشاء:',
+            DateFormatter.formatDisplayDate(installment.createdAt),
+          ),
         ],
       ),
     );
   }
 
   // بناء قسم دفعات القسط
-  static pw.Widget _buildInstallmentPaymentsSection(List<InstallmentPayment> payments) {
+  static pw.Widget _buildInstallmentPaymentsSection(
+    List<InstallmentPayment> payments,
+  ) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -897,13 +1232,19 @@ class PDFService {
                 _buildTableCell('الملاحظات', isHeader: true),
               ],
             ),
-            ...payments.map((payment) => pw.TableRow(
-              children: [
-                _buildTableCell(DateFormatter.formatDisplayDateTime(payment.paymentDate)),
-                _buildTableCell('${NumberFormatter.format(payment.amount)} د.ع'),
-                _buildTableCell(payment.notes ?? 'لا توجد'),
-              ],
-            )),
+            ...payments.map(
+              (payment) => pw.TableRow(
+                children: [
+                  _buildTableCell(
+                    DateFormatter.formatDisplayDateTime(payment.paymentDate),
+                  ),
+                  _buildTableCell(
+                    '${NumberFormatter.format(payment.amount)} د.ع',
+                  ),
+                  _buildTableCell(payment.notes ?? 'لا توجد'),
+                ],
+              ),
+            ),
           ],
         ),
       ],
@@ -911,14 +1252,26 @@ class PDFService {
   }
 
   // Helper for summary rows
-  static pw.Widget _buildSummaryRow(String title, String value, {PdfColor? color}) {
+  static pw.Widget _buildSummaryRow(
+    String title,
+    String value, {
+    PdfColor? color,
+  }) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 2),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(title, style: _arabicTextStyle(fontSize: 12, isBold: true), textDirection: pw.TextDirection.rtl),
-          pw.Text(value, style: _arabicTextStyle(fontSize: 12, color: color), textDirection: pw.TextDirection.rtl),
+          pw.Text(
+            title,
+            style: _arabicTextStyle(fontSize: 12, isBold: true),
+            textDirection: pw.TextDirection.rtl,
+          ),
+          pw.Text(
+            value,
+            style: _arabicTextStyle(fontSize: 12, color: color),
+            textDirection: pw.TextDirection.rtl,
+          ),
         ],
       ),
     );

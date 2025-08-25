@@ -35,7 +35,6 @@ class _DebtFormState extends State<DebtForm> {
     if (widget.debt != null) {
       _titleController.text = widget.debt!.title ?? '';
       _amountController.text = widget.debt!.amount.toString();
-      _paidAmountController.text = widget.debt!.paidAmount.toString();
       _notesController.text = widget.debt!.notes ?? '';
       _selectedPerson = personProvider.getPersonById(widget.debt!.personId);
     } else if (widget.person != null) {
@@ -58,9 +57,9 @@ class _DebtFormState extends State<DebtForm> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedPerson == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى اختيار الشخص')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('يرجى اختيار الشخص')));
       return;
     }
 
@@ -72,56 +71,59 @@ class _DebtFormState extends State<DebtForm> {
       final debtProvider = Provider.of<DebtProvider>(context, listen: false);
       final now = DateTime.now();
       final amount = double.parse(_amountController.text);
-      final paidAmount = widget.debt != null ? double.parse(_paidAmountController.text) : 0.0;
-
 
       if (widget.debt == null) {
         // إضافة دين جديد
         final debt = Debt(
-          title: _titleController.text.trim().isEmpty ? null : _titleController.text.trim(),
+          title: _titleController.text.trim().isEmpty
+              ? null
+              : _titleController.text.trim(),
           personId: _selectedPerson!.id!,
           amount: amount,
-          paidAmount: 0.0,
-          notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+          notes: _notesController.text.trim().isEmpty
+              ? null
+              : _notesController.text.trim(),
           createdAt: now,
           updatedAt: now,
           isPaid: amount <= 0,
         );
-        
+
         await debtProvider.addDebt(debt);
-        
+
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم إضافة الدين بنجاح')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('تم إضافة الدين بنجاح')));
           Navigator.pop(context);
         }
       } else {
         // تعديل دين موجود
         final updatedDebt = widget.debt!.copyWith(
-          title: _titleController.text.trim().isEmpty ? null : _titleController.text.trim(),
+          title: _titleController.text.trim().isEmpty
+              ? null
+              : _titleController.text.trim(),
           personId: _selectedPerson!.id!,
           amount: amount,
-          paidAmount: paidAmount,
-          notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+          notes: _notesController.text.trim().isEmpty
+              ? null
+              : _notesController.text.trim(),
           updatedAt: now,
-          isPaid: paidAmount >= amount,
         );
-        
+
         await debtProvider.updateDebt(updatedDebt);
-        
+
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم تحديث الدين بنجاح')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('تم تحديث الدين بنجاح')));
           Navigator.pop(context);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('خطأ: ${e.toString()}')));
       }
     } finally {
       if (mounted) {

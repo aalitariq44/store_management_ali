@@ -62,18 +62,16 @@ class DebtProvider with ChangeNotifier {
     }
   }
 
-  Future<void> payDebt(int id, double amount) async {
+  Future<void> payDebt(int id) async {
     try {
       final debt = _debts.firstWhere((d) => d.id == id);
-      final newPaidAmount = debt.paidAmount + amount;
-      final isPaid = newPaidAmount >= debt.amount;
-      
+
       final updatedDebt = debt.copyWith(
-        paidAmount: newPaidAmount,
-        isPaid: isPaid,
+        isPaid: true,
+        paymentDate: DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      
+
       await updateDebt(updatedDebt);
     } catch (e) {
       debugPrint('Error paying debt: $e');
@@ -94,17 +92,21 @@ class DebtProvider with ChangeNotifier {
   }
 
   double getTotalPaidAmount() {
-    return _debts.fold(0.0, (sum, debt) => sum + debt.paidAmount);
+    return _debts
+        .where((debt) => debt.isPaid)
+        .fold(0.0, (sum, debt) => sum + debt.amount);
   }
 
   double getTotalRemainingAmount() {
-    return _debts.fold(0.0, (sum, debt) => sum + debt.remainingAmount);
+    return _debts
+        .where((debt) => !debt.isPaid)
+        .fold(0.0, (sum, debt) => sum + debt.amount);
   }
 
   double getPersonTotalDebt(int personId) {
     return _debts
         .where((debt) => debt.personId == personId && !debt.isPaid)
-        .fold(0.0, (sum, debt) => sum + debt.remainingAmount);
+        .fold(0.0, (sum, debt) => sum + debt.amount);
   }
 
   // Remove debts for a specific person (called when person is deleted)

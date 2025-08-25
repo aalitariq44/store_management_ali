@@ -29,7 +29,7 @@ class DatabaseHelper {
     databaseFactory = databaseFactoryFfi;
     return await openDatabase(
       path,
-      version: 3, // Update version number
+      version: 4, // Update version number for debt structure changes
       onCreate: _createTables,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -51,7 +51,7 @@ class DatabaseHelper {
         )
       ''');
     }
-    
+
     if (oldVersion < 3) {
       // Create app_password table if upgrading from version 2 to 3
       await db.execute('''
@@ -62,6 +62,37 @@ class DatabaseHelper {
           updated_at INTEGER NOT NULL
         )
       ''');
+    }
+
+    if (oldVersion < 4) {
+      // Update debts table structure for version 4
+      // Create new debts table with updated structure
+      await db.execute('''
+        CREATE TABLE debts_new (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT,
+          person_id INTEGER NOT NULL,
+          amount REAL NOT NULL,
+          notes TEXT,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          is_paid INTEGER DEFAULT 0,
+          payment_date INTEGER,
+          FOREIGN KEY (person_id) REFERENCES persons (id) ON DELETE CASCADE
+        )
+      ''');
+
+      // Copy data from old table to new table
+      await db.execute('''
+        INSERT INTO debts_new (id, title, person_id, amount, notes, created_at, updated_at, is_paid, payment_date)
+        SELECT id, title, person_id, amount, notes, created_at, updated_at, is_paid, 
+               CASE WHEN is_paid = 1 THEN updated_at ELSE NULL END
+        FROM debts
+      ''');
+
+      // Drop old table and rename new table
+      await db.execute('DROP TABLE debts');
+      await db.execute('ALTER TABLE debts_new RENAME TO debts');
     }
   }
 
@@ -86,11 +117,11 @@ class DatabaseHelper {
         title TEXT,
         person_id INTEGER NOT NULL,
         amount REAL NOT NULL,
-        paid_amount REAL DEFAULT 0.0,
         notes TEXT,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
         is_paid INTEGER DEFAULT 0,
+        payment_date INTEGER,
         FOREIGN KEY (person_id) REFERENCES persons (id) ON DELETE CASCADE
       )
     ''');
@@ -143,7 +174,7 @@ class DatabaseHelper {
         FOREIGN KEY (person_id) REFERENCES persons (id) ON DELETE CASCADE
       )
     ''');
-    
+
     // Create incomes table
     await db.execute('''
       CREATE TABLE incomes (
@@ -153,7 +184,7 @@ class DatabaseHelper {
         date INTEGER NOT NULL
       )
     ''');
-    
+
     // Create app_password table
     await db.execute('''
       CREATE TABLE app_password (
@@ -202,7 +233,7 @@ class DatabaseHelper {
 
   Future<int> deletePerson(int id) async {
     final db = await database;
-    
+
     // Start a transaction to ensure all related data is deleted
     return await db.transaction((txn) async {
       // Delete internet subscriptions
@@ -211,35 +242,26 @@ class DatabaseHelper {
         where: 'person_id = ?',
         whereArgs: [id],
       );
-      
+
       // Delete installment payments first (child table)
-      await txn.rawDelete('''
+      await txn.rawDelete(
+        '''
         DELETE FROM installment_payments 
         WHERE installment_id IN (
           SELECT id FROM installments WHERE person_id = ?
         )
-      ''', [id]);
-      
+      ''',
+        [id],
+      );
+
       // Delete installments
-      await txn.delete(
-        'installments',
-        where: 'person_id = ?',
-        whereArgs: [id],
-      );
-      
+      await txn.delete('installments', where: 'person_id = ?', whereArgs: [id]);
+
       // Delete debts
-      await txn.delete(
-        'debts',
-        where: 'person_id = ?',
-        whereArgs: [id],
-      );
-      
+      await txn.delete('debts', where: 'person_id = ?', whereArgs: [id]);
+
       // Finally delete the person
-      return await txn.delete(
-        'persons',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      return await txn.delete('persons', where: 'id = ?', whereArgs: [id]);
     });
   }
 
@@ -290,11 +312,7 @@ class DatabaseHelper {
 
   Future<int> deleteDebt(int id) async {
     final db = await database;
-    return await db.delete(
-      'debts',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('debts', where: 'id = ?', whereArgs: [id]);
   }
 
   // CRUD operations for Installment
@@ -331,11 +349,7 @@ class DatabaseHelper {
 
   Future<int> deleteInstallment(int id) async {
     final db = await database;
-    return await db.delete(
-      'installments',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('installments', where: 'id = ?', whereArgs: [id]);
   }
 
   // CRUD operations for InstallmentPayment
@@ -344,14 +358,19 @@ class DatabaseHelper {
     return await db.insert('installment_payments', payment.toMap());
   }
 
-  Future<List<InstallmentPayment>> getInstallmentPayments(int installmentId) async {
+  Future<List<InstallmentPayment>> getInstallmentPayments(
+    int installmentId,
+  ) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'installment_payments',
       where: 'installment_id = ?',
       whereArgs: [installmentId],
     );
-    return List.generate(maps.length, (i) => InstallmentPayment.fromMap(maps[i]));
+    return List.generate(
+      maps.length,
+      (i) => InstallmentPayment.fromMap(maps[i]),
+    );
   }
 
   Future<int> deleteInstallmentPayment(int id) async {
@@ -364,28 +383,42 @@ class DatabaseHelper {
   }
 
   // CRUD operations for InternetSubscription
-  Future<int> insertInternetSubscription(InternetSubscription subscription) async {
+  Future<int> insertInternetSubscription(
+    InternetSubscription subscription,
+  ) async {
     final db = await database;
     return await db.insert('internet_subscriptions', subscription.toMap());
   }
 
   Future<List<InternetSubscription>> getAllInternetSubscriptions() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('internet_subscriptions');
-    return List.generate(maps.length, (i) => InternetSubscription.fromMap(maps[i]));
+    final List<Map<String, dynamic>> maps = await db.query(
+      'internet_subscriptions',
+    );
+    return List.generate(
+      maps.length,
+      (i) => InternetSubscription.fromMap(maps[i]),
+    );
   }
 
-  Future<List<InternetSubscription>> getInternetSubscriptionsByPersonId(int personId) async {
+  Future<List<InternetSubscription>> getInternetSubscriptionsByPersonId(
+    int personId,
+  ) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'internet_subscriptions',
       where: 'person_id = ?',
       whereArgs: [personId],
     );
-    return List.generate(maps.length, (i) => InternetSubscription.fromMap(maps[i]));
+    return List.generate(
+      maps.length,
+      (i) => InternetSubscription.fromMap(maps[i]),
+    );
   }
 
-  Future<int> updateInternetSubscription(InternetSubscription subscription) async {
+  Future<int> updateInternetSubscription(
+    InternetSubscription subscription,
+  ) async {
     final db = await database;
     return await db.update(
       'internet_subscriptions',
