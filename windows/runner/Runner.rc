@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "store_management_ali" "\0"
+            VALUE "FileDescription", "Store management" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "store_management_ali" "\0"
+            VALUE "InternalName", "Store management" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "store_management_ali.exe" "\0"
-            VALUE "ProductName", "store_management_ali" "\0"
+            VALUE "OriginalFilename", "Store management.exe" "\0"
+            VALUE "ProductName", "Store management" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
