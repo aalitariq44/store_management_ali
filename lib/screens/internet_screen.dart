@@ -277,16 +277,23 @@ class _InternetScreenState extends State<InternetScreen> {
       appBar: AppBar(
         title: const Text('اشتراكات الإنترنت'),
         actions: [
-          IconButton(
-            tooltip: 'طباعة الكل',
-            icon: const Icon(Icons.print),
+          TextButton.icon(
             onPressed: () => PrintActions.printAll(context, 'internet'),
+            icon: const Icon(Icons.print, color: Colors.blueAccent),
+            label: const Text(
+              'طباعة الكل',
+              style: TextStyle(color: Colors.blueAccent),
+            ),
           ),
-          IconButton(
-            tooltip: 'طباعة المحدد',
-            icon: const Icon(Icons.print_outlined),
+          const SizedBox(width: 8),
+          TextButton.icon(
             onPressed: () =>
                 PrintActions.showSelectionDialog(context, 'internet'),
+            icon: const Icon(Icons.print_outlined, color: Colors.blueAccent),
+            label: const Text(
+              'طباعة المحدد',
+              style: TextStyle(color: Colors.blueAccent),
+            ),
           ),
         ],
       ),
