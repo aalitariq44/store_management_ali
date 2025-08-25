@@ -8,7 +8,7 @@ import '../widgets/installment_form.dart';
 // تمت إزالة أزرار الطباعة من جسم الصفحة ونقلها إلى AppBar
 import '../widgets/print_actions.dart';
 // تمت إزالة ودجت الطباعة كزر منفصل، والآن الطباعة ضمن قائمة الزر الأيمن
-import '../services/pdf_service.dart';
+import '../services/word_service_simple.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
 
@@ -882,7 +882,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
           value: 'print',
           child: ListTile(
             leading: Icon(Icons.print, color: Colors.teal),
-            title: Text('طباعة'),
+            title: Text('طباعة الدفعات'),
           ),
         ),
       ],
@@ -930,21 +930,22 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
     );
 
     try {
-      await PDFService.printInstallmentDetails(
+      // استخدام خدمة Word بدلاً من PDF
+      await WordServiceSimple.createPaymentsDocumentHTML(
         installment: installment,
         person: person,
         payments: payments,
       );
       scaffoldMessenger.showSnackBar(
         const SnackBar(
-          content: Text('تم إنشاء تقرير القسط بنجاح'),
+          content: Text('تم إنشاء مستند Word وفتحه بنجاح'),
           backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text('خطأ في طباعة القسط: $e'),
+          content: Text('خطأ في إنشاء مستند Word: $e'),
           backgroundColor: Colors.red,
         ),
       );
