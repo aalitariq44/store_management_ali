@@ -9,6 +9,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // تهيئة SQLite لسطح المكتب
+  // File analyzed by Cline. Awaiting further instructions.
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     sqfliteFfiInit();
   }
