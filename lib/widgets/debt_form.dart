@@ -21,7 +21,6 @@ class _DebtFormState extends State<DebtForm> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
-  final _paidAmountController = TextEditingController();
   final _notesController = TextEditingController();
 
   Person? _selectedPerson;
@@ -48,7 +47,6 @@ class _DebtFormState extends State<DebtForm> {
   void dispose() {
     _titleController.dispose();
     _amountController.dispose();
-    _paidAmountController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -218,32 +216,6 @@ class _DebtFormState extends State<DebtForm> {
                   return null;
                 },
               ),
-              if (widget.debt != null) ...[
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _paidAmountController,
-                  decoration: const InputDecoration(
-                    labelText: 'المبلغ المدفوع',
-                    hintText: 'أدخل المبلغ المدفوع',
-                    suffixText: 'د.ع',
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'يرجى إدخال المبلغ المدفوع';
-                    }
-                    final paidAmount = double.tryParse(value);
-                    if (paidAmount == null || paidAmount < 0) {
-                      return 'يرجى إدخال مبلغ صحيح';
-                    }
-                    final totalAmount = double.tryParse(_amountController.text);
-                    if (totalAmount != null && paidAmount > totalAmount) {
-                      return 'المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ الإجمالي';
-                    }
-                    return null;
-                  },
-                ),
-              ],
               const SizedBox(height: 16),
               TextFormField(
                 controller: _notesController,

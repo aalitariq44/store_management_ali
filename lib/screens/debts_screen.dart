@@ -359,6 +359,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
               columns: const [
                 DataColumn(label: Text('ت')),
                 DataColumn(label: Text('الشخص')),
+                DataColumn(label: Text('العنوان')),
                 DataColumn(label: Text('المبلغ')),
                 DataColumn(label: Text('تاريخ الإنشاء')),
                 DataColumn(label: Text('تاريخ الدفع')),
@@ -383,6 +384,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
+                    DataCell(Text(debt.title ?? 'لا يوجد')),
                     DataCell(
                       Text('${NumberFormatter.format(debt.amount)} د.ع'),
                     ),
