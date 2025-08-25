@@ -14,12 +14,12 @@ class PasswordProvider with ChangeNotifier {
     try {
       // التحقق من حاجة قاعدة البيانات للترقية
       final status = await DatabaseMigrationHelper.checkDatabaseStatus();
-      
+
       if (status['needsMigration'] == true) {
         print('قاعدة البيانات تحتاج ترقية...');
         await DatabaseMigrationHelper.migratePasswordToPlainText();
       }
-      
+
       final db = await DatabaseHelper.instance.database;
       final result = await db.query('app_password', limit: 1);
       _isFirstTime = result.isEmpty;
@@ -63,10 +63,7 @@ class PasswordProvider with ChangeNotifier {
         // تحديث كلمة المرور الموجودة
         await db.update(
           'app_password',
-          {
-            'password': password,
-            'updated_at': timestamp,
-          },
+          {'password': password, 'updated_at': timestamp},
           where: 'id = ?',
           whereArgs: [result.first['id']],
         );
@@ -86,19 +83,19 @@ class PasswordProvider with ChangeNotifier {
     try {
       final db = await DatabaseHelper.instance.database;
       final result = await db.query('app_password', limit: 1);
-      
+
       if (result.isEmpty) {
         return false;
       }
 
       final storedPassword = result.first['password'] as String;
       final isValid = PasswordModel.verifyPassword(password, storedPassword);
-      
+
       if (isValid) {
         _isAuthenticated = true;
         notifyListeners();
       }
-      
+
       return isValid;
     } catch (e) {
       print('خطأ في التحقق من كلمة المرور: $e');
