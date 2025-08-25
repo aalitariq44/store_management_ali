@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/person_provider.dart';
 import '../providers/debt_provider.dart';
 import '../providers/installment_provider.dart';
-import '../providers/internet_provider.dart';
+// import '../providers/internet_provider.dart'; // مخفي مؤقتاً
 import '../providers/income_provider.dart';
 import '../providers/password_provider.dart';
 import '../services/backup_service.dart';
@@ -11,7 +11,7 @@ import '../utils/number_formatter.dart';
 import 'persons_screen.dart';
 import 'debts_screen.dart';
 import 'installments_screen.dart';
-import 'internet_screen.dart';
+// import 'internet_screen.dart'; // مخفي مؤقتاً
 import 'income_screen.dart';
 import 'backup_screen.dart';
 import 'password_settings_screen.dart';
@@ -25,12 +25,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  
+
   final List<Widget> _screens = [
     const PersonsScreen(),
     const DebtsScreen(),
     const InstallmentsScreen(),
-    const InternetScreen(),
+    // const InternetScreen(), // مخفي مؤقتاً
     const IncomeScreen(),
   ];
 
@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'إدارة الزبائن',
     'إدارة الديون',
     'إدارة الأقساط',
-    'اشتراكات الإنترنت',
+    // 'اشتراكات الإنترنت', // مخفي مؤقتاً
     'الواردات',
   ];
 
@@ -51,15 +51,18 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadAllData() async {
     final personProvider = Provider.of<PersonProvider>(context, listen: false);
     final debtProvider = Provider.of<DebtProvider>(context, listen: false);
-    final installmentProvider = Provider.of<InstallmentProvider>(context, listen: false);
-    final internetProvider = Provider.of<InternetProvider>(context, listen: false);
+    final installmentProvider = Provider.of<InstallmentProvider>(
+      context,
+      listen: false,
+    );
+    // final internetProvider = Provider.of<InternetProvider>(context, listen: false); // مخفي مؤقتاً
     final incomeProvider = Provider.of<IncomeProvider>(context, listen: false);
 
     await Future.wait([
       personProvider.loadPersons(),
       debtProvider.loadDebts(),
       installmentProvider.loadInstallments(),
-      internetProvider.loadSubscriptions(),
+      // internetProvider.loadSubscriptions(), // مخفي مؤقتاً
       incomeProvider.loadIncomes(),
     ]);
   }
@@ -121,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final success = await BackupService.uploadBackup();
       if (mounted) {
         Navigator.of(context).pop(); // إغلاق مؤشر التحميل
-        
+
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -157,11 +160,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openBackupScreen() async {
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (context) => const BackupScreen(),
-      ),
-    );
+    final result = await Navigator.of(
+      context,
+    ).push<bool>(MaterialPageRoute(builder: (context) => const BackupScreen()));
 
     // إذا تم استعادة نسخة احتياطية، أعد تحميل البيانات
     if (result == true) {
@@ -171,9 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _openPasswordSettings() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const PasswordSettingsScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const PasswordSettingsScreen()),
     );
   }
 
@@ -191,7 +190,10 @@ class _HomeScreenState extends State<HomeScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              final passwordProvider = Provider.of<PasswordProvider>(context, listen: false);
+              final passwordProvider = Provider.of<PasswordProvider>(
+                context,
+                listen: false,
+              );
               passwordProvider.logout();
             },
             child: const Text('تسجيل الخروج'),
@@ -247,9 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _buildSidebar(),
           const VerticalDivider(width: 1),
-          Expanded(
-            child: _screens[_selectedIndex],
-          ),
+          Expanded(child: _screens[_selectedIndex]),
         ],
       ),
     );
@@ -282,15 +282,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: 'الأقساط',
                   index: 2,
                 ),
-                _buildSidebarItem(
-                  icon: Icons.wifi,
-                  title: 'اشتراكات الإنترنت',
-                  index: 3,
-                ),
+                // _buildSidebarItem( // مخفي مؤقتاً
+                //   icon: Icons.wifi,
+                //   title: 'اشتراكات الإنترنت',
+                //   index: 3,
+                // ),
                 _buildSidebarItem(
                   icon: Icons.trending_up,
                   title: 'الواردات',
-                  index: 4,
+                  index: 3, // تم تغيير الفهرس من 4 إلى 3
                 ),
               ],
             ),
@@ -303,8 +303,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildDashboardSummary() {
     return Consumer<IncomeProvider>(
       builder: (context, incomeProvider, child) {
-        return Consumer4<PersonProvider, DebtProvider, InstallmentProvider, InternetProvider>(
-          builder: (context, personProvider, debtProvider, installmentProvider, internetProvider, child) {
+        return Consumer3<PersonProvider, DebtProvider, InstallmentProvider>(
+          builder: (context, personProvider, debtProvider, installmentProvider, child) {
             return Card(
               margin: const EdgeInsets.all(16),
               child: Padding(
@@ -334,12 +334,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icons.payment,
                       color: Colors.orange,
                     ),
-                    _buildSummaryItem(
-                      'اشتراكات فعالة',
-                      '${internetProvider.getActiveSubscriptions().length}',
-                      Icons.wifi,
-                      color: Colors.green,
-                    ),
+                    // _buildSummaryItem( // مخفي مؤقتاً
+                    //   'اشتراكات فعالة',
+                    //   '${internetProvider.getActiveSubscriptions().length}',
+                    //   Icons.wifi,
+                    //   color: Colors.green,
+                    // ),
                     _buildSummaryItem(
                       'واردات اليوم',
                       '${NumberFormatter.format(incomeProvider.getTodayIncome())} د.ع',
@@ -362,7 +362,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSummaryItem(String title, String value, IconData icon, {Color? color}) {
+  Widget _buildSummaryItem(
+    String title,
+    String value,
+    IconData icon, {
+    Color? color,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -372,10 +377,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: Text(
               title,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
           ),
           Text(
@@ -397,11 +399,13 @@ class _HomeScreenState extends State<HomeScreen> {
     required int index,
   }) {
     final isSelected = _selectedIndex == index;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: isSelected ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
+        color: isSelected
+            ? Theme.of(context).primaryColor.withOpacity(0.1)
+            : null,
         borderRadius: BorderRadius.circular(8),
       ),
       child: ListTile(
@@ -412,7 +416,9 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(
           title,
           style: TextStyle(
-            color: isSelected ? Theme.of(context).primaryColor : Colors.grey[800],
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Colors.grey[800],
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),

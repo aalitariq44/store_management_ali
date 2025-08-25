@@ -157,7 +157,7 @@ class WordService {
       // إنشاء محتوى نصي بسيط
       String documentText =
           '''
-محلات نيويورك
+معرض الاصدقاء
 
 بيانات الزبون:
 الاسم: ${person.name}

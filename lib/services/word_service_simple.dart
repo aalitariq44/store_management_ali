@@ -124,7 +124,7 @@ class WordServiceSimple {
 </head>
 <body>
     <div class="header">
-        <h1>محلات نيويورك</h1>
+        <h1>معرض الاصدقاء</h1>
     </div>
 
     <div class="section-title">بيانات الزبون</div>

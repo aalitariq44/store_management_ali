@@ -3,15 +3,15 @@ import 'package:provider/provider.dart';
 import '../models/person_model.dart';
 import '../models/debt_model.dart';
 import '../models/installment_model.dart';
-import '../models/internet_model.dart';
+// import '../models/internet_model.dart'; // مخفي مؤقتاً
 import '../providers/debt_provider.dart';
 import '../providers/installment_provider.dart';
-import '../providers/internet_provider.dart';
+// import '../providers/internet_provider.dart'; // مخفي مؤقتاً
 import '../providers/person_provider.dart';
 import '../providers/password_provider.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
-import '../widgets/internet_form.dart';
+// import '../widgets/internet_form.dart'; // مخفي مؤقتاً
 import '../widgets/debt_form.dart';
 import '../widgets/installment_form.dart';
 // تمت إزالة أزرار الإجراءات في الجداول واستبدالها بقوائم بالزر الأيمن
@@ -36,7 +36,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+    ); // تم تغيير من 3 إلى 2 (إخفاء الإنترنت)
     _loadData();
   }
 
@@ -53,7 +56,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         context,
         listen: false,
       ).loadInstallments(),
-      Provider.of<InternetProvider>(context, listen: false).loadSubscriptions(),
+      // Provider.of<InternetProvider>(context, listen: false).loadSubscriptions(), // مخفي مؤقتاً
     ]);
   }
 
@@ -79,16 +82,16 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
   }
 
-  void _showInternetForm({InternetSubscription? subscription}) {
-    showDialog(
-      context: context,
-      builder: (context) => InternetForm(
-        subscription: subscription,
-        customerId: widget.person.id,
-        person: widget.person,
-      ),
-    );
-  }
+  // void _showInternetForm({InternetSubscription? subscription}) { // مخفي مؤقتاً
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => InternetForm(
+  //       subscription: subscription,
+  //       customerId: widget.person.id,
+  //       person: widget.person,
+  //     ),
+  //   );
+  // }
 
   void _showDebtDetailsDialog(Debt debt) {
     showDialog(
@@ -137,7 +140,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     children: [
                       _buildDebtsTab(),
                       _buildInstallmentsTab(),
-                      _buildInternetTab(),
+                      // _buildInternetTab(), // مخفي مؤقتاً
                     ],
                   ),
                 ),
@@ -265,13 +268,14 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   Widget _buildSummaryCards() {
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      child: Consumer3<DebtProvider, InstallmentProvider, InternetProvider>(
+      child: Consumer2<DebtProvider, InstallmentProvider>(
+        // تم تغيير من Consumer3 إلى Consumer2
         builder:
             (
               context,
               debtProvider,
               installmentProvider,
-              internetProvider,
+              // internetProvider, // مخفي مؤقتاً
               child,
             ) {
               final customerDebts = debtProvider.debts
@@ -282,11 +286,11 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     (installment) => installment.personId == widget.person.id,
                   )
                   .toList();
-              final customerSubscriptions = internetProvider.subscriptions
-                  .where(
-                    (subscription) => subscription.personId == widget.person.id,
-                  )
-                  .toList();
+              // final customerSubscriptions = internetProvider.subscriptions // مخفي مؤقتاً
+              //     .where(
+              //       (subscription) => subscription.personId == widget.person.id,
+              //     )
+              //     .toList();
 
               final totalDebts = customerDebts.fold(
                 0.0,
@@ -296,12 +300,13 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 0.0,
                 (sum, installment) => sum + installment.remainingAmount,
               );
-              final totalInternet = customerSubscriptions.fold(
-                0.0,
-                (sum, subscription) => sum + subscription.remainingAmount,
-              );
+              // final totalInternet = customerSubscriptions.fold( // مخفي مؤقتاً
+              //   0.0,
+              //   (sum, subscription) => sum + subscription.remainingAmount,
+              // );
               final totalOutstanding =
-                  totalDebts + totalInstallments + totalInternet;
+                  totalDebts +
+                  totalInstallments; // + totalInternet; // مخفي مؤقتاً
 
               return Column(
                 children: [
@@ -320,21 +325,20 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     Icons.payment,
                     Colors.blue,
                   ),
-                  const SizedBox(height: 8),
-                  _buildSummaryCard(
-                    'إجمالي الإنترنت المتبقي',
-                    totalInternet,
-                    customerSubscriptions.length,
-                    Icons.wifi,
-                    Colors.green,
-                  ),
+                  // const SizedBox(height: 8), // مخفي مؤقتاً
+                  // _buildSummaryCard( // مخفي مؤقتاً
+                  //   'إجمالي الإنترنت المتبقي',
+                  //   totalInternet,
+                  //   customerSubscriptions.length,
+                  //   Icons.wifi,
+                  //   Colors.green,
+                  // ),
                   const SizedBox(height: 8),
                   _buildSummaryCard(
                     'إجمالي المبلغ المتبقي',
                     totalOutstanding,
-                    customerDebts.length +
-                        customerInstallments.length +
-                        customerSubscriptions.length,
+                    customerDebts.length + customerInstallments.length,
+                    // + customerSubscriptions.length, // مخفي مؤقتاً
                     Icons.account_balance_wallet,
                     Colors.orange,
                   ),
@@ -435,13 +439,13 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                 Colors.blue,
                 () => _showInstallmentForm(),
               ),
-              const SizedBox(height: 8),
-              _buildQuickActionButton(
-                'إضافة اشتراك إنترنت',
-                Icons.wifi,
-                Colors.green,
-                () => _showInternetForm(),
-              ),
+              // const SizedBox(height: 8), // مخفي مؤقتاً
+              // _buildQuickActionButton( // مخفي مؤقتاً
+              //   'إضافة اشتراك إنترنت',
+              //   Icons.wifi,
+              //   Colors.green,
+              //   () => _showInternetForm(),
+              // ),
             ],
           ),
         ),
@@ -482,16 +486,17 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           _buildDesktopTab('الديون', Icons.money_off, 0),
           const SizedBox(width: 16),
           _buildDesktopTab('الأقساط', Icons.payment, 1),
-          const SizedBox(width: 16),
-          _buildDesktopTab('الإنترنت', Icons.wifi, 2),
+          // const SizedBox(width: 16), // مخفي مؤقتاً
+          // _buildDesktopTab('الإنترنت', Icons.wifi, 2), // مخفي مؤقتاً
           const Spacer(),
-          Consumer3<DebtProvider, InstallmentProvider, InternetProvider>(
+          Consumer2<DebtProvider, InstallmentProvider>(
+            // تم تغيير من Consumer3 إلى Consumer2
             builder:
                 (
                   context,
                   debtProvider,
                   installmentProvider,
-                  internetProvider,
+                  // internetProvider, // مخفي مؤقتاً
                   child,
                 ) {
                   final customerDebts = debtProvider.debts
@@ -503,17 +508,16 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                             installment.personId == widget.person.id,
                       )
                       .toList();
-                  final customerSubscriptions = internetProvider.subscriptions
-                      .where(
-                        (subscription) =>
-                            subscription.personId == widget.person.id,
-                      )
-                      .toList();
+                  // final customerSubscriptions = internetProvider.subscriptions // مخفي مؤقتاً
+                  //     .where(
+                  //       (subscription) =>
+                  //           subscription.personId == widget.person.id,
+                  //     )
+                  //     .toList();
 
                   final totalCount =
-                      customerDebts.length +
-                      customerInstallments.length +
-                      customerSubscriptions.length;
+                      customerDebts.length + customerInstallments.length;
+                  // + customerSubscriptions.length; // مخفي مؤقتاً
 
                   return Container(
                     padding: const EdgeInsets.symmetric(
@@ -633,37 +637,37 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
   }
 
-  Widget _buildInternetTab() {
-    return Consumer2<InternetProvider, PersonProvider>(
-      builder: (context, internetProvider, personProvider, child) {
-        if (internetProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
+  // Widget _buildInternetTab() { // مخفي مؤقتاً
+  //   return Consumer2<InternetProvider, PersonProvider>(
+  //     builder: (context, internetProvider, personProvider, child) {
+  //       if (internetProvider.isLoading) {
+  //         return const Center(child: CircularProgressIndicator());
+  //       }
 
-        final customerSubscriptions = internetProvider.subscriptions
-            .where((subscription) => subscription.personId == widget.person.id)
-            .toList();
+  //       final customerSubscriptions = internetProvider.subscriptions
+  //           .where((subscription) => subscription.personId == widget.person.id)
+  //           .toList();
 
-        return Column(
-          children: [
-            _buildDesktopTabHeader(
-              'اشتراكات الإنترنت',
-              customerSubscriptions.length,
-              () => _showInternetForm(),
-            ),
-            Expanded(
-              child: customerSubscriptions.isEmpty
-                  ? _buildEmptyState('لا توجد اشتراكات', Icons.wifi)
-                  : _buildInternetDataTable(
-                      customerSubscriptions,
-                      personProvider,
-                    ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  //       return Column(
+  //         children: [
+  //           _buildDesktopTabHeader(
+  //             'اشتراكات الإنترنت',
+  //             customerSubscriptions.length,
+  //             () => _showInternetForm(),
+  //           ),
+  //           Expanded(
+  //             child: customerSubscriptions.isEmpty
+  //                 ? _buildEmptyState('لا توجد اشتراكات', Icons.wifi)
+  //                 : _buildInternetDataTable(
+  //                     customerSubscriptions,
+  //                     personProvider,
+  //                   ),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   Widget _buildDesktopTabHeader(String title, int count, VoidCallback onAdd) {
     return Container(
@@ -854,86 +858,61 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               return DataRow(
                 cells: [
                   DataCell(
-                    _wrapContextMenu(
-                      installment,
-                      person,
-                      Text(
-                        person?.name ?? 'غير محدد',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      person?.name ?? 'غير محدد',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      installment.productName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      '${NumberFormatter.format(installment.totalAmount)} د.ع',
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      '${NumberFormatter.format(installment.paidAmount)} د.ع',
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      '${NumberFormatter.format(installment.remainingAmount)} د.ع',
+                      style: TextStyle(
+                        color: installment.isCompleted
+                            ? Colors.green
+                            : Colors.red,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   DataCell(
-                    _wrapContextMenu(
-                      installment,
-                      person,
-                      Text(installment.productName),
+                    Text(
+                      DateFormatter.formatDisplayDate(installment.createdAt),
                     ),
                   ),
                   DataCell(
-                    _wrapContextMenu(
-                      installment,
-                      person,
-                      Text(
-                        '${NumberFormatter.format(installment.totalAmount)} د.ع',
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
                       ),
-                    ),
-                  ),
-                  DataCell(
-                    _wrapContextMenu(
-                      installment,
-                      person,
-                      Text(
-                        '${NumberFormatter.format(installment.paidAmount)} د.ع',
+                      decoration: BoxDecoration(
+                        color: installment.isCompleted
+                            ? Colors.green
+                            : Colors.orange,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                  ),
-                  DataCell(
-                    _wrapContextMenu(
-                      installment,
-                      person,
-                      Text(
-                        '${NumberFormatter.format(installment.remainingAmount)} د.ع',
-                        style: TextStyle(
-                          color: installment.isCompleted
-                              ? Colors.green
-                              : Colors.red,
+                      child: Text(
+                        installment.isCompleted ? 'مكتمل' : 'نشط',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  DataCell(
-                    _wrapContextMenu(
-                      installment,
-                      person,
-                      Text(
-                        DateFormatter.formatDisplayDate(installment.createdAt),
-                      ),
-                    ),
-                  ),
-                  DataCell(
-                    _wrapContextMenu(
-                      installment,
-                      person,
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: installment.isCompleted
-                              ? Colors.green
-                              : Colors.orange,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          installment.isCompleted ? 'مكتمل' : 'نشط',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
                         ),
                       ),
                     ),
@@ -1258,6 +1237,33 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     );
   }
 
+  // وظائف مساعدة
+  Widget _buildEmptyState(String message, IconData icon) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 64, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _wrapContextMenu(Widget child, List<PopupMenuEntry> menuItems) {
+    return child; // مبسط مؤقتاً - إزالة قائمة السياق
+  }
+
+  void _showDebtContextMenu(Offset position, Debt debt) {
+    // تنفيذ قائمة السياق للديون
+  }
+
+  // جميع الوظائف المتعلقة بالإنترنت مخفية مؤقتاً
+  /*
   Widget _buildInternetDataTable(
     List<InternetSubscription> subscriptions,
     PersonProvider personProvider,
@@ -2106,4 +2112,5 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       ),
     );
   }
+  */ // إغلاق تعليق وظائف الإنترنت
 }

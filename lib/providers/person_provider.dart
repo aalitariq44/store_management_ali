@@ -3,17 +3,17 @@ import '../models/person_model.dart';
 import '../config/database_helper.dart';
 import 'debt_provider.dart';
 import 'installment_provider.dart';
-import 'internet_provider.dart';
+// import 'internet_provider.dart'; // مخفي مؤقتاً
 
 class PersonProvider with ChangeNotifier {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   List<Person> _persons = [];
   bool _isLoading = false;
-  
+
   // References to other providers for cascading updates
   DebtProvider? _debtProvider;
   InstallmentProvider? _installmentProvider;
-  InternetProvider? _internetProvider;
+  // InternetProvider? _internetProvider; // مخفي مؤقتاً
 
   List<Person> get persons => _persons;
   bool get isLoading => _isLoading;
@@ -22,11 +22,11 @@ class PersonProvider with ChangeNotifier {
   void setOtherProviders({
     DebtProvider? debtProvider,
     InstallmentProvider? installmentProvider,
-    InternetProvider? internetProvider,
+    // InternetProvider? internetProvider, // مخفي مؤقتاً
   }) {
     _debtProvider = debtProvider;
     _installmentProvider = installmentProvider;
-    _internetProvider = internetProvider;
+    // _internetProvider = internetProvider; // مخفي مؤقتاً
   }
 
   Future<void> loadPersons() async {
@@ -74,15 +74,15 @@ class PersonProvider with ChangeNotifier {
     try {
       // Delete person from database (this will cascade delete related data)
       await _dbHelper.deletePerson(id);
-      
+
       // Remove person from local list
       _persons.removeWhere((person) => person.id == id);
-      
+
       // Update other providers to remove cached data
       _debtProvider?.removeDebtsForPerson(id);
       _installmentProvider?.removeInstallmentsForPerson(id);
-      _internetProvider?.removeSubscriptionsForPerson(id);
-      
+      // _internetProvider?.removeSubscriptionsForPerson(id); // مخفي مؤقتاً
+
       notifyListeners();
     } catch (e) {
       debugPrint('Error deleting person: $e');
@@ -92,7 +92,7 @@ class PersonProvider with ChangeNotifier {
 
   Future<List<Person>> searchPersons(String query) async {
     if (query.isEmpty) return _persons;
-    
+
     try {
       return await _dbHelper.searchPersons(query);
     } catch (e) {
