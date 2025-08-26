@@ -51,7 +51,7 @@ class InternetReceipt {
           // Store Name
           pw.Center(
             child: pw.Text(
-              'محل كاظم السعدي لخدمات الانترنت',
+              'محل كاظم السعدي لخدمات الانترنيت',
               style: _arabicTextStyle(fontSize: 14, isBold: true),
               textDirection: pw.TextDirection.rtl,
               textAlign: pw.TextAlign.center,
