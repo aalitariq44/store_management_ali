@@ -2101,7 +2101,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   }
 
   // طباعة وصل اشتراك إنترنت
-  void _printInternetSubscriptionReceipt(InternetSubscription subscription) async {
+  void _printInternetSubscriptionReceipt(
+    InternetSubscription subscription,
+  ) async {
     try {
       await PDFService.showInternetSubscriptionReceiptPreview(
         context: context,

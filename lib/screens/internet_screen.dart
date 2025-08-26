@@ -648,7 +648,8 @@ class _InternetScreenState extends State<InternetScreen> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.print, color: Colors.purple),
-                            onPressed: () => _printSubscriptionReceipt(subscription),
+                            onPressed: () =>
+                                _printSubscriptionReceipt(subscription),
                             tooltip: 'طباعة وصل',
                           ),
                           IconButton(
@@ -679,9 +680,12 @@ class _InternetScreenState extends State<InternetScreen> {
   // طباعة وصل اشتراك
   void _printSubscriptionReceipt(InternetSubscription subscription) async {
     try {
-      final personProvider = Provider.of<PersonProvider>(context, listen: false);
+      final personProvider = Provider.of<PersonProvider>(
+        context,
+        listen: false,
+      );
       final person = personProvider.getPersonById(subscription.personId);
-      
+
       if (person == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('خطأ: لم يتم العثور على الزبون')),

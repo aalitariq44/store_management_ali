@@ -6,11 +6,8 @@ class PDFPreviewDialog extends StatelessWidget {
   final pw.Document pdf;
   final String title;
 
-  const PDFPreviewDialog({
-    Key? key,
-    required this.pdf,
-    required this.title,
-  }) : super(key: key);
+  const PDFPreviewDialog({Key? key, required this.pdf, required this.title})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +30,7 @@ class PDFPreviewDialog extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.picture_as_pdf,
-                    color: Colors.white,
-                    size: 24,
-                  ),
+                  Icon(Icons.picture_as_pdf, color: Colors.white, size: 24),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -51,10 +44,7 @@ class PDFPreviewDialog extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                    ),
+                    icon: const Icon(Icons.close, color: Colors.white),
                   ),
                 ],
               ),
@@ -76,7 +66,9 @@ class PDFPreviewDialog extends StatelessWidget {
                       icon: const Icon(Icons.print),
                       onPressed: (context, build, pageFormat) async {
                         // إظهار حوار تأكيد الطباعة
-                        final confirmed = await _showPrintConfirmDialog(context);
+                        final confirmed = await _showPrintConfirmDialog(
+                          context,
+                        );
                         if (confirmed == true) {
                           await Printing.layoutPdf(
                             onLayout: (format) => build(format),
@@ -108,9 +100,7 @@ class PDFPreviewDialog extends StatelessWidget {
                   bottomLeft: Radius.circular(8),
                   bottomRight: Radius.circular(8),
                 ),
-                border: Border(
-                  top: BorderSide(color: Colors.grey[300]!),
-                ),
+                border: Border(top: BorderSide(color: Colors.grey[300]!)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -184,9 +174,7 @@ class PDFPreviewDialog extends StatelessWidget {
               const Text('تأكيد الطباعة'),
             ],
           ),
-          content: const Text(
-            'هل أنت متأكد من أنك تريد طباعة هذا المستند؟',
-          ),
+          content: const Text('هل أنت متأكد من أنك تريد طباعة هذا المستند؟'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -213,7 +201,7 @@ class PDFPreviewDialog extends StatelessWidget {
         bytes: await pdf.save(),
         filename: '${title}_${DateTime.now().millisecondsSinceEpoch}.pdf',
       );
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -244,10 +232,7 @@ class PDFPreviewDialog extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return PDFPreviewDialog(
-          pdf: pdf,
-          title: title,
-        );
+        return PDFPreviewDialog(pdf: pdf, title: title);
       },
     );
   }

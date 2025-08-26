@@ -122,7 +122,7 @@ class _InternetFormState extends State<InternetForm> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('تم إضافة الاشتراك بنجاح')),
           );
-          
+
           // إظهار حوار لطباعة الوصل
           _showPrintReceiptDialog(subscription);
         }
@@ -402,7 +402,7 @@ class _InternetFormState extends State<InternetForm> {
               try {
                 Navigator.pop(context); // إغلاق حوار الطباعة
                 Navigator.pop(context); // إغلاق فورم الاشتراك
-                
+
                 // عرض معاينة الوصل
                 await PDFService.showInternetSubscriptionReceiptPreview(
                   context: context,
@@ -412,7 +412,9 @@ class _InternetFormState extends State<InternetForm> {
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('خطأ في عرض المعاينة: ${e.toString()}')),
+                    SnackBar(
+                      content: Text('خطأ في عرض المعاينة: ${e.toString()}'),
+                    ),
                   );
                 }
               }

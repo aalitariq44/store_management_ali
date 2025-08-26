@@ -1419,15 +1419,15 @@ class PDFService {
             ),
           ),
           pw.SizedBox(height: 10),
-          
+
           // معلومات الزبون
           _buildReceiptRow('اسم الزبون:', person.name),
           _buildReceiptRow('رقم الزبون:', '${person.id}'),
-          
+
           pw.SizedBox(height: 8),
           pw.Divider(color: PdfColors.grey400),
           pw.SizedBox(height: 8),
-          
+
           // تفاصيل الاشتراك
           _buildReceiptRow('نوع الاشتراك:', subscription.packageName),
           _buildReceiptRow(
@@ -1446,25 +1446,22 @@ class PDFService {
             'المبلغ المدفوع:',
             '${NumberFormatter.format(subscription.paidAmount)} د.ع',
           ),
-          
+
           // الملاحظات إذا وجدت
           if (subscription.notes != null && subscription.notes!.isNotEmpty) ...[
             pw.SizedBox(height: 5),
             _buildReceiptRow('الملاحظات:', subscription.notes!),
           ],
-          
+
           pw.SizedBox(height: 8),
           pw.Divider(color: PdfColors.grey400),
           pw.SizedBox(height: 8),
-          
+
           // تاريخ ووقت الطباعة
           pw.Center(
             child: pw.Text(
               'تاريخ ووقت الطباعة: ${DateFormatter.formatDisplayDateTime(printTime)}',
-              style: _arabicTextStyle(
-                fontSize: 10,
-                color: PdfColors.grey700,
-              ),
+              style: _arabicTextStyle(fontSize: 10, color: PdfColors.grey700),
               textDirection: pw.TextDirection.rtl,
             ),
           ),
