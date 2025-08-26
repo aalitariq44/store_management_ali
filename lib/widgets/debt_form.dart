@@ -148,7 +148,7 @@ class _DebtFormState extends State<DebtForm> {
                   initialValue: widget.person!.name,
                   readOnly: true,
                   decoration: const InputDecoration(
-                    labelText: 'الشخص',
+                    labelText: 'الزبون',
                     border: OutlineInputBorder(),
                   ),
                 )
@@ -156,6 +156,13 @@ class _DebtFormState extends State<DebtForm> {
                 Consumer<PersonProvider>(
                   builder: (context, personProvider, child) {
                     return DropdownSearch<Person>(
+                      dropdownDecoratorProps: DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                          labelText: 'الزبون',
+                          hintText: 'اضغط لاختيار زبون',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
                       popupProps: PopupProps.menu(
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
@@ -175,7 +182,7 @@ class _DebtFormState extends State<DebtForm> {
                       selectedItem: _selectedPerson,
                       validator: (value) {
                         if (value == null) {
-                          return 'يرجى اختيار الشخص';
+                          return 'يرجى اختيار الزبون';
                         }
                         return null;
                       },
