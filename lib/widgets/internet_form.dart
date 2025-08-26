@@ -47,11 +47,17 @@ class _InternetFormState extends State<InternetForm> {
       _notesController.text = widget.subscription!.notes ?? '';
       _startDate = widget.subscription!.startDate;
       _paymentDate = widget.subscription!.paymentDate;
-      _selectedPerson = personProvider.getPersonById(widget.subscription!.personId);
+      _selectedPerson = personProvider.getPersonById(
+        widget.subscription!.personId,
+      );
     } else if (widget.person != null) {
       _selectedPerson = widget.person;
     } else if (widget.customerId != null) {
       _selectedPerson = personProvider.getPersonById(widget.customerId!);
+    }
+    // Automatically set payment date one month after start date for new subscriptions
+    if (widget.subscription == null) {
+      _paymentDate = _startDate.add(const Duration(days: 30));
     }
   }
 
@@ -68,9 +74,9 @@ class _InternetFormState extends State<InternetForm> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedPerson == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى اختيار الشخص')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('يرجى اختيار الشخص')));
       return;
     }
 
@@ -79,8 +85,10 @@ class _InternetFormState extends State<InternetForm> {
     });
 
     try {
-      final internetProvider =
-          Provider.of<InternetProvider>(context, listen: false);
+      final internetProvider = Provider.of<InternetProvider>(
+        context,
+        listen: false,
+      );
       final now = DateTime.now();
       final price = double.parse(_priceController.text);
       final paidAmount = double.parse(_paidAmountController.text);
@@ -98,13 +106,15 @@ class _InternetFormState extends State<InternetForm> {
           startDate: _startDate,
           endDate: endDate,
           paymentDate: _paymentDate,
-          notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+          notes: _notesController.text.trim().isEmpty
+              ? null
+              : _notesController.text.trim(),
           createdAt: now,
           updatedAt: now,
         );
-        
+
         await internetProvider.addSubscription(subscription);
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('تم إضافة الاشتراك بنجاح')),
@@ -122,12 +132,14 @@ class _InternetFormState extends State<InternetForm> {
           startDate: _startDate,
           endDate: endDate,
           paymentDate: _paymentDate,
-          notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+          notes: _notesController.text.trim().isEmpty
+              ? null
+              : _notesController.text.trim(),
           updatedAt: now,
         );
-        
+
         await internetProvider.updateSubscription(updatedSubscription);
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('تم تحديث الاشتراك بنجاح')),
@@ -137,9 +149,9 @@ class _InternetFormState extends State<InternetForm> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('خطأ: ${e.toString()}')));
       }
     } finally {
       if (mounted) {
@@ -157,11 +169,13 @@ class _InternetFormState extends State<InternetForm> {
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    
+
     if (picked != null) {
       setState(() {
         if (isStartDate) {
           _startDate = picked;
+          // Update payment date automatically when start date changes
+          _paymentDate = _startDate.add(const Duration(days: 30));
         } else {
           _paymentDate = picked;
         }
@@ -172,9 +186,11 @@ class _InternetFormState extends State<InternetForm> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.subscription?.id == null
-          ? 'إضافة اشتراك جديد'
-          : 'تعديل الاشتراك'),
+      title: Text(
+        widget.subscription?.id == null
+            ? 'إضافة اشتراك جديد'
+            : 'تعديل الاشتراك',
+      ),
       content: SizedBox(
         width: 400,
         child: SingleChildScrollView(
@@ -183,45 +199,45 @@ class _InternetFormState extends State<InternetForm> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-              if (widget.person != null)
-                TextFormField(
-                  initialValue: widget.person!.name,
-                  readOnly: true,
-                  decoration: const InputDecoration(
-                    labelText: 'الشخص',
-                    border: OutlineInputBorder(),
-                  ),
-                )
-              else
-                Consumer<PersonProvider>(
-                  builder: (context, personProvider, child) {
-                    return DropdownSearch<Person>(
-                      popupProps: PopupProps.menu(
-                        showSearchBox: true,
-                        searchFieldProps: TextFieldProps(
-                          controller: TextEditingController(),
-                          decoration: const InputDecoration(
-                            hintText: "ابحث عن شخص",
+                if (widget.person != null)
+                  TextFormField(
+                    initialValue: widget.person!.name,
+                    readOnly: true,
+                    decoration: const InputDecoration(
+                      labelText: 'الشخص',
+                      border: OutlineInputBorder(),
+                    ),
+                  )
+                else
+                  Consumer<PersonProvider>(
+                    builder: (context, personProvider, child) {
+                      return DropdownSearch<Person>(
+                        popupProps: PopupProps.menu(
+                          showSearchBox: true,
+                          searchFieldProps: TextFieldProps(
+                            controller: TextEditingController(),
+                            decoration: const InputDecoration(
+                              hintText: "ابحث عن شخص",
+                            ),
                           ),
                         ),
-                      ),
-                      items: personProvider.persons,
-                      itemAsString: (Person u) => u.name,
-                      onChanged: (Person? data) {
-                        setState(() {
-                          _selectedPerson = data;
-                        });
-                      },
-                      selectedItem: _selectedPerson,
-                      validator: (value) {
-                        if (value == null) {
-                          return 'يرجى اختيار الشخص';
-                        }
-                        return null;
-                      },
-                    );
-                  },
-                ),
+                        items: personProvider.persons,
+                        itemAsString: (Person u) => u.name,
+                        onChanged: (Person? data) {
+                          setState(() {
+                            _selectedPerson = data;
+                          });
+                        },
+                        selectedItem: _selectedPerson,
+                        validator: (value) {
+                          if (value == null) {
+                            return 'يرجى اختيار الشخص';
+                          }
+                          return null;
+                        },
+                      );
+                    },
+                  ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _packageNameController,
@@ -292,7 +308,9 @@ class _InternetFormState extends State<InternetForm> {
                             const Text('تاريخ البداية'),
                             Text(
                               DateFormatter.formatDisplayDate(_startDate),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -301,14 +319,17 @@ class _InternetFormState extends State<InternetForm> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: TextButton(
-                        onPressed: () => _selectDate(context, false),
+                        // Disabled: payment date is auto-calculated and cannot be changed
+                        onPressed: null,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text('تاريخ الدفع'),
                             Text(
                               DateFormatter.formatDisplayDate(_paymentDate),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
