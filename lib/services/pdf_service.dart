@@ -147,7 +147,7 @@ class PDFService {
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
-          pageFormat: PdfPageFormat.a4,
+          pageFormat: PdfPageFormat.a4.applyMargin(left: 0, top: 0, right: 0, bottom: 0),
           build: (pw.Context context) {
             return [
               _buildHeader('تفاصيل الزبون: ${person.name}'),
@@ -197,7 +197,7 @@ class PDFService {
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
-          pageFormat: PdfPageFormat.a4,
+          pageFormat: PdfPageFormat.a4.applyMargin(left: 0, top: 0, right: 0, bottom: 0),
           build: (pw.Context ctx) => [
             _buildHeader('تفاصيل الزبون: ${person.name}'),
             pw.SizedBox(height: 20),
@@ -244,7 +244,7 @@ class PDFService {
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
-          pageFormat: PdfPageFormat.a4,
+          pageFormat: PdfPageFormat.a4.applyMargin(left: 0, top: 0, right: 0, bottom: 0),
           build: (pw.Context context) {
             return [
               _buildHeader(
@@ -282,7 +282,7 @@ class PDFService {
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
-          pageFormat: PdfPageFormat.a4,
+          pageFormat: PdfPageFormat.a4.applyMargin(left: 0, top: 0, right: 0, bottom: 0),
           build: (pw.Context ctx) => [
             _buildHeader(
               customerName != null
@@ -322,7 +322,7 @@ class PDFService {
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
-          pageFormat: PdfPageFormat.a4,
+          pageFormat: PdfPageFormat.a4.applyMargin(left: 0, top: 0, right: 0, bottom: 0),
           build: (pw.Context context) {
             return [
               _buildHeader(
@@ -360,7 +360,7 @@ class PDFService {
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
-          pageFormat: PdfPageFormat.a4,
+          pageFormat: PdfPageFormat.a4.applyMargin(left: 0, top: 0, right: 0, bottom: 0),
           build: (pw.Context ctx) => [
             _buildHeader(
               customerName != null
@@ -400,7 +400,7 @@ class PDFService {
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
-          pageFormat: PdfPageFormat.a4,
+          pageFormat: PdfPageFormat.a4.applyMargin(left: 0, top: 0, right: 0, bottom: 0),
           build: (pw.Context context) {
             return [
               _buildHeader(
@@ -440,7 +440,7 @@ class PDFService {
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
-          pageFormat: PdfPageFormat.a4,
+          pageFormat: PdfPageFormat.a4.applyMargin(left: 0, top: 0, right: 0, bottom: 0),
           build: (pw.Context ctx) => [
             _buildHeader(
               customerName != null
@@ -1348,7 +1348,7 @@ class PDFService {
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
-          pageFormat: PdfPageFormat.a4,
+          pageFormat: PdfPageFormat.a4.copyWith(marginLeft: 0, marginTop: 0, marginRight: 0, marginBottom: 0),
           build: (pw.Context context) {
             return [
               _buildHeader('تفاصيل القسط'),
@@ -1516,9 +1516,11 @@ class PDFService {
       pdf.addPage(
         pw.Page(
           pageFormat: PdfPageFormat.a5,
+          margin: pw.EdgeInsets.zero, // إزالة الهوامش الخارجية
           textDirection: pw.TextDirection.rtl,
           build: (pw.Context context) {
             return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.stretch, // تمديد الوصل ليملأ العرض
               children: [
                 // الوصل الأول
                 InternetReceipt.buildReceiptCard(subscription, person, printTime),
@@ -1569,9 +1571,11 @@ class PDFService {
       pdf.addPage(
         pw.Page(
           pageFormat: PdfPageFormat.a5,
+          margin: pw.EdgeInsets.zero,
           textDirection: pw.TextDirection.rtl,
           build: (pw.Context context) {
             return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.stretch,
               children: [
                 // الوصل الأول
                 InternetReceipt.buildReceiptCard(subscription, person, printTime),
