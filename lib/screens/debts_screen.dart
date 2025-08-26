@@ -5,6 +5,7 @@ import '../providers/person_provider.dart';
 import '../models/debt_model.dart';
 import '../models/person_model.dart';
 import '../widgets/debt_form.dart';
+import '../widgets/add_debt_strip.dart'; // New import
 // تمت إزالة أزرار الطباعة من جسم الصفحة ونقلها إلى AppBar
 import '../widgets/print_actions.dart';
 import '../widgets/debt_details_dialog.dart';
@@ -160,20 +161,27 @@ class _DebtsScreenState extends State<DebtsScreen> {
       ),
       body: Column(
         children: [
-          _buildFiltersBar(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: AddDebtStrip(
+              onDebtAdded: (newDebt) {
+                // Optionally refresh the list or update state if needed
+                // The provider will automatically notify listeners, so a direct setState might not be necessary
+                // but we can trigger a rebuild if filters need to be re-applied or similar.
+                Provider.of<DebtProvider>(context, listen: false).loadDebts();
+              },
+            ),
+          ),
+          _buildFiltersAndActionsBar(), // Renamed and modified
           _buildSummaryCards(),
           Expanded(child: _buildDebtsList()),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showDebtForm(),
-        tooltip: 'إضافة دين جديد',
-        child: const Icon(Icons.add),
-      ),
+      // FloatingActionButton is no longer needed as AddDebtStrip handles adding debts
     );
   }
 
-  Widget _buildFiltersBar() {
+  Widget _buildFiltersAndActionsBar() {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -217,12 +225,6 @@ class _DebtsScreenState extends State<DebtsScreen> {
                 _showOnlyUnpaid = selected;
               });
             },
-          ),
-          const SizedBox(width: 16),
-          ElevatedButton.icon(
-            onPressed: () => _showDebtForm(),
-            icon: const Icon(Icons.add),
-            label: const Text('إضافة دين'),
           ),
         ],
       ),
@@ -343,10 +345,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
                   style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => _showDebtForm(),
-                  child: const Text('إضافة دين جديد'),
-                ),
+                // The button to add new debt is now in the AddDebtStrip
               ],
             ),
           );
