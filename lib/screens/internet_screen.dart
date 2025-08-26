@@ -644,7 +644,7 @@ class _InternetScreenState extends State<InternetScreen> {
                                 paymentDate: DateTime.now().add(const Duration(days: 30)),
                               ),
                             ),
-                            tooltip: 'تجديد اشتراك جديد',
+                            tooltip: 'تجديد الاشتراك',
                           ),
                           IconButton(
                             icon: const Icon(Icons.print, color: Colors.purple),
