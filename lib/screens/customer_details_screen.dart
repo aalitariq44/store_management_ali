@@ -20,6 +20,7 @@ import '../services/pdf_service.dart';
 import '../widgets/print_options_widget.dart';
 import '../widgets/debt_details_dialog.dart';
 import '../widgets/add_payment_dialog.dart';
+import '../widgets/add_debt_strip.dart';
 
 class CustomerDetailsScreen extends StatefulWidget {
   final Person person;
@@ -586,6 +587,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
 
         return Column(
           children: [
+            AddDebtStrip(
+              initialPersonId: widget.person.id,
+              onDebtAdded: (debt) {
+                _loadData(); // Refresh data after a debt is added
+              },
+            ),
             _buildDesktopTabHeader(
               'الديون',
               customerDebts.length,

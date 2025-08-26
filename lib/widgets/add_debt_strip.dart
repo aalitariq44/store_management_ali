@@ -181,11 +181,13 @@ class _AddDebtStripState extends State<AddDebtStrip> {
                     ),
                     items: personProvider.persons,
                     itemAsString: (Person u) => u.name,
-                    onChanged: (Person? data) {
-                      setState(() {
-                        _selectedPerson = data;
-                      });
-                    },
+                    onChanged: widget.initialPersonId != null
+                        ? null
+                        : (Person? data) {
+                            setState(() {
+                              _selectedPerson = data;
+                            });
+                          },
                     selectedItem: _selectedPerson,
                     validator: (value) {
                       if (value == null) {
@@ -193,6 +195,7 @@ class _AddDebtStripState extends State<AddDebtStrip> {
                       }
                       return null;
                     },
+                    enabled: widget.initialPersonId == null, // Disable if initialPersonId is provided
                   );
                 },
               ),
