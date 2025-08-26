@@ -163,7 +163,7 @@ class InternetReceipt {
               ],
             ),
           ),
-          // Dates: تاريخ البداية مقابل تاريخ الدفع
+          // Dates: تاريخ البداية مقابل تاريخ الانتهاء
           pw.Padding(
             padding: const pw.EdgeInsets.symmetric(vertical: 2),
             child: pw.Row(
@@ -187,7 +187,7 @@ class InternetReceipt {
                 pw.Row(
                   children: [
                     pw.Text(
-                      'تاريخ الدفع:',
+                      'تاريخ الانتهاء:',
                       style: _arabicTextStyle(fontSize: 11, isBold: true),
                       textDirection: pw.TextDirection.rtl,
                     ),
