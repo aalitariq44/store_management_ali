@@ -5,6 +5,7 @@ import '../providers/person_provider.dart';
 import '../providers/password_provider.dart';
 import '../models/installment_model.dart';
 import '../widgets/installment_form.dart';
+import '../widgets/add_payment_dialog.dart'; // Import the new dialog
 // تمت إزالة أزرار الطباعة من جسم الصفحة ونقلها إلى AppBar
 import '../widgets/print_actions.dart';
 // تمت إزالة ودجت الطباعة كزر منفصل، والآن الطباعة ضمن قائمة الزر الأيمن
@@ -30,133 +31,17 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
     );
   }
 
-  void _showPaymentDialog(Installment installment) {
-    final TextEditingController amountController = TextEditingController();
-    final TextEditingController notesController = TextEditingController();
-    DateTime selectedDate = DateTime.now();
-
+  // New method to show the extracted payment dialog
+  void _showAddPaymentDialog(Installment installment) {
     showDialog(
       context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('إضافة دفعة'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'المبلغ المتبقي: ${NumberFormatter.format(installment.remainingAmount)} د.ع',
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: amountController,
-                    decoration: const InputDecoration(
-                      labelText: 'مبلغ الدفعة',
-                      hintText: 'أدخل مبلغ الدفعة',
-                      suffixText: 'د.ع',
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: notesController,
-                    decoration: const InputDecoration(
-                      labelText: 'ملاحظات',
-                      hintText: 'أدخل ملاحظات للدفعة',
-                    ),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      const Text('تاريخ الدفعة:'),
-                      const SizedBox(width: 10),
-                      TextButton.icon(
-                        icon: const Icon(Icons.calendar_today),
-                        label: Text(DateFormatter.formatDisplayDate(selectedDate)),
-                        onPressed: () async {
-                          final DateTime? picked = await showDatePicker(
-                            context: context,
-                            initialDate: selectedDate,
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2101),
-                          );
-                          if (picked != null && picked != selectedDate) {
-                            setState(() {
-                              selectedDate = picked;
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('إلغاء'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    final amount = double.tryParse(amountController.text);
-                    if (amount != null && amount > 0) {
-                      if (amount > installment.remainingAmount) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ المتبقي',
-                            ),
-                          ),
-                        );
-                        return;
-                      }
-                      final provider = Provider.of<InstallmentProvider>(
-                        context,
-                        listen: false,
-                      );
-                      final navigator = Navigator.of(context);
-                      final messenger = ScaffoldMessenger.of(context);
-
-                      try {
-                        final payment = InstallmentPayment(
-                          installmentId: installment.id!,
-                          amount: amount,
-                          notes: notesController.text.trim().isEmpty
-                              ? null
-                              : notesController.text.trim(),
-                          paymentDate: selectedDate,
-                          createdAt: DateTime.now(),
-                        );
-
-                        await provider.addPayment(installment.id!, payment);
-
-                        if (mounted) {
-                          navigator.pop(); // Close the add payment dialog
-                          messenger.showSnackBar(
-                            const SnackBar(
-                                content: Text('تم إضافة الدفعة بنجاح')),
-                          );
-                          // Re-open the payment history dialog
-                          _showPaymentHistory(installment);
-                        }
-                      } catch (e) {
-                        if (mounted) {
-                          messenger.showSnackBar(
-                            SnackBar(content: Text('خطأ: ${e.toString()}')),
-                          );
-                        }
-                      }
-                    }
-                  },
-                  child: const Text('إضافة'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (context) => AddPaymentDialog(
+        installment: installment,
+        onPaymentAdded: (updatedInstallment) {
+          // Re-open the payment history dialog to show the new payment
+          _showPaymentHistory(updatedInstallment);
+        },
+      ),
     );
   }
 
@@ -352,7 +237,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
           ElevatedButton.icon(
             onPressed: () {
               Navigator.pop(context); // Close history dialog
-              _showPaymentDialog(latestInstallment); // Open add payment dialog
+              _showAddPaymentDialog(latestInstallment); // Open add payment dialog
             },
             icon: const Icon(Icons.add_card),
             label: const Text('إضافة دفعة'),
@@ -941,7 +826,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
 
     switch (selected) {
       case 'add_payment':
-        _showPaymentDialog(installment);
+        _showAddPaymentDialog(installment); // Use the new dialog
         break;
       case 'history':
         _showPaymentHistory(installment);
