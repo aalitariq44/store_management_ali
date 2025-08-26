@@ -217,13 +217,21 @@ class InternetReceipt {
           pw.Divider(color: PdfColors.grey400),
           pw.SizedBox(height: 8),
 
-          // Print Timestamp
-          pw.Center(
-            child: pw.Text(
-              'تاريخ ووقت الطباعة: ${DateFormatter.formatDisplayDateTime(printTime)}',
-              style: _arabicTextStyle(fontSize: 10, color: PdfColors.grey700),
-              textDirection: pw.TextDirection.rtl,
-            ),
+          // Print Timestamp and Receipt ID
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(
+                'رقم الوصل: ${subscription.id}',
+                style: _arabicTextStyle(fontSize: 10, color: PdfColors.grey700),
+                textDirection: pw.TextDirection.rtl,
+              ),
+              pw.Text(
+                'تاريخ ووقت الطباعة: ${DateFormatter.formatDisplayDateTime(printTime)}',
+                style: _arabicTextStyle(fontSize: 10, color: PdfColors.grey700),
+                textDirection: pw.TextDirection.rtl,
+              ),
+            ],
           ),
         ],
       ),
