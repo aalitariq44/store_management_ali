@@ -81,8 +81,44 @@ class InternetReceipt {
           pw.SizedBox(height: 10),
 
           // Customer Information
-          _buildReceiptRow('اسم الزبون:', person.name),
-          _buildReceiptRow('رقم الزبون:', '${person.id}'),
+          pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(vertical: 2),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Row(
+                  children: [
+                    pw.Text(
+                      'اسم الزبون:',
+                      style: _arabicTextStyle(fontSize: 11, isBold: true),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                    pw.SizedBox(width: 4),
+                    pw.Text(
+                      person.name,
+                      style: _arabicTextStyle(fontSize: 11),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                  ],
+                ),
+                pw.Row(
+                  children: [
+                    pw.Text(
+                      'رقم الزبون:',
+                      style: _arabicTextStyle(fontSize: 11, isBold: true),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                    pw.SizedBox(width: 4),
+                    pw.Text(
+                      '${person.id}',
+                      style: _arabicTextStyle(fontSize: 11),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
 
           pw.SizedBox(height: 8),
           pw.Divider(color: PdfColors.grey400),
