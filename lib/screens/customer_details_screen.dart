@@ -1026,6 +1026,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                     messenger.showSnackBar(
                       const SnackBar(content: Text('تم إضافة الدفعة بنجاح')),
                     );
+                    _showPaymentHistory(installment);
                   }
                 } catch (e) {
                   if (mounted) {
@@ -1095,8 +1096,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       context,
       listen: false,
     );
+    final latestInstallment = installmentProvider.installments.firstWhere(
+      (i) => i.id == installment.id,
+      orElse: () => installment,
+    );
     final payments = installmentProvider.getInstallmentPayments(
-      installment.id!,
+      latestInstallment.id!,
     );
 
     showDialog(
@@ -1115,7 +1120,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'المنتج: ${installment.productName}',
+                      'المنتج: ${latestInstallment.productName}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -1127,7 +1132,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       children: [
                         const Text('المبلغ الإجمالي:'),
                         Text(
-                          '${NumberFormatter.format(installment.totalAmount)} د.ع',
+                          '${NumberFormatter.format(latestInstallment.totalAmount)} د.ع',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -1138,7 +1143,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       children: [
                         const Text('المبلغ المدفوع:'),
                         Text(
-                          '${NumberFormatter.format(installment.paidAmount)} د.ع',
+                          '${NumberFormatter.format(latestInstallment.paidAmount)} د.ع',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.green,
@@ -1152,7 +1157,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                       children: [
                         const Text('المبلغ المتبقي:'),
                         Text(
-                          '${NumberFormatter.format(installment.remainingAmount)} د.ع',
+                          '${NumberFormatter.format(latestInstallment.remainingAmount)} د.ع',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.red,
@@ -1233,7 +1238,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                                       // Close the history dialog first
                                       Navigator.of(context).pop();
                                       _confirmDeletePayment(
-                                        installment,
+                                        latestInstallment,
                                         payment,
                                       );
                                     },
@@ -1252,6 +1257,16 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('إغلاق'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(context); // Close history dialog
+              _showInstallmentPaymentDialog(
+                latestInstallment,
+              ); // Open add payment dialog
+            },
+            icon: const Icon(Icons.add_card),
+            label: const Text('إضافة دفعة'),
           ),
         ],
       ),
@@ -1549,6 +1564,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   ) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
+      onTap: () => _showPaymentHistory(installment),
       onSecondaryTapDown: (details) {
         _showInstallmentContextMenu(
           details.globalPosition,
