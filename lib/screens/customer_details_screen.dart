@@ -1763,7 +1763,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
             durationInDays: 30,
-            paymentDate: DateTime.now(),
+            paymentDate: DateTime.now().add(const Duration(days: 30)),
           ),
         );
         break;

@@ -641,7 +641,7 @@ class _InternetScreenState extends State<InternetScreen> {
                                 createdAt: DateTime.now(),
                                 updatedAt: DateTime.now(),
                                 durationInDays: 30,
-                                paymentDate: DateTime.now(),
+                                paymentDate: DateTime.now().add(const Duration(days: 30)),
                               ),
                             ),
                             tooltip: 'تجديد اشتراك جديد',
