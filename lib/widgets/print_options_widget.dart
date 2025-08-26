@@ -49,7 +49,7 @@ class PrintOptionsWidget extends StatelessWidget {
                   'طباعة كامل التفاصيل',
                   Icons.description,
                   Colors.blue,
-                  () => _printFullDetails(context),
+                  () => _previewFullDetails(context),
                 ),
               ),
               const SizedBox(width: 8),
@@ -59,7 +59,7 @@ class PrintOptionsWidget extends StatelessWidget {
                   'طباعة الديون فقط',
                   Icons.account_balance_wallet,
                   Colors.red,
-                  () => _printDebtsOnly(context),
+                  () => _previewDebtsOnly(context),
                 ),
               ),
             ],
@@ -73,7 +73,7 @@ class PrintOptionsWidget extends StatelessWidget {
                   'طباعة الأقساط فقط',
                   Icons.payment,
                   Colors.orange,
-                  () => _printInstallmentsOnly(context),
+                  () => _previewInstallmentsOnly(context),
                 ),
               ),
               const SizedBox(width: 8),
@@ -83,7 +83,7 @@ class PrintOptionsWidget extends StatelessWidget {
                   'طباعة الإنترنت فقط',
                   Icons.wifi,
                   Colors.green,
-                  () => _printInternetOnly(context),
+                  () => _previewInternetOnly(context),
                 ),
               ),
             ],
@@ -119,9 +119,9 @@ class PrintOptionsWidget extends StatelessWidget {
     );
   }
 
-  Future<void> _printFullDetails(BuildContext context) async {
+  Future<void> _previewFullDetails(BuildContext context) async {
     try {
-      _showLoadingDialog(context, 'جاري تحضير تفاصيل الزبون...');
+      _showLoadingDialog(context, 'جاري إنشاء المعاينة...');
       
       final debtProvider = Provider.of<DebtProvider>(context, listen: false);
       final installmentProvider = Provider.of<InstallmentProvider>(context, listen: false);
@@ -131,24 +131,23 @@ class PrintOptionsWidget extends StatelessWidget {
       final installments = installmentProvider.getInstallmentsByPersonId(person.id!);
       final internetSubscriptions = internetProvider.getSubscriptionsByPersonId(person.id!);
 
-      await pdf_service.PDFService.printCustomerDetails(
+      Navigator.of(context).pop();
+      await pdf_service.PDFService.showCustomerDetailsPreview(
+        context: context,
         person: person,
         debts: debts,
         installments: installments,
         internetSubscriptions: internetSubscriptions,
       );
-
-      Navigator.of(context).pop(); // إغلاق نافذة التحميل
-      _showSuccessSnackBar(context, 'تم تحضير PDF بنجاح');
     } catch (e) {
       Navigator.of(context).pop(); // إغلاق نافذة التحميل
       _showErrorSnackBar(context, 'خطأ في طباعة التفاصيل: $e');
     }
   }
 
-  Future<void> _printDebtsOnly(BuildContext context) async {
+  Future<void> _previewDebtsOnly(BuildContext context) async {
     try {
-      _showLoadingDialog(context, 'جاري تحضير تقرير الديون...');
+      _showLoadingDialog(context, 'جاري إنشاء المعاينة...');
       
       final debtProvider = Provider.of<DebtProvider>(context, listen: false);
       final debts = debtProvider.getDebtsByPersonId(person.id!);
@@ -159,19 +158,21 @@ class PrintOptionsWidget extends StatelessWidget {
         return;
       }
 
-      await pdf_service.PDFService.printDebts(debts, customerName: person.name);
-
-      Navigator.of(context).pop(); // إغلاق نافذة التحميل
-      _showSuccessSnackBar(context, 'تم تحضير تقرير الديون بنجاح');
+      Navigator.of(context).pop();
+      await pdf_service.PDFService.showDebtsPreview(
+        context,
+        debts,
+        customerName: person.name,
+      );
     } catch (e) {
       Navigator.of(context).pop(); // إغلاق نافذة التحميل
       _showErrorSnackBar(context, 'خطأ في طباعة الديون: $e');
     }
   }
 
-  Future<void> _printInstallmentsOnly(BuildContext context) async {
+  Future<void> _previewInstallmentsOnly(BuildContext context) async {
     try {
-      _showLoadingDialog(context, 'جاري تحضير تقرير الأقساط...');
+      _showLoadingDialog(context, 'جاري إنشاء المعاينة...');
       
       final installmentProvider = Provider.of<InstallmentProvider>(context, listen: false);
       final installments = installmentProvider.getInstallmentsByPersonId(person.id!);
@@ -182,19 +183,21 @@ class PrintOptionsWidget extends StatelessWidget {
         return;
       }
 
-      await pdf_service.PDFService.printInstallments(installments, customerName: person.name);
-
-      Navigator.of(context).pop(); // إغلاق نافذة التحميل
-      _showSuccessSnackBar(context, 'تم تحضير تقرير الأقساط بنجاح');
+      Navigator.of(context).pop();
+      await pdf_service.PDFService.showInstallmentsPreview(
+        context,
+        installments,
+        customerName: person.name,
+      );
     } catch (e) {
       Navigator.of(context).pop(); // إغلاق نافذة التحميل
       _showErrorSnackBar(context, 'خطأ في طباعة الأقساط: $e');
     }
   }
 
-  Future<void> _printInternetOnly(BuildContext context) async {
+  Future<void> _previewInternetOnly(BuildContext context) async {
     try {
-      _showLoadingDialog(context, 'جاري تحضير تقرير الإنترنت...');
+      _showLoadingDialog(context, 'جاري إنشاء المعاينة...');
       
       final internetProvider = Provider.of<InternetProvider>(context, listen: false);
       final internetSubscriptions = internetProvider.getSubscriptionsByPersonId(person.id!);
@@ -205,10 +208,12 @@ class PrintOptionsWidget extends StatelessWidget {
         return;
       }
 
-      await pdf_service.PDFService.printInternetSubscriptions(internetSubscriptions, customerName: person.name);
-
-      Navigator.of(context).pop(); // إغلاق نافذة التحميل
-      _showSuccessSnackBar(context, 'تم تحضير تقرير الإنترنت بنجاح');
+      Navigator.of(context).pop();
+      await pdf_service.PDFService.showInternetSubscriptionsPreview(
+        context,
+        internetSubscriptions,
+        customerName: person.name,
+      );
     } catch (e) {
       Navigator.of(context).pop(); // إغلاق نافذة التحميل
       _showErrorSnackBar(context, 'خطأ في طباعة الإنترنت: $e');
@@ -230,16 +235,6 @@ class PrintOptionsWidget extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  void _showSuccessSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
     );
   }
 

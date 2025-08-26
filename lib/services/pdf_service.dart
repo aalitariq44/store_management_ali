@@ -123,6 +123,54 @@ class PDFService {
     }
   }
 
+  // معاينة تفاصيل الزبون كاملة (بدون طباعة مباشرة)
+  static Future<bool?> showCustomerDetailsPreview({
+    required BuildContext context,
+    required Person person,
+    required List<Debt> debts,
+    required List<Installment> installments,
+    required List<InternetSubscription> internetSubscriptions,
+  }) async {
+    try {
+      await _loadArabicFonts();
+
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.MultiPage(
+          textDirection: pw.TextDirection.rtl,
+          pageFormat: PdfPageFormat.a4,
+          build: (pw.Context ctx) => [
+            _buildHeader('تفاصيل الزبون: ${person.name}'),
+            pw.SizedBox(height: 20),
+            _buildCustomerInfo(person),
+            pw.SizedBox(height: 20),
+            _buildFinancialSummary(debts, installments, internetSubscriptions),
+            pw.SizedBox(height: 20),
+            if (debts.isNotEmpty) ...[
+              _buildDebtsSection(debts),
+              pw.SizedBox(height: 20),
+            ],
+            if (installments.isNotEmpty) ...[
+              _buildInstallmentsSection(installments),
+              pw.SizedBox(height: 20),
+            ],
+            if (internetSubscriptions.isNotEmpty) ...[
+              _buildInternetSection(internetSubscriptions),
+            ],
+          ],
+        ),
+      );
+
+      return await PDFPreviewDialog.show(
+        context: context,
+        pdf: pdf,
+        title: 'تفاصيل الزبون - ${person.name}',
+      );
+    } catch (e) {
+      throw Exception('خطأ في معاينة تفاصيل الزبون: $e');
+    }
+  }
+
   // طباعة الديون فقط
   static Future<void> printDebts(
     List<Debt> debts, {
@@ -160,6 +208,44 @@ class PDFService {
       );
     } catch (e) {
       throw Exception('خطأ في طباعة الديون: $e');
+    }
+  }
+
+  // معاينة الديون فقط
+  static Future<bool?> showDebtsPreview(
+    BuildContext context,
+    List<Debt> debts, {
+    String? customerName,
+  }) async {
+    try {
+      await _loadArabicFonts();
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.MultiPage(
+          textDirection: pw.TextDirection.rtl,
+          pageFormat: PdfPageFormat.a4,
+          build: (pw.Context ctx) => [
+            _buildHeader(
+              customerName != null
+                  ? 'ديون الزبون: $customerName'
+                  : 'تقرير الديون',
+            ),
+            pw.SizedBox(height: 20),
+            _buildDebtsSection(debts),
+            pw.SizedBox(height: 20),
+            _buildDebtsSummary(debts),
+          ],
+        ),
+      );
+      return await PDFPreviewDialog.show(
+        context: context,
+        pdf: pdf,
+        title: customerName != null
+            ? 'ديون الزبون - $customerName'
+            : 'تقرير الديون',
+      );
+    } catch (e) {
+      throw Exception('خطأ في معاينة الديون: $e');
     }
   }
 
@@ -203,6 +289,44 @@ class PDFService {
     }
   }
 
+  // معاينة الأقساط فقط
+  static Future<bool?> showInstallmentsPreview(
+    BuildContext context,
+    List<Installment> installments, {
+    String? customerName,
+  }) async {
+    try {
+      await _loadArabicFonts();
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.MultiPage(
+          textDirection: pw.TextDirection.rtl,
+          pageFormat: PdfPageFormat.a4,
+          build: (pw.Context ctx) => [
+            _buildHeader(
+              customerName != null
+                  ? 'أقساط الزبون: $customerName'
+                  : 'تقرير الأقساط',
+            ),
+            pw.SizedBox(height: 20),
+            _buildInstallmentsSection(installments),
+            pw.SizedBox(height: 20),
+            _buildInstallmentsSummary(installments),
+          ],
+        ),
+      );
+      return await PDFPreviewDialog.show(
+        context: context,
+        pdf: pdf,
+        title: customerName != null
+            ? 'أقساط الزبون - $customerName'
+            : 'تقرير الأقساط',
+      );
+    } catch (e) {
+      throw Exception('خطأ في معاينة الأقساط: $e');
+    }
+  }
+
   // طباعة اشتراكات الإنترنت فقط
   static Future<void> printInternetSubscriptions(
     List<InternetSubscription> subscriptions, {
@@ -242,6 +366,44 @@ class PDFService {
       );
     } catch (e) {
       throw Exception('خطأ في طباعة اشتراكات الإنترنت: $e');
+    }
+  }
+
+  // معاينة اشتراكات الإنترنت فقط
+  static Future<bool?> showInternetSubscriptionsPreview(
+    BuildContext context,
+    List<InternetSubscription> subscriptions, {
+    String? customerName,
+  }) async {
+    try {
+      await _loadArabicFonts();
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.MultiPage(
+          textDirection: pw.TextDirection.rtl,
+          pageFormat: PdfPageFormat.a4,
+          build: (pw.Context ctx) => [
+            _buildHeader(
+              customerName != null
+                  ? 'اشتراكات الإنترنت للزبون: $customerName'
+                  : 'تقرير اشتراكات الإنترنت',
+            ),
+            pw.SizedBox(height: 20),
+            _buildInternetSection(subscriptions),
+            pw.SizedBox(height: 20),
+            _buildInternetSummary(subscriptions),
+          ],
+        ),
+      );
+      return await PDFPreviewDialog.show(
+        context: context,
+        pdf: pdf,
+        title: customerName != null
+            ? 'اشتراكات الإنترنت - $customerName'
+            : 'تقرير اشتراكات الإنترنت',
+      );
+    } catch (e) {
+      throw Exception('خطأ في معاينة اشتراكات الإنترنت: $e');
     }
   }
 
