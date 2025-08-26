@@ -11,7 +11,12 @@ class InstallmentForm extends StatefulWidget {
   final int? personId;
   final Person? person;
 
-  const InstallmentForm({super.key, this.installment, this.personId, this.person});
+  const InstallmentForm({
+    super.key,
+    this.installment,
+    this.personId,
+    this.person,
+  });
 
   @override
   State<InstallmentForm> createState() => _InstallmentFormState();
@@ -35,7 +40,9 @@ class _InstallmentFormState extends State<InstallmentForm> {
       _productNameController.text = widget.installment!.productName;
       _totalAmountController.text = widget.installment!.totalAmount.toString();
       _notesController.text = widget.installment!.notes ?? '';
-      _selectedPerson = personProvider.getPersonById(widget.installment!.personId);
+      _selectedPerson = personProvider.getPersonById(
+        widget.installment!.personId,
+      );
     } else if (widget.person != null) {
       _selectedPerson = widget.person;
     } else if (widget.personId != null) {
@@ -55,9 +62,9 @@ class _InstallmentFormState extends State<InstallmentForm> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedPerson == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى اختيار الشخص')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('يرجى اختيار الشخص')));
       return;
     }
 
@@ -66,7 +73,10 @@ class _InstallmentFormState extends State<InstallmentForm> {
     });
 
     try {
-      final installmentProvider = Provider.of<InstallmentProvider>(context, listen: false);
+      final installmentProvider = Provider.of<InstallmentProvider>(
+        context,
+        listen: false,
+      );
       final now = DateTime.now();
       final totalAmount = double.parse(_totalAmountController.text);
 
@@ -77,18 +87,20 @@ class _InstallmentFormState extends State<InstallmentForm> {
           productName: _productNameController.text.trim(),
           totalAmount: totalAmount,
           paidAmount: 0.0,
-          notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+          notes: _notesController.text.trim().isEmpty
+              ? null
+              : _notesController.text.trim(),
           createdAt: now,
           updatedAt: now,
           isCompleted: totalAmount <= 0,
         );
-        
+
         await installmentProvider.addInstallment(installment);
-        
+
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم إضافة القسط بنجاح')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('تم إضافة القسط بنجاح')));
           Navigator.pop(context);
         }
       } else {
@@ -97,25 +109,27 @@ class _InstallmentFormState extends State<InstallmentForm> {
           personId: _selectedPerson!.id!,
           productName: _productNameController.text.trim(),
           totalAmount: totalAmount,
-          notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+          notes: _notesController.text.trim().isEmpty
+              ? null
+              : _notesController.text.trim(),
           updatedAt: now,
           isCompleted: widget.installment!.paidAmount >= totalAmount,
         );
-        
+
         await installmentProvider.updateInstallment(updatedInstallment);
-        
+
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم تحديث القسط بنجاح')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('تم تحديث القسط بنجاح')));
           Navigator.pop(context);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('خطأ: ${e.toString()}')));
       }
     } finally {
       if (mounted) {
@@ -129,7 +143,9 @@ class _InstallmentFormState extends State<InstallmentForm> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.installment == null ? 'إضافة قسط جديد' : 'تعديل القسط'),
+      title: Text(
+        widget.installment == null ? 'إضافة قسط جديد' : 'تعديل القسط',
+      ),
       content: SizedBox(
         width: 400,
         child: Form(
@@ -150,6 +166,13 @@ class _InstallmentFormState extends State<InstallmentForm> {
                 Consumer<PersonProvider>(
                   builder: (context, personProvider, child) {
                     return DropdownSearch<Person>(
+                      dropdownDecoratorProps: DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                          labelText: 'الزبون',
+                          hintText: 'اضغط لاختيار زبون',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
                       popupProps: PopupProps.menu(
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
@@ -169,7 +192,7 @@ class _InstallmentFormState extends State<InstallmentForm> {
                       selectedItem: _selectedPerson,
                       validator: (value) {
                         if (value == null) {
-                          return 'يرجى اختيار الشخص';
+                          return 'يرجى اختيار الزبون';
                         }
                         return null;
                       },
