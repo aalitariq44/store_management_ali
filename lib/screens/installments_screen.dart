@@ -309,6 +309,14 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('إغلاق'),
           ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(context); // Close history dialog
+              _showPaymentDialog(installment); // Open add payment dialog
+            },
+            icon: const Icon(Icons.add_card),
+            label: const Text('إضافة دفعة'),
+          ),
         ],
       ),
     );
