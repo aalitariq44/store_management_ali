@@ -43,16 +43,16 @@ class PDFService {
 
     // ترتيب التفضيل
     final regularCandidates = [
-      'assets/fonts/NotoSansArabic-Regular.ttf',
+      // 'assets/fonts/NotoSansArabic-Regular.ttf',
       'assets/fonts/Amiri-Regular.ttf',
-      'assets/fonts/Cairo-Regular.ttf',
-      'assets/fonts/Beiruti-VariableFont_wght.ttf',
+      // 'assets/fonts/Cairo-Regular.ttf',
+      // 'assets/fonts/Beiruti-VariableFont_wght.ttf',
     ];
     final boldCandidates = [
       'assets/fonts/Amiri-Bold.ttf',
-      'assets/fonts/Cairo-Bold.ttf',
-      'assets/fonts/Cairo-SemiBold.ttf',
-      'assets/fonts/NotoSansArabic-Regular.ttf',
+      // 'assets/fonts/Cairo-Bold.ttf',
+      // 'assets/fonts/Cairo-SemiBold.ttf',
+      // 'assets/fonts/NotoSansArabic-Regular.ttf',
     ];
 
     for (final path in regularCandidates) {
@@ -435,7 +435,7 @@ class PDFService {
   }) async {
     try {
       await _loadArabicFonts();
-      final pdf = pw.Document();
+      final pdf = pw.Document(theme: _arabicTheme);
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
@@ -1342,7 +1342,7 @@ class PDFService {
     try {
       await _loadArabicFonts();
 
-      final pdf = pw.Document();
+      final pdf = pw.Document(theme: _arabicTheme);
 
       pdf.addPage(
         pw.MultiPage(
@@ -1508,7 +1508,7 @@ class PDFService {
       // تحميل الخطوط العربية أولاً
       await _loadArabicFonts();
 
-      final pdf = pw.Document();
+      final pdf = pw.Document(theme: _arabicTheme);
       final printTime = DateTime.now();
 
       pdf.addPage(
@@ -1560,7 +1560,7 @@ class PDFService {
       // تحميل الخطوط العربية أولاً
       await _loadArabicFonts();
 
-      final pdf = pw.Document();
+      final pdf = pw.Document(theme: _arabicTheme);
       final printTime = DateTime.now();
 
       pdf.addPage(
@@ -1707,7 +1707,7 @@ class PDFService {
               value,
               style: _arabicTextStyle(fontSize: 11),
               textDirection: pw.TextDirection.rtl,
-              textAlign: pw.TextAlign.left,
+              textAlign: pw.TextAlign.right,
             ),
           ),
         ],
