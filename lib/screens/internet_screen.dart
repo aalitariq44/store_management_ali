@@ -307,7 +307,7 @@ class _InternetScreenState extends State<InternetScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showInternetForm(),
-        tooltip: 'إضافة اشتراك جديد',
+        tooltip: 'إضافة الاشتراك',
         child: const Icon(Icons.add),
       ),
     );
@@ -644,7 +644,7 @@ class _InternetScreenState extends State<InternetScreen> {
                                 paymentDate: DateTime.now(),
                               ),
                             ),
-                            tooltip: 'إضافة اشتراك جديد',
+                            tooltip: 'تجديد اشتراك جديد',
                           ),
                           IconButton(
                             icon: const Icon(Icons.print, color: Colors.purple),

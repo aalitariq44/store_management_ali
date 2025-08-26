@@ -1712,7 +1712,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           value: 'add_new',
           child: ListTile(
             leading: Icon(Icons.add_circle_outline, color: Colors.green),
-            title: Text('اشتراك جديد'),
+            title: Text('تجديد الاشتراك '),
           ),
         ),
         const PopupMenuItem<String>(
