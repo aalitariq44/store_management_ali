@@ -204,7 +204,6 @@ class _AddDebtStripState extends State<AddDebtStrip> {
                 controller: _titleController,
                 decoration: const InputDecoration(
                   labelText: 'عنوان الدين',
-                  hintText: 'مثال: شراء بضاعة',
                   border: OutlineInputBorder(),
                   isDense: true,
                 ),

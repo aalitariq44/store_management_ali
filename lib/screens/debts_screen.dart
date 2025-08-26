@@ -161,6 +161,8 @@ class _DebtsScreenState extends State<DebtsScreen> {
       ),
       body: Column(
         children: [
+          _buildFiltersAndActionsBar(), // Renamed and modified
+          _buildSummaryCards(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: AddDebtStrip(
@@ -172,8 +174,6 @@ class _DebtsScreenState extends State<DebtsScreen> {
               },
             ),
           ),
-          _buildFiltersAndActionsBar(), // Renamed and modified
-          _buildSummaryCards(),
           Expanded(child: _buildDebtsList()),
         ],
       ),
