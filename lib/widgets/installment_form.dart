@@ -1,5 +1,6 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/installment_provider.dart';
 import '../providers/person_provider.dart';
@@ -30,6 +31,7 @@ class _InstallmentFormState extends State<InstallmentForm> {
 
   Person? _selectedPerson;
   bool _isLoading = false;
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -43,6 +45,7 @@ class _InstallmentFormState extends State<InstallmentForm> {
       _selectedPerson = personProvider.getPersonById(
         widget.installment!.personId,
       );
+      _selectedDate = widget.installment!.createdAt;
     } else if (widget.person != null) {
       _selectedPerson = widget.person;
     } else if (widget.personId != null) {
@@ -90,7 +93,7 @@ class _InstallmentFormState extends State<InstallmentForm> {
           notes: _notesController.text.trim().isEmpty
               ? null
               : _notesController.text.trim(),
-          createdAt: now,
+          createdAt: _selectedDate,
           updatedAt: now,
           isCompleted: totalAmount <= 0,
         );
@@ -112,6 +115,7 @@ class _InstallmentFormState extends State<InstallmentForm> {
           notes: _notesController.text.trim().isEmpty
               ? null
               : _notesController.text.trim(),
+          createdAt: _selectedDate, // Keep original creation date
           updatedAt: now,
           isCompleted: widget.installment!.paidAmount >= totalAmount,
         );
@@ -137,6 +141,20 @@ class _InstallmentFormState extends State<InstallmentForm> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
     }
   }
 
@@ -241,6 +259,21 @@ class _InstallmentFormState extends State<InstallmentForm> {
                   hintText: 'أدخل ملاحظات إضافية',
                 ),
                 maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'تاريخ الإضافة: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.calendar_today),
+                    onPressed: () => _selectDate(context),
+                  ),
+                ],
               ),
             ],
           ),
