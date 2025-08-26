@@ -76,7 +76,7 @@ class _InternetFormState extends State<InternetForm> {
     if (_selectedPerson == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('يرجى اختيار الشخص')));
+      ).showSnackBar(const SnackBar(content: Text('يرجى اختيار الزبون')));
       return;
     }
 
@@ -204,7 +204,7 @@ class _InternetFormState extends State<InternetForm> {
                     initialValue: widget.person!.name,
                     readOnly: true,
                     decoration: const InputDecoration(
-                      labelText: 'الشخص',
+                      labelText: 'الزبون',
                       border: OutlineInputBorder(),
                     ),
                   )
@@ -212,6 +212,13 @@ class _InternetFormState extends State<InternetForm> {
                   Consumer<PersonProvider>(
                     builder: (context, personProvider, child) {
                       return DropdownSearch<Person>(
+                        dropdownDecoratorProps: DropDownDecoratorProps(
+                          dropdownSearchDecoration: InputDecoration(
+                            labelText: 'الزبون',
+                            hintText: 'اضغط لاختيار زبون',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
                         popupProps: PopupProps.menu(
                           showSearchBox: true,
                           searchFieldProps: TextFieldProps(
@@ -231,7 +238,7 @@ class _InternetFormState extends State<InternetForm> {
                         selectedItem: _selectedPerson,
                         validator: (value) {
                           if (value == null) {
-                            return 'يرجى اختيار الشخص';
+                            return 'يرجى اختيار الزبون';
                           }
                           return null;
                         },
