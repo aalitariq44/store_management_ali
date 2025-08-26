@@ -50,11 +50,23 @@ class InternetReceipt {
         children: [
           // Store Name
           pw.Center(
-            child: pw.Text(
-              'محل كاظم السعدي لخدمات الانترنيت',
-              style: _arabicTextStyle(fontSize: 14, isBold: true),
-              textDirection: pw.TextDirection.rtl,
-              textAlign: pw.TextAlign.center,
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                pw.Text(
+                  'محل كاظم السعدي لخدمات الانترنيت',
+                  style: _arabicTextStyle(fontSize: 14, isBold: true),
+                  textDirection: pw.TextDirection.rtl,
+                  textAlign: pw.TextAlign.left,
+                ),
+                pw.Text(
+                  '07709030073',
+                  style: _arabicTextStyle(fontSize: 11),
+                  textDirection: pw.TextDirection.rtl,
+                  textAlign: pw.TextAlign.right,
+                ),
+              ],
             ),
           ),
           pw.SizedBox(height: 5),
