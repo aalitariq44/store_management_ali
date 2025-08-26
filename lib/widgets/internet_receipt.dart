@@ -124,19 +124,83 @@ class InternetReceipt {
           pw.Divider(color: PdfColors.grey400),
           pw.SizedBox(height: 8),
 
-          // Subscription Details
-          _buildReceiptRow('نوع الاشتراك:', subscription.packageName),
-          _buildReceiptRow(
-            'سعر الاشتراك:',
-            '${NumberFormatter.format(subscription.price)} د.ع',
+          // Subscription Details: نوع الاشتراك مقابل سعر الاشتراك
+          pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(vertical: 2),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Row(
+                  children: [
+                    pw.Text(
+                      'نوع الاشتراك:',
+                      style: _arabicTextStyle(fontSize: 11, isBold: true),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                    pw.SizedBox(width: 4),
+                    pw.Text(
+                      subscription.packageName,
+                      style: _arabicTextStyle(fontSize: 11),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                  ],
+                ),
+                pw.Row(
+                  children: [
+                    pw.Text(
+                      'سعر الاشتراك:',
+                      style: _arabicTextStyle(fontSize: 11, isBold: true),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                    pw.SizedBox(width: 4),
+                    pw.Text(
+                      '${NumberFormatter.format(subscription.price)} د.ع',
+                      style: _arabicTextStyle(fontSize: 11),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          _buildReceiptRow(
-            'تاريخ البداية:',
-            DateFormatter.formatDisplayDate(subscription.startDate),
-          ),
-          _buildReceiptRow(
-            'تاريخ الدفع:',
-            DateFormatter.formatDisplayDate(subscription.paymentDate),
+          // Dates: تاريخ البداية مقابل تاريخ الدفع
+          pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(vertical: 2),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Row(
+                  children: [
+                    pw.Text(
+                      'تاريخ البداية:',
+                      style: _arabicTextStyle(fontSize: 11, isBold: true),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                    pw.SizedBox(width: 4),
+                    pw.Text(
+                      DateFormatter.formatDisplayDate(subscription.startDate),
+                      style: _arabicTextStyle(fontSize: 11),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                  ],
+                ),
+                pw.Row(
+                  children: [
+                    pw.Text(
+                      'تاريخ الدفع:',
+                      style: _arabicTextStyle(fontSize: 11, isBold: true),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                    pw.SizedBox(width: 4),
+                    pw.Text(
+                      DateFormatter.formatDisplayDate(subscription.paymentDate),
+                      style: _arabicTextStyle(fontSize: 11),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           _buildReceiptRow(
             'المبلغ المدفوع:',
