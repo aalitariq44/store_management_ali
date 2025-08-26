@@ -58,6 +58,8 @@ class _InternetFormState extends State<InternetForm> {
     // Automatically set payment date one month after start date for new subscriptions
     if (widget.subscription == null) {
       _paymentDate = _startDate.add(const Duration(days: 30));
+      // Set default package name 'بلاص' for new subscriptions
+      _packageNameController.text = 'بلاص';
     }
   }
 
