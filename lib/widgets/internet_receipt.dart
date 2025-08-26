@@ -45,6 +45,17 @@ class InternetReceipt {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.stretch,
         children: [
+          // Store Name
+          pw.Center(
+            child: pw.Text(
+              'محل كاظم السعدي لخدمات الانترنت',
+              style: _arabicTextStyle(fontSize: 14, isBold: true),
+              textDirection: pw.TextDirection.rtl,
+              textAlign: pw.TextAlign.center,
+            ),
+          ),
+          pw.SizedBox(height: 5),
+
           // Receipt Header
           pw.Container(
             padding: const pw.EdgeInsets.symmetric(vertical: 8),
