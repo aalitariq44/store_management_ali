@@ -39,7 +39,10 @@ class InternetReceipt {
     return pw.Container(
       padding: const pw.EdgeInsets.all(6), // تقليل الحشوة الداخلية
       decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.black, width: 1.2), // تقليل سماكة الحافة
+        border: pw.Border.all(
+          color: PdfColors.black,
+          width: 1.2,
+        ), // تقليل سماكة الحافة
         borderRadius: pw.BorderRadius.circular(4), // تقليل نصف القطر
       ),
       child: pw.Column(
