@@ -133,8 +133,14 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
       context,
       listen: false,
     );
+    // Get the latest installment details from the provider
+    final latestInstallment = installmentProvider.installments.firstWhere(
+      (i) => i.id == installment.id,
+      orElse: () => installment, // Fallback to the passed installment
+    );
+
     final payments = installmentProvider.getInstallmentPayments(
-      installment.id!,
+      latestInstallment.id!,
     );
 
     showDialog(
@@ -153,7 +159,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'المنتج: ${installment.productName}',
+                      'المنتج: ${latestInstallment.productName}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -165,7 +171,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                       children: [
                         const Text('المبلغ الإجمالي:'),
                         Text(
-                          '${NumberFormatter.format(installment.totalAmount)} د.ع',
+                          '${NumberFormatter.format(latestInstallment.totalAmount)} د.ع',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -176,7 +182,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                       children: [
                         const Text('المبلغ المدفوع:'),
                         Text(
-                          '${NumberFormatter.format(installment.paidAmount)} د.ع',
+                          '${NumberFormatter.format(latestInstallment.paidAmount)} د.ع',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.green,
@@ -190,7 +196,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                       children: [
                         const Text('المبلغ المتبقي:'),
                         Text(
-                          '${NumberFormatter.format(installment.remainingAmount)} د.ع',
+                          '${NumberFormatter.format(latestInstallment.remainingAmount)} د.ع',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.red,
@@ -291,7 +297,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                                       // Close the history dialog first
                                       Navigator.of(context).pop();
                                       _confirmDeletePayment(
-                                        installment,
+                                        latestInstallment,
                                         payment,
                                       );
                                     },
@@ -314,7 +320,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
           ElevatedButton.icon(
             onPressed: () {
               Navigator.pop(context); // Close history dialog
-              _showPaymentDialog(installment); // Open add payment dialog
+              _showPaymentDialog(latestInstallment); // Open add payment dialog
             },
             icon: const Icon(Icons.add_card),
             label: const Text('إضافة دفعة'),
