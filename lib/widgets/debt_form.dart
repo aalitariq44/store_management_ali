@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../providers/debt_provider.dart';
 import '../providers/person_provider.dart';
 import '../models/debt_model.dart';
@@ -22,6 +23,8 @@ class _DebtFormState extends State<DebtForm> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
+  final _dateController = TextEditingController();
+  late DateTime _selectedDate;
 
   Person? _selectedPerson;
   bool _isLoading = false;
@@ -29,6 +32,8 @@ class _DebtFormState extends State<DebtForm> {
   @override
   void initState() {
     super.initState();
+    _selectedDate = widget.debt?.createdAt ?? DateTime.now();
+    _dateController.text = DateFormat.yMd('ar').format(_selectedDate);
     final personProvider = Provider.of<PersonProvider>(context, listen: false);
 
     if (widget.debt != null) {
@@ -48,6 +53,7 @@ class _DebtFormState extends State<DebtForm> {
     _titleController.dispose();
     _amountController.dispose();
     _notesController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -81,7 +87,7 @@ class _DebtFormState extends State<DebtForm> {
           notes: _notesController.text.trim().isEmpty
               ? null
               : _notesController.text.trim(),
-          createdAt: now,
+          createdAt: _selectedDate,
           updatedAt: now,
           isPaid: amount <= 0,
         );
@@ -105,6 +111,7 @@ class _DebtFormState extends State<DebtForm> {
           notes: _notesController.text.trim().isEmpty
               ? null
               : _notesController.text.trim(),
+          createdAt: _selectedDate,
           updatedAt: now,
         );
 
@@ -189,6 +196,33 @@ class _DebtFormState extends State<DebtForm> {
                     );
                   },
                 ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _dateController,
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: 'التاريخ',
+                  hintText: 'اختر التاريخ',
+                  suffixIcon: Icon(Icons.calendar_today),
+                  border: OutlineInputBorder(),
+                ),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now(),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _selectedDate = picked;
+                      _dateController.text = DateFormat.yMd(
+                        'ar',
+                      ).format(picked);
+                    });
+                  }
+                },
+              ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _titleController,
