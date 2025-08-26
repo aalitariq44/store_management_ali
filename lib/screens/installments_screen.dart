@@ -105,10 +105,12 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                   await provider.addPayment(installment.id!, payment);
 
                   if (mounted) {
-                    navigator.pop();
+                    navigator.pop(); // Close the add payment dialog
                     messenger.showSnackBar(
                       const SnackBar(content: Text('تم إضافة الدفعة بنجاح')),
                     );
+                    // Re-open the payment history dialog
+                    _showPaymentHistory(installment);
                   }
                 } catch (e) {
                   if (mounted) {
