@@ -1276,4 +1276,169 @@ class PDFService {
       ),
     );
   }
+
+  // طباعة وصل اشتراك إنترنت صغير (A5 مع وصلين)
+  static Future<void> printInternetSubscriptionReceipt({
+    required InternetSubscription subscription,
+    required Person person,
+  }) async {
+    try {
+      // تحميل الخطوط العربية أولاً
+      await _loadArabicFonts();
+
+      final pdf = pw.Document();
+      final printTime = DateTime.now();
+
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a5,
+          textDirection: pw.TextDirection.rtl,
+          build: (pw.Context context) {
+            return pw.Column(
+              children: [
+                // الوصل الأول
+                _buildReceiptCard(subscription, person, printTime),
+                pw.SizedBox(height: 10),
+                // خط فاصل
+                pw.Container(
+                  height: 1,
+                  width: double.infinity,
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(
+                      color: PdfColors.grey300,
+                      style: pw.BorderStyle.dashed,
+                    ),
+                  ),
+                ),
+                pw.SizedBox(height: 10),
+                // الوصل الثاني (نفس المحتوى)
+                _buildReceiptCard(subscription, person, printTime),
+              ],
+            );
+          },
+        ),
+      );
+
+      await _printOrSavePDF(
+        pdf,
+        'وصل_اشتراك_${person.name}_${subscription.id}',
+      );
+    } catch (e) {
+      throw Exception('خطأ في طباعة وصل الاشتراك: $e');
+    }
+  }
+
+  // بناء كارت الوصل
+  static pw.Widget _buildReceiptCard(
+    InternetSubscription subscription,
+    Person person,
+    DateTime printTime,
+  ) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(12),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.black, width: 2),
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+        children: [
+          // رأس الوصل
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(vertical: 8),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.blue100,
+              borderRadius: pw.BorderRadius.circular(4),
+            ),
+            child: pw.Center(
+              child: pw.Text(
+                'وصل اشتراك إنترنت',
+                style: _arabicTextStyle(
+                  fontSize: 16,
+                  isBold: true,
+                  color: PdfColors.blue800,
+                ),
+                textDirection: pw.TextDirection.rtl,
+              ),
+            ),
+          ),
+          pw.SizedBox(height: 10),
+          
+          // معلومات الزبون
+          _buildReceiptRow('اسم الزبون:', person.name),
+          _buildReceiptRow('رقم الزبون:', '${person.id}'),
+          
+          pw.SizedBox(height: 8),
+          pw.Divider(color: PdfColors.grey400),
+          pw.SizedBox(height: 8),
+          
+          // تفاصيل الاشتراك
+          _buildReceiptRow('نوع الاشتراك:', subscription.packageName),
+          _buildReceiptRow(
+            'سعر الاشتراك:',
+            '${NumberFormatter.format(subscription.price)} د.ع',
+          ),
+          _buildReceiptRow(
+            'تاريخ البداية:',
+            DateFormatter.formatDisplayDate(subscription.startDate),
+          ),
+          _buildReceiptRow(
+            'تاريخ الدفع:',
+            DateFormatter.formatDisplayDate(subscription.paymentDate),
+          ),
+          _buildReceiptRow(
+            'المبلغ المدفوع:',
+            '${NumberFormatter.format(subscription.paidAmount)} د.ع',
+          ),
+          
+          // الملاحظات إذا وجدت
+          if (subscription.notes != null && subscription.notes!.isNotEmpty) ...[
+            pw.SizedBox(height: 5),
+            _buildReceiptRow('الملاحظات:', subscription.notes!),
+          ],
+          
+          pw.SizedBox(height: 8),
+          pw.Divider(color: PdfColors.grey400),
+          pw.SizedBox(height: 8),
+          
+          // تاريخ ووقت الطباعة
+          pw.Center(
+            child: pw.Text(
+              'تاريخ ووقت الطباعة: ${DateFormatter.formatDisplayDateTime(printTime)}',
+              style: _arabicTextStyle(
+                fontSize: 10,
+                color: PdfColors.grey700,
+              ),
+              textDirection: pw.TextDirection.rtl,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // بناء صف في الوصل
+  static pw.Widget _buildReceiptRow(String title, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            title,
+            style: _arabicTextStyle(fontSize: 11, isBold: true),
+            textDirection: pw.TextDirection.rtl,
+          ),
+          pw.Expanded(
+            child: pw.Text(
+              value,
+              style: _arabicTextStyle(fontSize: 11),
+              textDirection: pw.TextDirection.rtl,
+              textAlign: pw.TextAlign.left,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

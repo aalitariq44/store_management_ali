@@ -1723,6 +1723,13 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           ),
         ),
         const PopupMenuItem<String>(
+          value: 'print',
+          child: ListTile(
+            leading: Icon(Icons.print, color: Colors.purple),
+            title: Text('طباعة وصل'),
+          ),
+        ),
+        const PopupMenuItem<String>(
           value: 'delete',
           child: ListTile(
             leading: Icon(Icons.delete, color: Colors.red),
@@ -1762,6 +1769,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         break;
       case 'edit':
         _showInternetForm(subscription: subscription);
+        break;
+      case 'print':
+        _printInternetSubscriptionReceipt(subscription);
         break;
       case 'delete':
         _confirmDeleteSubscription(subscription);
@@ -2088,6 +2098,22 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         );
       },
     );
+  }
+
+  // طباعة وصل اشتراك إنترنت
+  void _printInternetSubscriptionReceipt(InternetSubscription subscription) async {
+    try {
+      await PDFService.printInternetSubscriptionReceipt(
+        subscription: subscription,
+        person: widget.person,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('خطأ في الطباعة: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   // Widget to show empty state with icon and message

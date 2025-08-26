@@ -8,6 +8,7 @@ import '../widgets/internet_form.dart';
 import '../widgets/print_actions.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
+import '../services/pdf_service.dart';
 
 class InternetScreen extends StatefulWidget {
   const InternetScreen({super.key});
@@ -646,6 +647,11 @@ class _InternetScreenState extends State<InternetScreen> {
                             tooltip: 'إضافة اشتراك جديد',
                           ),
                           IconButton(
+                            icon: const Icon(Icons.print, color: Colors.purple),
+                            onPressed: () => _printSubscriptionReceipt(subscription),
+                            tooltip: 'طباعة وصل',
+                          ),
+                          IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),
                             onPressed: () =>
                                 _showInternetForm(subscription: subscription),
@@ -668,5 +674,29 @@ class _InternetScreenState extends State<InternetScreen> {
         );
       },
     );
+  }
+
+  // طباعة وصل اشتراك
+  void _printSubscriptionReceipt(InternetSubscription subscription) async {
+    try {
+      final personProvider = Provider.of<PersonProvider>(context, listen: false);
+      final person = personProvider.getPersonById(subscription.personId);
+      
+      if (person == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('خطأ: لم يتم العثور على الزبون')),
+        );
+        return;
+      }
+
+      await PDFService.printInternetSubscriptionReceipt(
+        subscription: subscription,
+        person: person,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('خطأ في الطباعة: ${e.toString()}')),
+      );
+    }
   }
 }

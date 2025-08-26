@@ -6,6 +6,7 @@ import '../providers/person_provider.dart';
 import '../models/internet_model.dart';
 import '../models/person_model.dart';
 import '../utils/date_formatter.dart';
+import '../services/pdf_service.dart';
 
 class InternetForm extends StatefulWidget {
   final InternetSubscription? subscription;
@@ -121,7 +122,9 @@ class _InternetFormState extends State<InternetForm> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('تم إضافة الاشتراك بنجاح')),
           );
-          Navigator.pop(context);
+          
+          // إظهار حوار لطباعة الوصل
+          _showPrintReceiptDialog(subscription);
         }
       } else {
         // تعديل اشتراك موجود
@@ -376,6 +379,47 @@ class _InternetFormState extends State<InternetForm> {
               : Text(widget.subscription?.id == null ? 'إضافة' : 'تحديث'),
         ),
       ],
+    );
+  }
+
+  // إظهار حوار لطباعة الوصل
+  void _showPrintReceiptDialog(InternetSubscription subscription) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('طباعة وصل الاشتراك'),
+        content: const Text('هل تريد طباعة وصل لهذا الاشتراك؟'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // إغلاق حوار الطباعة
+              Navigator.pop(context); // إغلاق فورم الاشتراك
+            },
+            child: const Text('لا'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                Navigator.pop(context); // إغلاق حوار الطباعة
+                Navigator.pop(context); // إغلاق فورم الاشتراك
+                
+                // طباعة الوصل
+                await PDFService.printInternetSubscriptionReceipt(
+                  subscription: subscription,
+                  person: _selectedPerson!,
+                );
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('خطأ في الطباعة: ${e.toString()}')),
+                  );
+                }
+              }
+            },
+            child: const Text('نعم، اطبع'),
+          ),
+        ],
+      ),
     );
   }
 }
