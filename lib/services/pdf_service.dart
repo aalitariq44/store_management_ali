@@ -18,43 +18,96 @@ class PDFService {
   // متغيرات الخطوط العربية
   static pw.Font? _arabicFont;
   static pw.Font? _arabicBoldFont;
+  static bool _fontsTried = false; // لمنع تكرار المحاولات إذا فشلت
+
+  // إنشاء الثيم العربي الموحد
+  static pw.ThemeData? _arabicTheme;
 
   // تحميل الخطوط العربية
   static Future<void> _loadArabicFonts() async {
-    if (_arabicFont == null || _arabicBoldFont == null) {
+    if ((_arabicFont != null && _arabicBoldFont != null) || _fontsTried) return;
+    _fontsTried = true; // نحاول مرة واحدة فقط لكل دورة تشغيل
+    Future<pw.Font?> tryLoad(String path) async {
       try {
-        // تحميل خط Amiri العادي والعريض
-        final regularFont = await rootBundle.load(
-          "assets/fonts/Amiri-Regular.ttf",
-        );
-        final boldFont = await rootBundle.load("assets/fonts/Amiri-Bold.ttf");
-
-        _arabicFont = pw.Font.ttf(regularFont);
-        _arabicBoldFont = pw.Font.ttf(boldFont);
+        // استخدام الطريقة المباشرة لتجنب خطأ RangeError (byteOffset)
+        final data = await rootBundle.load(path);
+        print('Attempting to load font: $path');
+        final font = pw.Font.ttf(data);
+        print('Successfully loaded font: $path');
+        return font;
       } catch (e) {
-        // في حالة فشل تحميل خط Amiri، نجرب Cairo
-        try {
-          final regularFont = await rootBundle.load(
-            "assets/fonts/Cairo-Regular.ttf",
-          );
-          final boldFont = await rootBundle.load("assets/fonts/Cairo-Bold.ttf");
-
-          _arabicFont = pw.Font.ttf(regularFont);
-          _arabicBoldFont = pw.Font.ttf(boldFont);
-        } catch (e2) {
-          // في حالة فشل جميع الخطوط، نجرب NotoSansArabic
-          try {
-            final arabicFont = await rootBundle.load(
-              "assets/fonts/NotoSansArabic-Regular.ttf",
-            );
-            _arabicFont = pw.Font.ttf(arabicFont);
-            _arabicBoldFont = _arabicFont; // نستخدم نفس الخط للعريض
-          } catch (e3) {
-            print('فشل في تحميل الخطوط العربية: $e3');
-            // سنستخدم الخط الافتراضي
-          }
-        }
+        print('Error loading font $path: $e');
+        return null;
       }
+    }
+
+    // ترتيب التفضيل
+    final regularCandidates = [
+      'assets/fonts/NotoSansArabic-Regular.ttf',
+      'assets/fonts/Amiri-Regular.ttf',
+      'assets/fonts/Cairo-Regular.ttf',
+      'assets/fonts/Beiruti-VariableFont_wght.ttf',
+    ];
+    final boldCandidates = [
+      'assets/fonts/Amiri-Bold.ttf',
+      'assets/fonts/Cairo-Bold.ttf',
+      'assets/fonts/Cairo-SemiBold.ttf',
+      'assets/fonts/NotoSansArabic-Regular.ttf',
+    ];
+
+    for (final path in regularCandidates) {
+      _arabicFont = await tryLoad(path);
+      if (_arabicFont != null) break;
+    }
+    for (final path in boldCandidates) {
+      _arabicBoldFont = await tryLoad(path);
+      if (_arabicBoldFont != null) break;
+    }
+
+    // إذا فشل كل شيء نترك المتغيرات null وسيستخدم الخط الافتراضي (قد يؤدي لمربعات)
+    if (_arabicFont == null) {
+      print(
+        'تحذير: لم يتم تحميل أي خط عربي (Regular). تحقق من pubspec.yaml ومسار الملفات.',
+      );
+      // تحقق من وجود ملفات الخطوط
+      try {
+        final bool notoExists = await rootBundle
+            .loadString('assets/fonts/NotoSansArabic-Regular.ttf')
+            .then((_) => true)
+            .catchError((_) => false);
+        final bool amiriExists = await rootBundle
+            .loadString('assets/fonts/Amiri-Regular.ttf')
+            .then((_) => true)
+            .catchError((_) => false);
+        final bool cairoExists = await rootBundle
+            .loadString('assets/fonts/Cairo-Regular.ttf')
+            .then((_) => true)
+            .catchError((_) => false);
+
+        print(
+          'وجود الخطوط: Noto: $notoExists, Amiri: $amiriExists, Cairo: $cairoExists',
+        );
+      } catch (e) {
+        print('خطأ عند التحقق من وجود ملفات الخطوط: $e');
+      }
+    }
+    if (_arabicBoldFont == null) {
+      print(
+        'تحذير: لم يتم تحميل أي خط عربي (Bold). سيتم استخدام الخط العادي مكانه.',
+      );
+      _arabicBoldFont = _arabicFont; // استخدم نفس الخط كعريض إن وجد
+    }
+
+    if (_arabicFont != null) {
+      print('تم تحميل الخط العربي (Regular) بنجاح');
+      _arabicTheme = pw.ThemeData.withFont(
+        base: _arabicFont!,
+        bold: _arabicBoldFont ?? _arabicFont!,
+        italic: _arabicFont!,
+        boldItalic: _arabicBoldFont ?? _arabicFont!,
+      );
+    } else {
+      print('تنبيه: سيتم استخدام الخط الافتراضي للـ PDF (قد تظهر مربعات).');
     }
   }
 
@@ -66,6 +119,11 @@ class PDFService {
   }) {
     return pw.TextStyle(
       font: isBold ? _arabicBoldFont : _arabicFont,
+      // إضافة fallback لضمان إظهار أي محارف عربية مفقودة في الخط الأساسي
+      fontFallback: [
+        if (_arabicFont != null) _arabicFont!,
+        if (_arabicBoldFont != null) _arabicBoldFont!,
+      ],
       fontSize: fontSize,
       fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
       color: color,
@@ -83,7 +141,7 @@ class PDFService {
       // تحميل الخطوط العربية أولاً
       await _loadArabicFonts();
 
-      final pdf = pw.Document();
+      final pdf = pw.Document(theme: _arabicTheme);
 
       pdf.addPage(
         pw.MultiPage(
@@ -134,7 +192,7 @@ class PDFService {
     try {
       await _loadArabicFonts();
 
-      final pdf = pw.Document();
+      final pdf = pw.Document(theme: _arabicTheme);
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
@@ -180,7 +238,7 @@ class PDFService {
       // تحميل الخطوط العربية أولاً
       await _loadArabicFonts();
 
-      final pdf = pw.Document();
+      final pdf = pw.Document(theme: _arabicTheme);
 
       pdf.addPage(
         pw.MultiPage(
@@ -219,7 +277,7 @@ class PDFService {
   }) async {
     try {
       await _loadArabicFonts();
-      final pdf = pw.Document();
+      final pdf = pw.Document(theme: _arabicTheme);
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
@@ -258,7 +316,7 @@ class PDFService {
       // تحميل الخطوط العربية أولاً
       await _loadArabicFonts();
 
-      final pdf = pw.Document();
+      final pdf = pw.Document(theme: _arabicTheme);
 
       pdf.addPage(
         pw.MultiPage(
@@ -297,7 +355,7 @@ class PDFService {
   }) async {
     try {
       await _loadArabicFonts();
-      final pdf = pw.Document();
+      final pdf = pw.Document(theme: _arabicTheme);
       pdf.addPage(
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
@@ -336,7 +394,7 @@ class PDFService {
       // تحميل الخطوط العربية أولاً
       await _loadArabicFonts();
 
-      final pdf = pw.Document();
+      final pdf = pw.Document(theme: _arabicTheme);
 
       pdf.addPage(
         pw.MultiPage(
