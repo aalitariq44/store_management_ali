@@ -5,12 +5,14 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/material.dart';
 import '../models/person_model.dart';
 import '../models/debt_model.dart';
 import '../models/installment_model.dart';
 import '../models/internet_model.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
+import '../widgets/pdf_preview_dialog.dart';
 
 class PDFService {
   // متغيرات الخطوط العربية
@@ -1325,6 +1327,60 @@ class PDFService {
       );
     } catch (e) {
       throw Exception('خطأ في طباعة وصل الاشتراك: $e');
+    }
+  }
+
+  // عرض معاينة وصل اشتراك إنترنت مع إمكانية الطباعة
+  static Future<bool?> showInternetSubscriptionReceiptPreview({
+    required BuildContext context,
+    required InternetSubscription subscription,
+    required Person person,
+  }) async {
+    try {
+      // تحميل الخطوط العربية أولاً
+      await _loadArabicFonts();
+
+      final pdf = pw.Document();
+      final printTime = DateTime.now();
+
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a5,
+          textDirection: pw.TextDirection.rtl,
+          build: (pw.Context context) {
+            return pw.Column(
+              children: [
+                // الوصل الأول
+                _buildReceiptCard(subscription, person, printTime),
+                pw.SizedBox(height: 10),
+                // خط فاصل
+                pw.Container(
+                  height: 1,
+                  width: double.infinity,
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(
+                      color: PdfColors.grey300,
+                      style: pw.BorderStyle.dashed,
+                    ),
+                  ),
+                ),
+                pw.SizedBox(height: 10),
+                // الوصل الثاني (نفس المحتوى)
+                _buildReceiptCard(subscription, person, printTime),
+              ],
+            );
+          },
+        ),
+      );
+
+      // عرض نافذة المعاينة
+      return await PDFPreviewDialog.show(
+        context: context,
+        pdf: pdf,
+        title: 'وصل اشتراك إنترنت - ${person.name}',
+      );
+    } catch (e) {
+      throw Exception('خطأ في عرض معاينة وصل الاشتراك: $e');
     }
   }
 

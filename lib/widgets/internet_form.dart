@@ -403,20 +403,21 @@ class _InternetFormState extends State<InternetForm> {
                 Navigator.pop(context); // إغلاق حوار الطباعة
                 Navigator.pop(context); // إغلاق فورم الاشتراك
                 
-                // طباعة الوصل
-                await PDFService.printInternetSubscriptionReceipt(
+                // عرض معاينة الوصل
+                await PDFService.showInternetSubscriptionReceiptPreview(
+                  context: context,
                   subscription: subscription,
                   person: _selectedPerson!,
                 );
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('خطأ في الطباعة: ${e.toString()}')),
+                    SnackBar(content: Text('خطأ في عرض المعاينة: ${e.toString()}')),
                   );
                 }
               }
             },
-            child: const Text('نعم، اطبع'),
+            child: const Text('نعم، اعرض المعاينة'),
           ),
         ],
       ),

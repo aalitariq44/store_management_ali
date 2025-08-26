@@ -2103,14 +2103,15 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   // طباعة وصل اشتراك إنترنت
   void _printInternetSubscriptionReceipt(InternetSubscription subscription) async {
     try {
-      await PDFService.printInternetSubscriptionReceipt(
+      await PDFService.showInternetSubscriptionReceiptPreview(
+        context: context,
         subscription: subscription,
         person: widget.person,
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ في الطباعة: ${e.toString()}')),
+          SnackBar(content: Text('خطأ في عرض المعاينة: ${e.toString()}')),
         );
       }
     }

@@ -689,13 +689,14 @@ class _InternetScreenState extends State<InternetScreen> {
         return;
       }
 
-      await PDFService.printInternetSubscriptionReceipt(
+      await PDFService.showInternetSubscriptionReceiptPreview(
+        context: context,
         subscription: subscription,
         person: person,
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('خطأ في الطباعة: ${e.toString()}')),
+        SnackBar(content: Text('خطأ في عرض المعاينة: ${e.toString()}')),
       );
     }
   }
