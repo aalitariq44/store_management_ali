@@ -820,6 +820,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
     return DataCell(
       GestureDetector(
         behavior: HitTestBehavior.opaque,
+        onTap: () => _showPaymentHistory(installment),
         onSecondaryTapDown: (details) {
           _showInstallmentContextMenu(
             details.globalPosition,
