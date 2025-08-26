@@ -9,10 +9,7 @@ import '../services/pdf_service.dart' as pdf_service;
 class PrintOptionsWidget extends StatelessWidget {
   final Person person;
 
-  const PrintOptionsWidget({
-    super.key,
-    required this.person,
-  });
+  const PrintOptionsWidget({super.key, required this.person});
 
   @override
   Widget build(BuildContext context) {
@@ -112,9 +109,7 @@ class PrintOptionsWidget extends StatelessWidget {
         backgroundColor: color,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
@@ -122,14 +117,24 @@ class PrintOptionsWidget extends StatelessWidget {
   Future<void> _previewFullDetails(BuildContext context) async {
     try {
       _showLoadingDialog(context, 'جاري إنشاء المعاينة...');
-      
+
       final debtProvider = Provider.of<DebtProvider>(context, listen: false);
-      final installmentProvider = Provider.of<InstallmentProvider>(context, listen: false);
-      final internetProvider = Provider.of<InternetProvider>(context, listen: false);
+      final installmentProvider = Provider.of<InstallmentProvider>(
+        context,
+        listen: false,
+      );
+      final internetProvider = Provider.of<InternetProvider>(
+        context,
+        listen: false,
+      );
 
       final debts = debtProvider.getDebtsByPersonId(person.id!);
-      final installments = installmentProvider.getInstallmentsByPersonId(person.id!);
-      final internetSubscriptions = internetProvider.getSubscriptionsByPersonId(person.id!);
+      final installments = installmentProvider.getInstallmentsByPersonId(
+        person.id!,
+      );
+      final internetSubscriptions = internetProvider.getSubscriptionsByPersonId(
+        person.id!,
+      );
 
       Navigator.of(context).pop();
       await pdf_service.PDFService.showCustomerDetailsPreview(
@@ -148,7 +153,7 @@ class PrintOptionsWidget extends StatelessWidget {
   Future<void> _previewDebtsOnly(BuildContext context) async {
     try {
       _showLoadingDialog(context, 'جاري إنشاء المعاينة...');
-      
+
       final debtProvider = Provider.of<DebtProvider>(context, listen: false);
       final debts = debtProvider.getDebtsByPersonId(person.id!);
 
@@ -173,9 +178,14 @@ class PrintOptionsWidget extends StatelessWidget {
   Future<void> _previewInstallmentsOnly(BuildContext context) async {
     try {
       _showLoadingDialog(context, 'جاري إنشاء المعاينة...');
-      
-      final installmentProvider = Provider.of<InstallmentProvider>(context, listen: false);
-      final installments = installmentProvider.getInstallmentsByPersonId(person.id!);
+
+      final installmentProvider = Provider.of<InstallmentProvider>(
+        context,
+        listen: false,
+      );
+      final installments = installmentProvider.getInstallmentsByPersonId(
+        person.id!,
+      );
 
       if (installments.isEmpty) {
         Navigator.of(context).pop();
@@ -198,9 +208,14 @@ class PrintOptionsWidget extends StatelessWidget {
   Future<void> _previewInternetOnly(BuildContext context) async {
     try {
       _showLoadingDialog(context, 'جاري إنشاء المعاينة...');
-      
-      final internetProvider = Provider.of<InternetProvider>(context, listen: false);
-      final internetSubscriptions = internetProvider.getSubscriptionsByPersonId(person.id!);
+
+      final internetProvider = Provider.of<InternetProvider>(
+        context,
+        listen: false,
+      );
+      final internetSubscriptions = internetProvider.getSubscriptionsByPersonId(
+        person.id!,
+      );
 
       if (internetSubscriptions.isEmpty) {
         Navigator.of(context).pop();
