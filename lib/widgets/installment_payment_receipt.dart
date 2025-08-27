@@ -139,18 +139,42 @@ class InstallmentPaymentReceipt {
           pw.SizedBox(height: 8),
 
           // Installment Details
-          _buildReceiptRow('اسم المنتج:', installment.productName),
-          _buildReceiptRow('المبلغ الإجمالي للمنتج:', '${NumberFormatter.format(installment.totalAmount)} د.ع'),
-          _buildReceiptRow('مجموع المدفوع:', '${NumberFormatter.format(installment.paidAmount)} د.ع', color: PdfColors.green),
-          _buildReceiptRow('المتبقي:', '${NumberFormatter.format(installment.remainingAmount)} د.ع', color: PdfColors.red),
+          pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(vertical: 2),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                _buildTitleValueText('اسم المنتج:', installment.productName),
+                _buildTitleValueText('المبلغ الإجمالي للمنتج:', '${NumberFormatter.format(installment.totalAmount)} د.ع', textAlign: pw.TextAlign.right),
+              ],
+            ),
+          ),
+          pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(vertical: 2),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                _buildTitleValueText('مجموع المدفوع:', '${NumberFormatter.format(installment.paidAmount)} د.ع', color: PdfColors.green),
+                _buildTitleValueText('المتبقي:', '${NumberFormatter.format(installment.remainingAmount)} د.ع', color: PdfColors.red, textAlign: pw.TextAlign.right),
+              ],
+            ),
+          ),
           
           pw.SizedBox(height: 8),
           pw.Divider(color: PdfColors.grey400),
           pw.SizedBox(height: 8),
 
           // Payment Details
-          _buildReceiptRow('مبلغ هذه الدفعة:', '${NumberFormatter.format(payment.amount)} د.ع', isBold: true, fontSize: 14),
-          _buildReceiptRow('تاريخ الدفعة:', DateFormatter.formatDisplayDateTime(payment.paymentDate)),
+          pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(vertical: 2),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                _buildTitleValueText('مبلغ هذه الدفعة:', '${NumberFormatter.format(payment.amount)} د.ع', isBold: true, fontSize: 14),
+                _buildTitleValueText('تاريخ الدفعة:', DateFormatter.formatDisplayDateTime(payment.paymentDate), textAlign: pw.TextAlign.right),
+              ],
+            ),
+          ),
 
           // Notes if available
           if (payment.notes != null && payment.notes!.isNotEmpty) ...[
@@ -204,6 +228,26 @@ class InstallmentPaymentReceipt {
           ),
         ],
       ),
+    );
+  }
+
+  static pw.Widget _buildTitleValueText(String title, String value, {PdfColor? color, bool isBold = false, double fontSize = 11, pw.TextAlign? textAlign}) {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.start,
+      children: [
+        pw.Text(
+          title,
+          style: _arabicTextStyle(fontSize: fontSize, isBold: true),
+          textDirection: pw.TextDirection.rtl,
+        ),
+        pw.SizedBox(width: 4),
+        pw.Text(
+          value,
+          style: _arabicTextStyle(fontSize: fontSize, color: color, isBold: isBold),
+          textDirection: pw.TextDirection.rtl,
+          textAlign: textAlign ?? pw.TextAlign.left,
+        ),
+      ],
     );
   }
 }
