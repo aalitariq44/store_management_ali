@@ -37,7 +37,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
       context: context,
       builder: (context) => AddPaymentDialog(
         installment: installment,
-        onPaymentAdded: (updatedInstallment) {
+        onPaymentAdded: (updatedInstallment, newPayment) {
           // Re-open the payment history dialog to show the new payment
           _showPaymentHistory(updatedInstallment);
         },

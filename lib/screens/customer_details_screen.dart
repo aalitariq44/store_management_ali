@@ -966,12 +966,35 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       context: context,
       builder: (context) => AddPaymentDialog(
         installment: installment,
-        onPaymentAdded: (updatedInstallment) {
-          // Refresh the payment history after a payment is added
-          _showPaymentHistory(updatedInstallment);
+        onPaymentAdded: (updatedInstallment, payment) {
+          if (mounted) {
+            Navigator.of(context).pop(); // Close the add payment dialog
+            _printInstallmentPaymentReceipt(updatedInstallment, payment);
+          }
         },
       ),
     );
+  }
+
+  Future<void> _printInstallmentPaymentReceipt(
+    Installment installment,
+    InstallmentPayment payment,
+  ) async {
+    final person = widget.person;
+    try {
+      await PDFService.showInstallmentPaymentReceiptPreview(
+        context: context,
+        installment: installment,
+        payment: payment,
+        person: person,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('خطأ في طباعة الوصل: $e')),
+        );
+      }
+    }
   }
 
   void _confirmDeletePayment(
@@ -1159,20 +1182,38 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                                       ],
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: () {
-                                      // Close the history dialog first
-                                      Navigator.of(context).pop();
-                                      _confirmDeletePayment(
-                                        latestInstallment,
-                                        payment,
-                                      );
-                                    },
-                                  ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.print,
+                                          color: Colors.blue,
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          _printInstallmentPaymentReceipt(
+                                            latestInstallment,
+                                            payment,
+                                          );
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
+                                        ),
+                                        onPressed: () {
+                                          // Close the history dialog first
+                                          Navigator.of(context).pop();
+                                          _confirmDeletePayment(
+                                            latestInstallment,
+                                            payment,
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  )
                                 ],
                               ),
                             ),

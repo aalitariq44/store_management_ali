@@ -13,6 +13,7 @@ import '../models/internet_model.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
 import '../widgets/internet_receipt.dart';
+import '../widgets/installment_payment_receipt.dart';
 import '../widgets/pdf_preview_dialog.dart';
 
 class PDFService {
@@ -1670,6 +1671,75 @@ class PDFService {
       );
     } catch (e) {
       throw Exception('خطأ في عرض معاينة وصل الاشتراك: $e');
+    }
+  }
+
+
+  // عرض معاينة وصل دفع قسط مع إمكانية الطباعة
+  static Future<bool?> showInstallmentPaymentReceiptPreview({
+    required BuildContext context,
+    required Installment installment,
+    required InstallmentPayment payment,
+    required Person person,
+  }) async {
+    try {
+      // تحميل الخطوط العربية أولاً
+      await _loadArabicFonts();
+      InstallmentPaymentReceipt.setFonts(_arabicFont, _arabicBoldFont);
+
+      final pdf = pw.Document(theme: _arabicTheme);
+      final printTime = DateTime.now();
+
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a5,
+          margin: pw.EdgeInsets.all(0.4 * PdfPageFormat.cm), // هامش صغير 0.4 سم
+          textDirection: pw.TextDirection.rtl,
+          build: (pw.Context context) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+              children: [
+                // الوصل الأول
+                InstallmentPaymentReceipt.buildReceiptCard(
+                  installment,
+                  payment,
+                  person,
+                  printTime,
+                ),
+                pw.SizedBox(height: 10),
+                // خط فاصل
+                pw.Container(
+                  height: 1,
+                  width: double.infinity,
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(
+                      color: PdfColors.grey300,
+                      style: pw.BorderStyle.dashed,
+                    ),
+                  ),
+                ),
+                pw.SizedBox(height: 10),
+                // الوصل الثاني (نفس المحتوى)
+                InstallmentPaymentReceipt.buildReceiptCard(
+                  installment,
+                  payment,
+                  person,
+                  printTime,
+                ),
+              ],
+            );
+          },
+        ),
+      );
+
+      // عرض نافذة المعاينة
+      return await PDFPreviewDialog.show(
+        context: context,
+        pdf: pdf,
+        title: 'وصل دفع قسط - ${person.name}',
+      );
+    } catch (e) {
+      throw Exception('خطأ في عرض معاينة وصل القسط: $e');
     }
   }
 }

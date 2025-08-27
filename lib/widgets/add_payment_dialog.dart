@@ -8,7 +8,7 @@ import '../utils/number_formatter.dart';
 
 class AddPaymentDialog extends StatefulWidget {
   final Installment installment;
-  final Function(Installment) onPaymentAdded;
+  final Function(Installment, InstallmentPayment) onPaymentAdded;
 
   const AddPaymentDialog({
     super.key,
@@ -134,15 +134,15 @@ class _AddPaymentDialogState extends State<AddPaymentDialog> {
       await provider.addPayment(widget.installment.id!, payment);
 
       if (mounted) {
-        navigator.pop(); // Close the add payment dialog
+        // Callback to refresh the previous screen and show receipt
+        widget.onPaymentAdded(widget.installment, payment);
+
         messenger.showSnackBar(
           const SnackBar(
             content: Text('تم إضافة الدفعة بنجاح'),
             backgroundColor: Colors.green,
           ),
         );
-        // Callback to refresh the previous screen
-        widget.onPaymentAdded(widget.installment);
       }
     } catch (e) {
       if (mounted) {
