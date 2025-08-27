@@ -209,7 +209,7 @@ class _BackupScreenState extends State<BackupScreen> {
                                 ),
                                 title: Text(_formatFileName(file.name)),
                                 subtitle: Text(
-                                  'تاريخ الإنشاء: ${DateFormatter.formatDateTime(DateTime.parse(file.createdAt!))}',
+                                  'تاريخ الإنشاء: ${DateFormatter.formatDateTime(DateTime.parse(file.createdAt!).toLocal())}',
                                 ),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,

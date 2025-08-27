@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart'; // Import DateFormat
 import '../config/database_helper.dart';
 import '../config/supabase_config.dart';
 
@@ -17,7 +18,7 @@ class BackupService {
       final bytes = await dbFile.readAsBytes();
       
       // إنشاء اسم الملف مع الطابع الزمني
-      final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
+      final timestamp = DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.now().toLocal());
       final fileName = 'backup_$timestamp.db';
       
       // رفع قاعدة البيانات إلى Supabase Storage
