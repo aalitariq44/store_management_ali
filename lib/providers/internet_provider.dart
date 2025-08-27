@@ -26,12 +26,13 @@ class InternetProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addSubscription(InternetSubscription subscription) async {
+  Future<InternetSubscription> addSubscription(InternetSubscription subscription) async {
     try {
       final id = await _dbHelper.insertInternetSubscription(subscription);
       final newSubscription = subscription.copyWith(id: id);
       _subscriptions.insert(0, newSubscription);
       notifyListeners();
+      return newSubscription; // Return the subscription with the generated ID
     } catch (e) {
       debugPrint('Error adding subscription: $e');
       throw Exception('فشل في إضافة الاشتراك');

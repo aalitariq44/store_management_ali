@@ -116,7 +116,7 @@ class _InternetFormState extends State<InternetForm> {
           updatedAt: now,
         );
 
-        await internetProvider.addSubscription(subscription);
+        final newSubscriptionWithId = await internetProvider.addSubscription(subscription);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -124,7 +124,7 @@ class _InternetFormState extends State<InternetForm> {
           );
 
           // إظهار حوار لطباعة الوصل
-          _showPrintReceiptDialog(subscription);
+          _showPrintReceiptDialog(newSubscriptionWithId);
         }
       } else {
         // تعديل اشتراك موجود
