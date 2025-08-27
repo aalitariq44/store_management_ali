@@ -519,7 +519,7 @@ class PDFService {
         crossAxisAlignment: pw.CrossAxisAlignment.center,
         children: [
           pw.Text(
-            'نظام إدارة المتجر',
+            'محل كاظم السعدي',
             style: pw.TextStyle(
               font: _arabicBoldFont,
               fontSize: 24,
