@@ -50,17 +50,17 @@ class _BackupScreenState extends State<BackupScreen> {
     });
 
     try {
-      final success = await BackupService.uploadBackup();
-      if (success) {
+      final errorMessage = await BackupService.uploadBackup();
+      if (errorMessage == null) {
         _showSnackBar('تم إنشاء النسخة الاحتياطية بنجاح');
         await _loadBackupFiles();
         // تنظيف النسخ القديمة
         await BackupService.cleanupOldBackups();
       } else {
-        _showSnackBar('فشل في إنشاء النسخة الاحتياطية', isError: true);
+        _showSnackBar('فشل في إنشاء النسخة الاحتياطية: $errorMessage', isError: true);
       }
-    } catch (e) {
-      _showSnackBar('خطأ في إنشاء النسخة الاحتياطية: $e', isError: true);
+    } catch (e, stackTrace) {
+      _showSnackBar('خطأ غير متوقع في إنشاء النسخة الاحتياطية: $e\nتتبع الخطأ: $stackTrace', isError: true);
     } finally {
       setState(() {
         _isLoading = false;

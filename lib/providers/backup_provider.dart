@@ -28,24 +28,27 @@ class BackupProvider extends ChangeNotifier {
   }
 
   /// إنشاء نسخة احتياطية جديدة
-  Future<bool> createBackup() async {
+  /// يعيد رسالة خطأ مفصلة إذا فشل، أو null إذا نجح.
+  Future<String?> createBackup() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final success = await BackupService.uploadBackup();
-      if (success) {
+      final errorMessage = await BackupService.uploadBackup();
+      if (errorMessage == null) {
         // تنظيف النسخ القديمة
         await BackupService.cleanupOldBackups();
         // إعادة تحميل قائمة النسخ
         await loadBackupFiles();
-        return true;
+        return null; // النجاح
+      } else {
+        _errorMessage = errorMessage;
+        return errorMessage; // الفشل مع رسالة خطأ مفصلة
       }
-      return false;
-    } catch (e) {
-      _errorMessage = 'خطأ في إنشاء النسخة الاحتياطية: $e';
-      return false;
+    } catch (e, stackTrace) {
+      _errorMessage = 'خطأ غير متوقع في إنشاء النسخة الاحتياطية: $e\nتتبع الخطأ: $stackTrace';
+      return _errorMessage; // الفشل مع رسالة خطأ مفصلة
     } finally {
       _isLoading = false;
       notifyListeners();

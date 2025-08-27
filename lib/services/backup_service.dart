@@ -7,7 +7,8 @@ import '../config/supabase_config.dart';
 class BackupService {
   
   /// رفع النسخة الاحتياطية إلى Supabase
-  static Future<bool> uploadBackup() async {
+  /// يعيد رسالة خطأ مفصلة إذا فشل، أو null إذا نجح.
+  static Future<String?> uploadBackup() async {
     try {
       // الحصول على مسار قاعدة البيانات
       final db = await DatabaseHelper.instance.database;
@@ -33,10 +34,11 @@ class BackupService {
             ),
           );
       
-      return true;
-    } catch (e) {
-      print('خطأ في رفع النسخة الاحتياطية: $e');
-      return false;
+      return null; // النجاح
+    } catch (e, stackTrace) {
+      final errorMessage = 'فشل في عمل نسخة احتياطية. التفاصيل: $e\nتتبع الخطأ: $stackTrace';
+      print('خطأ في رفع النسخة الاحتياطية: $errorMessage');
+      return errorMessage; // الفشل مع رسالة خطأ مفصلة
     }
   }
 

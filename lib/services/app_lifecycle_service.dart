@@ -33,13 +33,13 @@ class AppLifecycleService {
       }
 
       // إنشاء النسخة الاحتياطية
-      final success = await BackupService.uploadBackup();
+      final errorMessage = await BackupService.uploadBackup();
 
       if (context.mounted) {
         Navigator.of(context).pop(); // إغلاق مؤشر التقدم
       }
 
-      if (success) {
+      if (errorMessage == null) {
         // تنظيف النسخ القديمة
         await BackupService.cleanupOldBackups();
 
@@ -52,15 +52,15 @@ class AppLifecycleService {
         _exitApplication(); // الخروج بعد رسالة النجاح
       } else {
         if (context.mounted) {
-          await _showErrorMessage(context, 'فشل في إنشاء النسخة الاحتياطية');
+          await _showErrorMessage(context, 'فشل في إنشاء النسخة الاحتياطية: $errorMessage');
         } else {
           _exitApplication(); // الخروج حتى لو لم يكن السياق متاحًا لعرض الرسالة
         }
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (context.mounted) {
         Navigator.of(context).pop(); // إغلاق مؤشر التقدم إذا كان مفتوحاً
-        await _showErrorMessage(context, 'خطأ في إنشاء النسخة الاحتياطية: $e');
+        await _showErrorMessage(context, 'خطأ غير متوقع في إنشاء النسخة الاحتياطية: $e\nتتبع الخطأ: $stackTrace');
       } else {
         _exitApplication(); // الخروج حتى لو لم يكن السياق متاحًا لعرض الرسالة
       }

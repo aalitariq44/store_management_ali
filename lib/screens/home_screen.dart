@@ -138,11 +138,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     try {
-      final success = await BackupService.uploadBackup();
+      final errorMessage = await BackupService.uploadBackup();
       if (mounted) {
         Navigator.of(context).pop(); // إغلاق مؤشر التحميل
 
-        if (success) {
+        if (errorMessage == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('تم إنشاء النسخة الاحتياطية بنجاح'),
@@ -154,20 +154,20 @@ class _HomeScreenState extends State<HomeScreen> {
           await BackupService.cleanupOldBackups();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('فشل في إنشاء النسخة الاحتياطية'),
+            SnackBar(
+              content: Text('فشل في إنشاء النسخة الاحتياطية: $errorMessage'),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
             ),
           );
         }
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (mounted) {
         Navigator.of(context).pop(); // إغلاق مؤشر التحميل
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('خطأ في إنشاء النسخة الاحتياطية: $e'),
+            content: Text('خطأ غير متوقع في إنشاء النسخة الاحتياطية: $e\nتتبع الخطأ: $stackTrace'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
