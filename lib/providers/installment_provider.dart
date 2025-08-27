@@ -72,7 +72,7 @@ class InstallmentProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addPayment(int installmentId, InstallmentPayment payment) async {
+  Future<InstallmentPayment> addPayment(int installmentId, InstallmentPayment payment) async {
     try {
       final paymentId = await _dbHelper.insertInstallmentPayment(payment);
       final newPayment = payment.copyWith(id: paymentId);
@@ -95,6 +95,7 @@ class InstallmentProvider with ChangeNotifier {
       );
       
       await updateInstallment(updatedInstallment);
+      return newPayment; // Return the newly added payment
     } catch (e) {
       debugPrint('Error adding payment: $e');
       throw Exception('فشل في إضافة الدفعة');
@@ -154,6 +155,17 @@ class InstallmentProvider with ChangeNotifier {
     return _installments
         .where((installment) => installment.personId == personId && !installment.isCompleted)
         .fold(0.0, (sum, installment) => sum + installment.remainingAmount);
+  }
+
+  // New method to fetch a single installment by ID
+  Future<Installment?> fetchInstallmentById(int id) async {
+    try {
+      await loadInstallments(); // Ensure data is fresh
+      return _installments.firstWhere((i) => i.id == id);
+    } catch (e) {
+      debugPrint('Error fetching installment by ID: $e');
+      return null;
+    }
   }
 
   // Remove installments for a specific person (called when person is deleted)

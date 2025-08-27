@@ -32,14 +32,19 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
   }
 
   // New method to show the extracted payment dialog
-  void _showAddPaymentDialog(Installment installment) {
+  void _showAddPaymentDialog(Installment installment, {bool printReceipt = false}) {
     showDialog(
       context: context,
       builder: (context) => AddPaymentDialog(
         installment: installment,
         onPaymentAdded: (updatedInstallment, newPayment) {
+          // Close the add payment dialog
+          Navigator.of(context).pop();
           // Re-open the payment history dialog to show the new payment
           _showPaymentHistory(updatedInstallment);
+          if (printReceipt) {
+            _printInstallment(updatedInstallment);
+          }
         },
       ),
     );
@@ -237,10 +242,20 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
           ElevatedButton.icon(
             onPressed: () {
               Navigator.pop(context); // Close history dialog
-              _showAddPaymentDialog(latestInstallment); // Open add payment dialog
+              _showAddPaymentDialog(
+                latestInstallment,
+              ); // Open add payment dialog
             },
             icon: const Icon(Icons.add_card),
             label: const Text('إضافة دفعة'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(context); // Close history dialog
+              _showAddPaymentDialog(latestInstallment, printReceipt: true); // Open add payment dialog and request print
+            },
+            icon: const Icon(Icons.print),
+            label: const Text('إضافة دفعة وطباعة'),
           ),
         ],
       ),
@@ -783,7 +798,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
         position.dy + 1,
       ),
       items: [
-        if (!installment.isCompleted)
+        if (!installment.isCompleted) ...[
           const PopupMenuItem<String>(
             value: 'add_payment',
             child: ListTile(
@@ -791,6 +806,14 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
               title: Text('إضافة دفعة'),
             ),
           ),
+          const PopupMenuItem<String>(
+            value: 'add_payment_and_print',
+            child: ListTile(
+              leading: Icon(Icons.print, color: Colors.green),
+              title: Text('إضافة دفعة وطباعة'),
+            ),
+          ),
+        ],
         const PopupMenuItem<String>(
           value: 'history',
           child: ListTile(
@@ -830,6 +853,9 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
         break;
       case 'history':
         _showPaymentHistory(installment);
+        break;
+      case 'add_payment_and_print':
+        _showAddPaymentDialog(installment, printReceipt: true);
         break;
       case 'edit':
         _showInstallmentForm(installment: installment);

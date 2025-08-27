@@ -131,11 +131,19 @@ class _AddPaymentDialogState extends State<AddPaymentDialog> {
         createdAt: DateTime.now(),
       );
 
-      await provider.addPayment(widget.installment.id!, payment);
+      final newPayment = await provider.addPayment(widget.installment.id!, payment);
 
       if (mounted) {
+        // The provider's addPayment method now updates the installment internally
+        // and returns the new payment. We need to get the *latest* installment
+        // from the provider's list to ensure all calculated fields are up-to-date.
+        final updatedInstallment = provider.installments.firstWhere(
+          (i) => i.id == widget.installment.id,
+          orElse: () => widget.installment, // Fallback if not found (should not happen)
+        );
+
         // Callback to refresh the previous screen and show receipt
-        widget.onPaymentAdded(widget.installment, payment);
+        widget.onPaymentAdded(updatedInstallment, newPayment);
 
         messenger.showSnackBar(
           const SnackBar(
