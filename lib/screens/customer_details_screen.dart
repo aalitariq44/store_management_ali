@@ -722,6 +722,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
+          DataCell(Text(debt.title ?? 'لا يوجد عنوان')),
           DataCell(Text('${NumberFormatter.format(debt.amount)} د.ع')),
           DataCell(Text(DateFormatter.formatDisplayDate(debt.createdAt))),
           DataCell(
@@ -761,6 +762,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
           child: DataTable(
             columns: const [
               DataColumn(label: Text('الشخص')),
+              DataColumn(label: Text('عنوان الدين')),
               DataColumn(label: Text('المبلغ')),
               DataColumn(label: Text('تاريخ الإنشاء')),
               DataColumn(label: Text('تاريخ الدفع')),
@@ -771,7 +773,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               final debt = debts[debtIndex];
               // غلف كل خلية بإيماءة النقر بالزر الأيمن
               return DataRow(
-                cells: row.cells.take(5).map((cell) {
+                cells: row.cells.take(6).map((cell) {
                   return DataCell(
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
