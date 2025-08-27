@@ -366,6 +366,7 @@ class DatabaseHelper {
       'installment_payments',
       where: 'installment_id = ?',
       whereArgs: [installmentId],
+      orderBy: 'payment_date ASC', // Order by payment_date in ascending order
     );
     return List.generate(
       maps.length,

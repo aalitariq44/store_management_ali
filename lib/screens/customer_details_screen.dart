@@ -1142,6 +1142,15 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                               padding: const EdgeInsets.all(12.0),
                               child: Row(
                                 children: [
+                                  Text(
+                                    '${index + 1}.', // Sequence number
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
                                   const Icon(
                                     Icons.monetization_on,
                                     color: Colors.green,
