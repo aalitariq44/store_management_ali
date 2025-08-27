@@ -71,11 +71,11 @@ class InstallmentPaymentReceipt {
               ],
             ),
           ),
-          pw.SizedBox(height: 5),
+          pw.SizedBox(height: 3),
 
           // Receipt Header
           pw.Container(
-            padding: const pw.EdgeInsets.symmetric(vertical: 8),
+            padding: const pw.EdgeInsets.symmetric(vertical: 5),
             decoration: pw.BoxDecoration(
               color: PdfColors.blue100,
               borderRadius: pw.BorderRadius.circular(4),
@@ -92,11 +92,11 @@ class InstallmentPaymentReceipt {
               ),
             ),
           ),
-          pw.SizedBox(height: 10),
+          pw.SizedBox(height: 6),
 
           // Customer Information
           pw.Padding(
-            padding: const pw.EdgeInsets.symmetric(vertical: 2),
+            padding: const pw.EdgeInsets.symmetric(vertical: 1),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
@@ -134,13 +134,13 @@ class InstallmentPaymentReceipt {
             ),
           ),
           
-          pw.SizedBox(height: 8),
+          pw.SizedBox(height: 4),
           pw.Divider(color: PdfColors.grey400),
-          pw.SizedBox(height: 8),
+          pw.SizedBox(height: 4),
 
           // Installment Details
           pw.Padding(
-            padding: const pw.EdgeInsets.symmetric(vertical: 2),
+            padding: const pw.EdgeInsets.symmetric(vertical: 1),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
@@ -150,7 +150,7 @@ class InstallmentPaymentReceipt {
             ),
           ),
           pw.Padding(
-            padding: const pw.EdgeInsets.symmetric(vertical: 2),
+            padding: const pw.EdgeInsets.symmetric(vertical: 1),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
@@ -160,13 +160,13 @@ class InstallmentPaymentReceipt {
             ),
           ),
           
-          pw.SizedBox(height: 8),
+          pw.SizedBox(height: 4),
           pw.Divider(color: PdfColors.grey400),
-          pw.SizedBox(height: 8),
+          pw.SizedBox(height: 4),
 
           // Payment Details
           pw.Padding(
-            padding: const pw.EdgeInsets.symmetric(vertical: 2),
+            padding: const pw.EdgeInsets.symmetric(vertical: 1),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
@@ -178,13 +178,13 @@ class InstallmentPaymentReceipt {
 
           // Notes if available
           if (payment.notes != null && payment.notes!.isNotEmpty) ...[
-            pw.SizedBox(height: 5),
+            pw.SizedBox(height: 3),
             _buildReceiptRow('الملاحظات:', payment.notes!),
           ],
 
-          pw.SizedBox(height: 8),
+          pw.SizedBox(height: 4),
           pw.Divider(color: PdfColors.grey400),
-          pw.SizedBox(height: 8),
+          pw.SizedBox(height: 4),
 
           // Print Timestamp and Receipt ID
           pw.Row(
@@ -209,7 +209,7 @@ class InstallmentPaymentReceipt {
 
   static pw.Widget _buildReceiptRow(String title, String value, {PdfColor? color, bool isBold = false, double fontSize = 11}) {
     return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      padding: const pw.EdgeInsets.symmetric(vertical: 1),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
