@@ -29,6 +29,11 @@ class _BackupScreenState extends State<BackupScreen> {
       final files = await BackupService.getBackupFiles();
       setState(() {
         _backupFiles = files;
+        _backupFiles.sort((a, b) {
+          final dateA = DateTime.parse(a.createdAt!);
+          final dateB = DateTime.parse(b.createdAt!);
+          return dateB.compareTo(dateA); // Sort from newest to oldest
+        });
       });
     } catch (e) {
       _showSnackBar('خطأ في جلب قائمة النسخ الاحتياطية: $e', isError: true);
