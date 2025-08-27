@@ -5,14 +5,17 @@ import '../models/installment_model.dart';
 import '../providers/installment_provider.dart';
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
+import '../models/person_model.dart'; // Import Person model
 
 class AddPaymentDialog extends StatefulWidget {
   final Installment installment;
-  final Function(Installment, InstallmentPayment) onPaymentAdded;
+  final Person person; // Add person
+  final Function(Installment, InstallmentPayment, Person) onPaymentAdded; // Update callback signature
 
   const AddPaymentDialog({
     super.key,
     required this.installment,
+    required this.person, // Require person
     required this.onPaymentAdded,
   });
 
@@ -143,7 +146,7 @@ class _AddPaymentDialogState extends State<AddPaymentDialog> {
         );
 
         // Callback to refresh the previous screen and show receipt
-        widget.onPaymentAdded(updatedInstallment, newPayment);
+        widget.onPaymentAdded(updatedInstallment, newPayment, widget.person); // Pass person
 
         messenger.showSnackBar(
           const SnackBar(

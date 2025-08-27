@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../providers/installment_provider.dart';
 import '../providers/person_provider.dart';
 import '../providers/password_provider.dart';
 import '../models/installment_model.dart';
+import '../models/person_model.dart'; // Import Person model
 import '../widgets/installment_form.dart';
 import '../widgets/add_payment_dialog.dart'; // Import the new dialog
 // تمت إزالة أزرار الطباعة من جسم الصفحة ونقلها إلى AppBar
 import '../widgets/print_actions.dart';
 // تمت إزالة ودجت الطباعة كزر منفصل، والآن الطباعة ضمن قائمة الزر الأيمن
 import '../services/word_service_simple.dart';
+import '../services/pdf_service.dart'; // Import PDFService
 import '../utils/date_formatter.dart';
 import '../utils/number_formatter.dart';
 
@@ -32,18 +36,19 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
   }
 
   // New method to show the extracted payment dialog
-  void _showAddPaymentDialog(Installment installment, {bool printReceipt = false}) {
+  void _showAddPaymentDialog(Installment installment, Person person, {bool printReceipt = false}) {
     showDialog(
       context: context,
       builder: (context) => AddPaymentDialog(
         installment: installment,
-        onPaymentAdded: (updatedInstallment, newPayment) {
+        person: person, // Pass the person object
+        onPaymentAdded: (updatedInstallment, newPayment, person) {
           // Close the add payment dialog
           Navigator.of(context).pop();
           // Re-open the payment history dialog to show the new payment
           _showPaymentHistory(updatedInstallment);
           if (printReceipt) {
-            _printInstallment(updatedInstallment);
+            _printInstallmentPaymentReceipt(updatedInstallment, newPayment, person); // Call new print method
           }
         },
       ),
@@ -64,6 +69,8 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
     final payments = installmentProvider.getInstallmentPayments(
       latestInstallment.id!,
     );
+    final personProvider = Provider.of<PersonProvider>(context, listen: false); // Get PersonProvider
+    final person = personProvider.getPersonById(latestInstallment.personId); // Get person here
 
     showDialog(
       context: context,
@@ -138,6 +145,7 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                         itemBuilder: (context, index) {
                           final payment = payments[index];
                           final paymentNumber = index + 1; // Add payment number
+                          final person = personProvider.getPersonById(latestInstallment.personId); // Get person here
                           return Card(
                             margin: const EdgeInsets.symmetric(
                               vertical: 4.0,
@@ -210,20 +218,45 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
                                       ],
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: () {
-                                      // Close the history dialog first
-                                      Navigator.of(context).pop();
-                                      _confirmDeletePayment(
-                                        latestInstallment,
-                                        payment,
-                                      );
-                                    },
-                                  ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.print,
+                                          color: Colors.blue,
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          if (person != null) {
+                                            _printInstallmentPaymentReceipt(
+                                              latestInstallment,
+                                              payment,
+                                              person,
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text('لم يتم العثور على معلومات الزبون للطباعة')),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
+                                        ),
+                                        onPressed: () {
+                                          // Close the history dialog first
+                                          Navigator.of(context).pop();
+                                          _confirmDeletePayment(
+                                            latestInstallment,
+                                            payment,
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  )
                                 ],
                               ),
                             ),
@@ -242,9 +275,16 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
           ElevatedButton.icon(
             onPressed: () {
               Navigator.pop(context); // Close history dialog
-              _showAddPaymentDialog(
-                latestInstallment,
-              ); // Open add payment dialog
+              if (person != null) {
+                _showAddPaymentDialog(
+                  latestInstallment,
+                  person,
+                ); // Open add payment dialog
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('لم يتم العثور على معلومات الزبون لإضافة دفعة')),
+                );
+              }
             },
             icon: const Icon(Icons.add_card),
             label: const Text('إضافة دفعة'),
@@ -252,7 +292,13 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
           ElevatedButton.icon(
             onPressed: () {
               Navigator.pop(context); // Close history dialog
-              _showAddPaymentDialog(latestInstallment, printReceipt: true); // Open add payment dialog and request print
+              if (person != null) {
+                _showAddPaymentDialog(latestInstallment, person, printReceipt: true); // Open add payment dialog and request print
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('لم يتم العثور على معلومات الزبون لإضافة دفعة وطباعة')),
+                );
+              }
             },
             icon: const Icon(Icons.print),
             label: const Text('إضافة دفعة وطباعة'),
@@ -847,15 +893,25 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
 
     if (selected == null) return;
 
+    final personProvider = Provider.of<PersonProvider>(context, listen: false);
+    final currentPerson = personProvider.getPersonById(installment.personId);
+
+    if (currentPerson == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('لم يتم العثور على معلومات الزبون')),
+      );
+      return;
+    }
+
     switch (selected) {
       case 'add_payment':
-        _showAddPaymentDialog(installment); // Use the new dialog
+        _showAddPaymentDialog(installment, currentPerson); // Use the new dialog
         break;
       case 'history':
         _showPaymentHistory(installment);
         break;
       case 'add_payment_and_print':
-        _showAddPaymentDialog(installment, printReceipt: true);
+        _showAddPaymentDialog(installment, currentPerson, printReceipt: true);
         break;
       case 'edit':
         _showInstallmentForm(installment: installment);
@@ -909,6 +965,27 @@ class _InstallmentsScreenState extends State<InstallmentsScreen> {
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  Future<void> _printInstallmentPaymentReceipt(
+    Installment installment,
+    InstallmentPayment payment,
+    Person person,
+  ) async {
+    try {
+      await PDFService.showInstallmentPaymentReceiptPreview(
+        context: context,
+        installment: installment,
+        payment: payment,
+        person: person,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('خطأ في طباعة الوصل: $e')),
+        );
+      }
     }
   }
 }

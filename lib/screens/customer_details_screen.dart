@@ -966,10 +966,11 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
       context: context,
       builder: (context) => AddPaymentDialog(
         installment: installment,
-        onPaymentAdded: (updatedInstallment, payment) {
+        person: widget.person, // Pass the person object
+        onPaymentAdded: (updatedInstallment, payment, person) {
           if (mounted) {
             Navigator.of(context).pop(); // Close the add payment dialog
-            _printInstallmentPaymentReceipt(updatedInstallment, payment);
+            _printInstallmentPaymentReceipt(updatedInstallment, payment, person);
           }
         },
       ),
@@ -979,8 +980,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   Future<void> _printInstallmentPaymentReceipt(
     Installment installment,
     InstallmentPayment payment,
+    Person person, // Add person parameter
   ) async {
-    final person = widget.person;
     try {
       await PDFService.showInstallmentPaymentReceiptPreview(
         context: context,
@@ -1204,6 +1205,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
                                           _printInstallmentPaymentReceipt(
                                             latestInstallment,
                                             payment,
+                                            widget.person, // Pass the person object
                                           );
                                         },
                                       ),
