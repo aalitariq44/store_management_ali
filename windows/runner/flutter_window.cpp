@@ -1,6 +1,8 @@
 #include "flutter_window.h"
 
 #include <optional>
+#include <flutter/method_channel.h>
+#include <flutter/standard_method_codec.h>
 
 #include "flutter/generated_plugin_registrant.h"
 
@@ -26,6 +28,24 @@ bool FlutterWindow::OnCreate() {
   }
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
+
+  // Set up method channel for app lifecycle
+  auto channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+      flutter_controller_->engine()->messenger(),
+      "app_lifecycle",
+      &flutter::StandardMethodCodec::GetInstance());
+
+  channel->SetMethodCallHandler(
+      [this](const flutter::MethodCall<flutter::EncodableValue>& call,
+             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        if (call.method_name().compare("forceClose") == 0) {
+          // Force close the window
+          PostMessage(GetHandle(), WM_DESTROY, 0, 0);
+          result->Success();
+        } else {
+          result->NotImplemented();
+        }
+      });
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
@@ -62,6 +82,20 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   }
 
   switch (message) {
+    case WM_CLOSE: {
+      // Notify Flutter about window close event
+      if (flutter_controller_ && flutter_controller_->engine()) {
+        auto channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+            flutter_controller_->engine()->messenger(),
+            "app_lifecycle",
+            &flutter::StandardMethodCodec::GetInstance());
+        
+        channel->InvokeMethod("windowClosing", nullptr);
+      }
+      
+      // Don't close immediately, let Flutter handle it
+      return 0;
+    }
     case WM_FONTCHANGE:
       flutter_controller_->engine()->ReloadSystemFonts();
       break;
