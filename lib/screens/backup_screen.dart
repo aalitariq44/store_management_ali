@@ -63,38 +63,6 @@ class _BackupScreenState extends State<BackupScreen> {
     }
   }
 
-  Future<void> _restoreBackup(String fileName) async {
-    final confirmed = await _showConfirmationDialog(
-      'استعادة النسخة الاحتياطية',
-      'هل أنت متأكد من أنك تريد استعادة هذه النسخة الاحتياطية؟\nسيتم حذف جميع البيانات الحالية.',
-    );
-
-    if (!confirmed) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final success = await BackupService.restoreBackup(fileName);
-      if (success) {
-        _showSnackBar('تم استعادة النسخة الاحتياطية بنجاح');
-        // إعادة تحميل البيانات في الصفحة الرئيسية
-        if (mounted) {
-          Navigator.of(context).pop(true);
-        }
-      } else {
-        _showSnackBar('فشل في استعادة النسخة الاحتياطية', isError: true);
-      }
-    } catch (e) {
-      _showSnackBar('خطأ في استعادة النسخة الاحتياطية: $e', isError: true);
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
   Future<void> _deleteBackup(String fileName) async {
     final confirmed = await _showConfirmationDialog(
       'حذف النسخة الاحتياطية',
@@ -241,16 +209,6 @@ class _BackupScreenState extends State<BackupScreen> {
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.restore,
-                                        color: Colors.orange,
-                                      ),
-                                      onPressed: _isLoading
-                                          ? null
-                                          : () => _restoreBackup(file.name),
-                                      tooltip: 'استعادة',
-                                    ),
                                     IconButton(
                                       icon: const Icon(
                                         Icons.delete,
