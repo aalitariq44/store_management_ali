@@ -214,12 +214,15 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: _openPasswordSettings,
             tooltip: 'إعدادات كلمة المرور',
           ),
-          GestureDetector(
-            onTap: _createQuickBackup, // Direct backup on left-click (tap)
-            onSecondaryTap: _showBackupOptions, // Show options on right-click (secondary tap)
-            child: const Padding(
-              padding: EdgeInsets.all(8.0), // Add some padding for better touch target
-              child: Icon(Icons.backup, color: Colors.white), // Use a direct Icon
+          MouseRegion(
+            cursor: SystemMouseCursors.click, // Change cursor to hand on hover
+            child: GestureDetector(
+              onTap: _createQuickBackup, // Direct backup on left-click (tap)
+              onSecondaryTap: _showBackupOptions, // Show options on right-click (secondary tap)
+              child: const Padding(
+                padding: EdgeInsets.all(8.0), // Add some padding for better touch target
+                child: Icon(Icons.backup, color: Colors.white), // Use a direct Icon
+              ),
             ),
           ),
           IconButton(
