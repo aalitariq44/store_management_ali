@@ -355,7 +355,11 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
     Color color,
   ) {
     return Card(
-      color: color.withOpacity(0.1),
+      color: Colors.white, // Changed to white background
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: color, width: 2), // Added colored border
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
           vertical: 8,
