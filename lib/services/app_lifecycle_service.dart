@@ -49,23 +49,25 @@ class AppLifecycleService {
 
         // إعطاء وقت قصير لعرض الرسالة
         await Future.delayed(const Duration(milliseconds: 1500));
-
-        return true;
+        _exitApplication(); // الخروج بعد رسالة النجاح
       } else {
         if (context.mounted) {
-          _showErrorMessage(context, 'فشل في إنشاء النسخة الاحتياطية');
+          await _showErrorMessage(context, 'فشل في إنشاء النسخة الاحتياطية');
+        } else {
+          _exitApplication(); // الخروج حتى لو لم يكن السياق متاحًا لعرض الرسالة
         }
-        return false;
       }
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop(); // إغلاق مؤشر التقدم إذا كان مفتوحاً
-        _showErrorMessage(context, 'خطأ في إنشاء النسخة الاحتياطية: $e');
+        await _showErrorMessage(context, 'خطأ في إنشاء النسخة الاحتياطية: $e');
+      } else {
+        _exitApplication(); // الخروج حتى لو لم يكن السياق متاحًا لعرض الرسالة
       }
-      return false;
     } finally {
       _isBackupInProgress = false;
     }
+    return true; // Return true to satisfy the Future<bool> return type, but exit is handled internally.
   }
 
   /// عرض حوار تأكيد الخروج مع النسخ الاحتياطي
@@ -177,35 +179,46 @@ class AppLifecycleService {
   }
 
   /// عرض رسالة خطأ
-  static void _showErrorMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
+  static Future<void> _showErrorMessage(BuildContext context, String message) async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Row(
           children: [
-            const Icon(Icons.error, color: Colors.white),
-            const SizedBox(width: 10),
-            Expanded(child: Text(message)),
+            Icon(Icons.error, color: Colors.red),
+            SizedBox(width: 10),
+            Text('فشل النسخ الاحتياطي'),
           ],
         ),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // إغلاق الحوار
+              _exitApplication(); // الخروج من التطبيق
+            },
+            child: const Text('موافق'),
+          ),
+        ],
       ),
     );
   }
 
+  /// وظيفة مساعدة للخروج من التطبيق
+  static void _exitApplication() {
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      exit(0);
+    } else {
+      SystemNavigator.pop();
+    }
+  }
+
   /// إغلاق التطبيق بعد النسخ الاحتياطي
   static Future<void> exitAppWithBackup(BuildContext context) async {
-    final success = await createBackupOnExit(context: context);
-
-    if (success) {
-      // إغلاق التطبيق
-      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-        exit(0);
-      } else {
-        SystemNavigator.pop();
-      }
-    }
+    await createBackupOnExit(context: context);
+    // The createBackupOnExit function now handles showing messages and exiting the app.
+    // No need for additional exit logic here.
   }
 
   /// إغلاق التطبيق فوراً بدون نسخ احتياطي
