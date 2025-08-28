@@ -35,6 +35,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   
+  # HTTP Client
+  http: ^1.2.2
+  
   # Database
   sqflite_common_ffi: ^2.3.3
   sqlite3: ^2.4.6
