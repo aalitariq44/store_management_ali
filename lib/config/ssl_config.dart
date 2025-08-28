@@ -12,11 +12,12 @@ class SSLConfig {
     if (kDebugMode) {
       // في وضع التطوير، نتجاهل شهادات SSL
       final HttpClient httpClient = HttpClient()
-        ..badCertificateCallback = (X509Certificate cert, String host, int port) {
-          print('تجاهل شهادة SSL للمضيف: $host:$port');
-          return true; // تجاهل جميع أخطاء الشهادات
-        };
-      
+        ..badCertificateCallback =
+            (X509Certificate cert, String host, int port) {
+              print('تجاهل شهادة SSL للمضيف: $host:$port');
+              return true; // تجاهل جميع أخطاء الشهادات
+            };
+
       return IOClient(httpClient);
     } else {
       // في الإنتاج، نستخدم العميل العادي
@@ -27,19 +28,20 @@ class SSLConfig {
   /// تكوين HttpClient مخصص للاستخدام المباشر
   static HttpClient createHttpClientDirect() {
     final HttpClient httpClient = HttpClient();
-    
+
     if (kDebugMode) {
-      httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) {
-        print('تجاهل شهادة SSL للمضيف: $host:$port');
-        print('تفاصيل الشهادة: ${cert.subject}');
-        return true;
-      };
-      
+      httpClient.badCertificateCallback =
+          (X509Certificate cert, String host, int port) {
+            print('تجاهل شهادة SSL للمضيف: $host:$port');
+            print('تفاصيل الشهادة: ${cert.subject}');
+            return true;
+          };
+
       // إعدادات إضافية للتطوير
       httpClient.connectionTimeout = const Duration(seconds: 30);
       httpClient.idleTimeout = const Duration(seconds: 30);
     }
-    
+
     return httpClient;
   }
 
@@ -95,7 +97,12 @@ class SecureHttpHelper {
     Object? body,
     Encoding? encoding,
   }) {
-    return _client.delete(url, headers: headers, body: body, encoding: encoding);
+    return _client.delete(
+      url,
+      headers: headers,
+      body: body,
+      encoding: encoding,
+    );
   }
 
   /// إغلاق العميل

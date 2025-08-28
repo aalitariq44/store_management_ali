@@ -32,7 +32,7 @@ Future<void> main() async {
   if (kDebugMode) {
     HttpOverrides.global = DevelopmentHttpOverrides();
     print('تم تفعيل تجاهل شهادات SSL للتطوير');
-    
+
     // طباعة حالة تكوين SSL
     SSLConfig.printSSLStatus();
   }

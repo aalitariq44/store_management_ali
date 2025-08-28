@@ -13,7 +13,7 @@ class SSLTestHelper {
 
     try {
       print('بدء اختبار الاتصال مع تجاهل SSL...');
-      
+
       // مثال على طلب GET لخادم محلي
       final response = await SecureHttpHelper.get(
         Uri.parse('https://localhost:3000/api/test'),
@@ -25,7 +25,6 @@ class SSLTestHelper {
 
       print('نجح الاتصال! كود الاستجابة: ${response.statusCode}');
       print('محتوى الاستجابة: ${response.body}');
-      
     } catch (e) {
       print('فشل الاختبار: $e');
     }
@@ -40,7 +39,7 @@ class SSLTestHelper {
 
     try {
       print('بدء اختبار طلب POST...');
-      
+
       final testData = {
         'message': 'اختبار تجاهل SSL',
         'timestamp': DateTime.now().toIso8601String(),
@@ -48,14 +47,11 @@ class SSLTestHelper {
 
       final response = await SecureHttpHelper.post(
         Uri.parse('https://localhost:3000/api/data'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: json.encode(testData),
       );
 
       print('نجح إرسال POST! كود الاستجابة: ${response.statusCode}');
-      
     } catch (e) {
       print('فشل اختبار POST: $e');
     }
@@ -65,8 +61,10 @@ class SSLTestHelper {
   static void printSSLConfiguration() {
     print('\n=== معلومات تكوين SSL ===');
     print('وضع التطوير: ${kDebugMode ? 'مفعل' : 'معطل'}');
-    print('تجاهل شهادات SSL: ${SSLConfig.isSSLBypassEnabled() ? 'مفعل' : 'معطل'}');
-    
+    print(
+      'تجاهل شهادات SSL: ${SSLConfig.isSSLBypassEnabled() ? 'مفعل' : 'معطل'}',
+    );
+
     if (kDebugMode) {
       print('✅ تم تكوين تجاهل SSL بنجاح للتطوير');
       print('📝 الاتصالات مع الخوادم المحلية ستعمل بدون مشاكل شهادات SSL');
